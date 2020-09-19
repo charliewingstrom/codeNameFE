@@ -26,6 +26,9 @@ class Map(object):
         else:
             self.Tiles = Tiles
         
+    def addUnit(self, Unit, Xcoord, Ycoord):
+        Unit.setCurrTile(self.Tiles[Xcoord][Ycoord])
+
     def selectLeft(self):
         self.Tiles[self.cursor[0]][self.cursor[1]].unselected()
         self.cursor[1] -= 1
@@ -45,6 +48,7 @@ class Map(object):
         self.Tiles[self.cursor[0]][self.cursor[1]].unselected()
         self.cursor[0] += 1
         self.Tiles[self.cursor[0]][self.cursor[1]].selected()
+
     def draw(self):
         for row in self.Tiles:
             for Tile in row:

@@ -14,9 +14,12 @@ class Tile(object):
     
     def draw(self):
         pygame.draw.rect(self.window, self.borderColor,(self.posX, self.posY, self.width, self.height))
-        pygame.draw.rect(self.window, self.color, (self.posX+1, self.posY+1, self.width-5, self.height-5))
+        pygame.draw.rect(self.window, self.color, (self.posX+1, self.posY+1, self.width-2, self.height-2))
     
         
+    def getCenter(self):
+        return (self.posX + (self.width//2), self.posY + (self.height//2))
+
     def selected(self):
         self.borderColor = (0, 255, 0)
         

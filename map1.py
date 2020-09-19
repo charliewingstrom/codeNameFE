@@ -9,15 +9,21 @@ import pygame
 import math
 import random
 from Map import Map
-
+from Unit import Unit
 screenWidth = 1080
 screenHeight = 1080
 
 window = pygame.display.set_mode((screenWidth, screenHeight))
 
 pygame.display.set_caption("codeFE")
-        
+
+UnitArray = []        
 map1 = Map(window)
+
+robin = Unit(window)
+map1.addUnit(robin, 1, 1)
+
+UnitArray.append(robin)
 run = True
 while run:
     
@@ -39,6 +45,8 @@ while run:
     window.fill((0,0,0))
     
     map1.draw()
+    for unit in unitArray:
+        unit.draw()
     pygame.display.update()
     
         
