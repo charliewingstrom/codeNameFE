@@ -10,12 +10,15 @@ class Tile(object):
         self.height = height
         self.color = color
         self.borderColor = borderColor
+        self.currentUnit = None
         
     
     def draw(self):
         pygame.draw.rect(self.window, self.borderColor,(self.posX, self.posY, self.width, self.height))
         pygame.draw.rect(self.window, self.color, (self.posX+1, self.posY+1, self.width-2, self.height-2))
     
+    def setCurrentUnit(self, Unit):
+        self.currentUnit = Unit
         
     def getCenter(self):
         return (self.posX + (self.width//2), self.posY + (self.height//2))

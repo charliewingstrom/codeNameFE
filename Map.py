@@ -7,7 +7,7 @@ class Map(object):
         self.width = width
         self.height = height
         self.cursor = [width//2,height//2]
-        
+        self.isUnitSelected = False
         if (Tiles == []):
             tmpTiles = []
             posX = width
@@ -28,26 +28,37 @@ class Map(object):
         
     def addUnit(self, Unit, Xcoord, Ycoord):
         Unit.setCurrTile(self.Tiles[Xcoord][Ycoord])
+        self.Tiles[Xcoord][Ycoord].setCurrentUnit(Unit)
+
+    def unitSelectedCursor(self):
+        if (self.getTileCursorIsOn().currentUnit != None):
+            print("Theres a guy there")
+            self.isUnitSelected = True
+        else:
+            print("Theres no one home")
 
     def selectLeft(self):
-        self.Tiles[self.cursor[0]][self.cursor[1]].unselected()
+        self.getTileCursorIsOn().unselected()
         self.cursor[1] -= 1
-        self.Tiles[self.cursor[0]][self.cursor[1]].selected()
+        self.getTileCursorIsOn().selected()
 
     def selectRight(self):
-        self.Tiles[self.cursor[0]][self.cursor[1]].unselected()
+        self.getTileCursorIsOn().unselected()
         self.cursor[1] += 1
-        self.Tiles[self.cursor[0]][self.cursor[1]].selected()
+        self.getTileCursorIsOn().selected()
     
     def selectUp(self):
-        self.Tiles[self.cursor[0]][self.cursor[1]].unselected()
+        self.getTileCursorIsOn().unselected()
         self.cursor[0] -= 1
-        self.Tiles[self.cursor[0]][self.cursor[1]].selected()
+        self.getTileCursorIsOn().selected()
 
     def selectDown(self):
-        self.Tiles[self.cursor[0]][self.cursor[1]].unselected()
+        self.getTileCursorIsOn().unselected()
         self.cursor[0] += 1
-        self.Tiles[self.cursor[0]][self.cursor[1]].selected()
+        self.getTileCursorIsOn().selected()
+
+    def getTileCursorIsOn(self):
+        return self.Tiles[self.cursor[0]][self.cursor[1]]
 
     def draw(self):
         for row in self.Tiles:

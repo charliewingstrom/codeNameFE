@@ -17,13 +17,13 @@ window = pygame.display.set_mode((screenWidth, screenHeight))
 
 pygame.display.set_caption("codeFE")
 
-UnitArray = []        
+unitArray = []        
 map1 = Map(window)
 
 robin = Unit(window)
 map1.addUnit(robin, 1, 1)
 
-UnitArray.append(robin)
+unitArray.append(robin)
 run = True
 while run:
     
@@ -42,6 +42,9 @@ while run:
         map1.selectUp()
     if keys[pygame.K_DOWN] and map1.cursor[0] < map1.height-1:
         map1.selectDown()
+    if keys[pygame.K_z]:
+        map1.unitSelectedCursor()
+        
     window.fill((0,0,0))
     
     map1.draw()
