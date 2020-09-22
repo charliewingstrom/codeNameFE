@@ -7,9 +7,10 @@ class Unit(object):
     def __init__(self, window, currTile = None):
         self.window = window
         self.currTile = currTile
+        self.mov = 5
+        self.attackRange = 1
 
-
-    def setCurrTile(self, tile):
+    def setCurrentTile(self, tile):
         self.currTile = tile
 
 

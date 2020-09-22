@@ -23,6 +23,9 @@ class Tile(object):
     def getCenter(self):
         return (self.posX + (self.width//2), self.posY + (self.height//2))
 
+    def setColor(self, color):
+        self.color = color
+        
     def selected(self):
         self.borderColor = (0, 255, 0)
         
