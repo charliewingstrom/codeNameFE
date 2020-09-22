@@ -8,7 +8,7 @@
             "name": "Launch",
             "type": "python",
             "request": "launch",
-            "program": "${workspaceFolder}/map1.py",
+            "program": "${workspaceFolder}/Index.py",
             "console": "integratedTerminal"
         },
         {

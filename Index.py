@@ -31,7 +31,7 @@ startGame = Game(map1)
 run = True
 while run:
     
-    pygame.time.delay(90)
+    pygame.time.delay(120)
     keys = pygame.key.get_pressed()
     
     for event in pygame.event.get():
@@ -48,10 +48,12 @@ while run:
         startGame.selectDown()
     if keys[pygame.K_z] and not startGame.cursor.unitSelected:
         startGame.unitSelectedCursor()
+        startGame.showMovementAndAttackRange()
     elif keys[pygame.K_z] and startGame.cursor.unitSelected:
         startGame.cursor.unitSelected.setCurrentTile(startGame.getTileCursorIsOn())
         startGame.getTileCursorIsOn().setCurrentUnit(startGame.cursor.unitSelected)
         startGame.cursor.setUnitSelected(None)
+        
     window.fill((0,0,0))
     
     startGame.draw()
