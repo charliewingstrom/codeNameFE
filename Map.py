@@ -3,7 +3,7 @@ from Tile import Tile
 from cursor import Cursor
 class Map(object):
     
-    def __init__(self, window, width = 7, height = 7, Tiles = []):
+    def __init__(self, window, width = 20, height = 20, Tiles = []):
         self.window = window
         self.width = width
         self.height = height

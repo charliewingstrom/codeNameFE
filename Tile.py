@@ -12,6 +12,8 @@ class Tile(object):
         self.borderColor = borderColor
         self.currentUnit = None
         
+    def __str__(self):
+        return (str(self.posX) + ", " + str(self.posY))
     
     def draw(self):
         pygame.draw.rect(self.window, self.borderColor,(self.posX, self.posY, self.width, self.height))
@@ -26,8 +28,8 @@ class Tile(object):
     def setColor(self, color):
         self.color = color
         
-    def selected(self):
+    def highlighted(self):
         self.borderColor = (0, 255, 0)
         
-    def unselected(self):
+    def unhighlighted(self):
         self.borderColor = (255, 255, 255)
