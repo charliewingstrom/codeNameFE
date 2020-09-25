@@ -47,12 +47,9 @@ while run:
     if keys[pygame.K_DOWN] and startGame.cursor.pos[0] < startGame.currentMap.height-1:
         startGame.selectDown()
     if keys[pygame.K_z] and not startGame.cursor.unitSelected:
-        startGame.unitSelectedCursor()
-        startGame.showMovementAndAttackRange()
+        startGame.selectUnit()
     elif keys[pygame.K_z] and startGame.cursor.unitSelected:
-        startGame.cursor.unitSelected.setCurrentTile(startGame.getTileCursorIsOn())
-        startGame.getTileCursorIsOn().setCurrentUnit(startGame.cursor.unitSelected)
-        startGame.cursor.setUnitSelected(None)
+        startGame.placeUnit()
         
     window.fill((0,0,0))
     
