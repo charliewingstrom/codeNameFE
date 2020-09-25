@@ -50,6 +50,8 @@ while run:
         startGame.selectUnit()
     elif keys[pygame.K_z] and startGame.cursor.unitSelected:
         startGame.placeUnit()
+    if keys[pygame.K_x] and startGame.cursor.unitSelected:
+        startGame.resetSelectedUnit()
         
     window.fill((0,0,0))
     
