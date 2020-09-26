@@ -19,7 +19,7 @@ window = pygame.display.set_mode((screenWidth, screenHeight))
 pygame.display.set_caption("codeFE")
 
 unitArray = []        
-map1 = Map(window)
+map1 = Map(window, screenWidth, screenHeight)
 
 robin = Unit(window)
 map1.addUnit(robin, 1, 1)
@@ -31,7 +31,7 @@ startGame = Game(map1)
 run = True
 while run:
     
-    pygame.time.delay(120)
+    pygame.time.delay(100)
     keys = pygame.key.get_pressed()
     
     for event in pygame.event.get():
@@ -52,7 +52,15 @@ while run:
         startGame.placeUnit()
     if keys[pygame.K_x] and startGame.cursor.unitSelected:
         startGame.resetSelectedUnit()
-        
+    if keys[pygame.K_s]:
+        startGame.currentMap.scrollDown()
+    if keys[pygame.K_w]:
+        startGame.currentMap.scrollUp()
+    if keys[pygame.K_a]:
+        startGame.currentMap.scrollLeft()
+    if keys[pygame.K_d]:
+        startGame.currentMap.scrollRight()
+    
     window.fill((0,0,0))
     
     startGame.draw()

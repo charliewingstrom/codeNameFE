@@ -30,6 +30,8 @@ class Game(object):
         self.selectedUnitPrevPos = None
         self.cursor.setUnitSelected(None)
 
+    ## finds the tiles that the current unit can move to and changes their color,
+    ## then finds the tiles that a unit can attack (but not move to) and makes them a different color
     def showMovementAndAttackRange(self):
         attackRange = self.cursor.unitSelected.attackRange
         movement = self.cursor.unitSelected.mov +1
@@ -76,6 +78,7 @@ class Game(object):
         self.getTileCursorIsOn().highlighted()
 
     def selectRight(self):
+        print(self.getTileCursorIsOn())
         self.getTileCursorIsOn().unhighlighted()
         self.cursor.pos[1] += 1
         self.getTileCursorIsOn().highlighted()

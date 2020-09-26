@@ -2,7 +2,7 @@ import pygame
 
 class Tile(object):
     
-    def __init__(self, window, posX, posY, width = 100, height = 100, defaultColor = (0,0,0), borderColor = (255, 255, 255)):
+    def __init__(self, window, posX, posY, width = 100, height = 100, defaultColor = (0,0,0), borderColor =(255, 255, 255)):
         self.window = window
         self.posX = posX
         self.posY = posY
@@ -10,6 +10,7 @@ class Tile(object):
         self.height = height
         self.defaultColor = defaultColor
         self.currentColor = defaultColor
+        self.defaultBorderColor = borderColor
         self.borderColor = borderColor
         self.currentUnit = None
         
@@ -33,4 +34,4 @@ class Tile(object):
         self.borderColor = (0, 255, 0)
         
     def unhighlighted(self):
-        self.borderColor = (255, 255, 255)
+        self.borderColor = self.defaultBorderColor
