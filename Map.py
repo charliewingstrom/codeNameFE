@@ -11,10 +11,7 @@ class Map(object):
         self.height = height
         self.screenWidth = screenWidth
         self.screenHeight = screenHeight
-        self.screenBufferTop = 0
-        self.screenBufferBottom = screenHeight
-        self.screenBufferLeft = 0
-        self.screenBufferRight = screenWidth
+        self.tileSize = tileSize
         if (Tiles == []):
             tmpTiles = []
             posX = 10
@@ -35,30 +32,22 @@ class Map(object):
     def scrollDown(self):
         for row in self.Tiles:
             for tile in row:
-                tile.posY -=tileSize
-        self.screenBufferTop -= tileSize
-        self.screenBufferBottom -= tileSize    
-    
+                tile.posY -= self.tileSize
+
     def scrollUp(self):
         for row in self.Tiles:
             for tile in row:
-                tile.posY +=tileSize
-        self.screenBufferTop += tileSize
-        self.screenBufferBottom += tileSize    
+                tile.posY += self.tileSize
 
     def scrollLeft(self):
         for row in self.Tiles:
             for tile in row:
-                tile.posX +=tileSize
-        self.screenBufferRight += tileSize
-        self.screenBufferLeft += tileSize    
-    
+                tile.posX += self.tileSize
+        
     def scrollRight(self):
         for row in self.Tiles:
             for tile in row:
-                tile.posX -=tileSize
-        self.screenBufferRight -= tileSize
-        self.screenBufferLeft -= tileSize
+                tile.posX -= self.tileSize
 
     def addUnit(self, Unit, Xcoord, Ycoord):
         Unit.setCurrentTile(self.Tiles[Xcoord][Ycoord])

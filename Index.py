@@ -12,7 +12,7 @@ from Map import Map
 from Unit import Unit
 from Game import Game
 screenWidth = 1080
-screenHeight = 1080
+screenHeight = 720
 
 window = pygame.display.set_mode((screenWidth, screenHeight))
 

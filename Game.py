@@ -8,6 +8,7 @@ class Game(object):
         self.selectedUnitPrevPos = None
         self.selectedUnitTilesInRange = []
         self.selectedUnitAttackRangeTiles = []
+
     def selectUnit(self):
         if (self.getTileCursorIsOn().currentUnit != None):
             self.unitSelectedCursor()
@@ -76,22 +77,29 @@ class Game(object):
         self.getTileCursorIsOn().unhighlighted()
         self.cursor.pos[1] -= 1
         self.getTileCursorIsOn().highlighted()
+        if (self.getTileCursorIsOn().posX < self.currentMap.tileSize ):
+            self.currentMap.scrollLeft()
 
     def selectRight(self):
-        print(self.getTileCursorIsOn())
         self.getTileCursorIsOn().unhighlighted()
         self.cursor.pos[1] += 1
         self.getTileCursorIsOn().highlighted()
+        if (self.getTileCursorIsOn().posX > self.currentMap.screenWidth - self.currentMap.tileSize):
+            self.currentMap.scrollRight()
     
     def selectUp(self):
         self.getTileCursorIsOn().unhighlighted()
         self.cursor.pos[0] -= 1
         self.getTileCursorIsOn().highlighted()
+        if (self.getTileCursorIsOn().posY < self.currentMap.tileSize ):
+            self.currentMap.scrollUp()
 
     def selectDown(self):
         self.getTileCursorIsOn().unhighlighted()
         self.cursor.pos[0] += 1
         self.getTileCursorIsOn().highlighted()
+        if (self.getTileCursorIsOn().posY > self.currentMap.screenHeight - self.currentMap.tileSize):
+            self.currentMap.scrollDown()
 
     def getTileCursorIsOn(self):
         return self.currentMap.Tiles[self.cursor.pos[0]][self.cursor.pos[1]]
