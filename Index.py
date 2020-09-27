@@ -25,7 +25,7 @@ robin = Unit(window)
 map1.addUnit(robin, 1, 1)
 unitArray.append(robin)
 
-startGame = Game(map1)
+startGame = Game(window, map1)
 
 
 run = True

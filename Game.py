@@ -1,7 +1,10 @@
 from cursor import Cursor
+from Menu import Menu
 class Game(object):
 
-    def __init__(self, currentMap):
+    def __init__(self, window, currentMap):
+        self.menu = Menu(window)
+        self.window = window
         self.currentMap = currentMap
         self.cursor = Cursor()
         self.getTileCursorIsOn().highlighted()
@@ -38,9 +41,7 @@ class Game(object):
         movement = self.cursor.unitSelected.mov +1
         cursorPosX = self.cursor.pos[0]
         cursorPosY = self.cursor.pos[1]
-        ##self.ShowMovAttHelper(self.cursor.pos, movement, attackRange, inRangeTiles)
         tmpVal = movement
-
         for i in range(movement):
             for j in range(tmpVal):
                 self.currentMap.Tiles[cursorPosX+i][cursorPosY+j].setColor((0, 0, 255))
@@ -106,5 +107,6 @@ class Game(object):
 
     def draw(self):
         self.currentMap.draw()
+        self.menu.draw()
 
     

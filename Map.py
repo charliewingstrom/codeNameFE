@@ -14,15 +14,15 @@ class Map(object):
         self.tileSize = tileSize
         if (Tiles == []):
             tmpTiles = []
-            posX = 10
-            posY = 10
+            posX = 0
+            posY = 0
             for i in range(height):
                 tmp = []
                 for j in range(width):
                     tmp.append(Tile(window, posX, posY))
                     posX += tileSize
                 posY += tileSize
-                posX = 10
+                posX = 0
                 tmpTiles.append(tmp)
                 tmp = []
             self.Tiles = tmpTiles
