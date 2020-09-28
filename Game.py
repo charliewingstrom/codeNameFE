@@ -3,10 +3,11 @@ from Menu import Menu
 class Game(object):
 
     def __init__(self, window, currentMap):
-        self.menu = Menu(window)
+        
         self.window = window
         self.currentMap = currentMap
         self.cursor = Cursor()
+        self.menu = Menu(window, self.cursor.pos, currentMap.screenWidth)
         self.getTileCursorIsOn().highlighted()
         self.selectedUnitPrevPos = None
         self.selectedUnitTilesInRange = []
