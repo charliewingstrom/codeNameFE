@@ -10,6 +10,7 @@ import math
 import random
 from Map import Map
 from Unit import Unit
+from EnemyUnit import EnemyUnit
 from Game import Game
 screenWidth = 1080
 screenHeight = 720
@@ -25,6 +26,9 @@ robin = Unit(window)
 map1.addUnit(robin, 1, 1)
 unitArray.append(robin)
 
+Bandit = EnemyUnit(window)
+map1.addUnit(Bandit, 1, 4)
+unitArray.append(Bandit)
 startGame = Game(window, map1)
 
 

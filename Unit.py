@@ -9,10 +9,14 @@ class Unit(object):
         self.currentTile = currTile
         self.mov = 5
         self.attackRange = 1
+        
+        self.hp = 23
+        self.stength = 6
+        self.defense = 4
 
     def setCurrentTile(self, tile):
         self.currentTile = tile
 
 
     def draw(self):
-        pygame.draw.circle(self.window, (255, 0, 0), self.currentTile.getCenter(), 10)
+        pygame.draw.circle(self.window, (255, 255, 0), self.currentTile.getCenter(), 10)

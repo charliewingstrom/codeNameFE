@@ -22,9 +22,11 @@ class Menu(object):
         text = font.render("Menu", True, black)
         text2 = font.render("Wait", True, black)
         textRect = text.get_rect()
+        textRect2 = text.get_rect()
         textRect.center = (self.posX+75, self.posY+50)
-        
-        pygame.draw.rect(self.window, white, (self.posX, self.posY, 150, 100))
+        textRect2.center = (self.posX+75, self.posY+100)
+        pygame.draw.rect(self.window, white, (self.posX, self.posY, 150, 200))
         self.window.blit(text, textRect)
+        self.window.blit(text2, textRect2)
 
 
