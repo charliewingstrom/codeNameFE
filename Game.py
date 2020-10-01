@@ -36,6 +36,9 @@ class Game(object):
         self.cursor.unitSelected.currentTile.setCurrentUnit(None)
         self.cursor.unitSelected.setCurrentTile(self.currentMap.Tiles[self.selectedUnitPrevPos[0]][self.selectedUnitPrevPos[1]])
         self.currentMap.Tiles[self.selectedUnitPrevPos[0]][self.selectedUnitPrevPos[1]].setCurrentUnit(self.cursor.unitSelected)
+        self.getTileCursorIsOn().unhighlighted()
+        self.cursor.pos = self.selectedUnitPrevPos
+        self.getTileCursorIsOn().highlighted()
         self.selectedUnitPrevPos = None
         self.cursor.setUnitSelected(None)
         self.unitIsPlaced = False
@@ -67,8 +70,6 @@ class Game(object):
                     self.selectedUnitTilesInRange.append(self.currentMap.Tiles[cursorPosX-i][cursorPosY+j])
                     self.selectedUnitAttackRangeTiles.append(self.currentMap.Tiles[cursorPosX-i][cursorPosY+j])
                 
-                
-                
             tmpVal-=1
         tmpVal = attackRange
         for i in range(movement+1):
@@ -87,7 +88,8 @@ class Game(object):
                     self.selectedUnitAttackRangeTiles.append(self.currentMap.Tiles[cursorPosX-i][cursorPosY+j])
             tmpVal-=1
 
-
+    def getUnitsInAttackRange(self):
+        print(self.cursor.unitSelected.attackRange)
     def unitSelectedCursor(self):
         self.cursor.setUnitSelected(self.getTileCursorIsOn().currentUnit)
         
