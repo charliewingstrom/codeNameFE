@@ -57,6 +57,11 @@ while run:
     if keys[pygame.K_x] and startGame.cursor.unitSelected:
         startGame.resetSelectedUnit()
     
+    if keys[pygame.K_w]:
+        startGame.menu.highlightUp()
+    if keys[pygame.K_s]:
+        startGame.menu.highlightDown()
+
     window.fill((0,0,0))
     
     startGame.draw()

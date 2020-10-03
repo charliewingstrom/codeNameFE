@@ -2,6 +2,7 @@ import pygame
 
 white = (255, 255, 255)
 black = (0, 0, 0)
+green = (0, 255, 0)
 class Menu(object):
 
     def __init__(self, window, screenWidth):
@@ -10,23 +11,40 @@ class Menu(object):
         self.screenWidth = screenWidth
         self.posX = 100
         self.posY = 100
+        self.selectedIndex = 0
+        self.menuItems = ["Attack", "Items", "Wait"]
+
+    def highlightDown(self):
+        self.selectedIndex+=1
+        if (self.selectedIndex > len(self.menuItems) - 1):
+            self.selectedIndex = 0
+
+    def highlightUp(self):
+        self.selectedIndex-=1
+        if (self.selectedIndex < 0):
+            self.selectedIndex = len(self.menuItems) - 1
 
     def checkPos(self, currentTile):
+        self.selectedIndex = 0
         if (currentTile.posX < self.screenWidth // 2):
             self.posX = 800
         else:
             self.posX = 100
+
+    
     def draw(self):
         font = pygame.font.Font('freesansbold.ttf', 32)
-
-        text = font.render("Menu", True, black)
-        text2 = font.render("Wait", True, black)
-        textRect = text.get_rect()
-        textRect2 = text.get_rect()
-        textRect.center = (self.posX+75, self.posY+50)
-        textRect2.center = (self.posX+75, self.posY+100)
         pygame.draw.rect(self.window, white, (self.posX, self.posY, 150, 200))
-        self.window.blit(text, textRect)
-        self.window.blit(text2, textRect2)
+
+        for i in range(len(self.menuItems)):
+            if i == self.selectedIndex:
+                color = green
+            else:
+                color = black
+            tmpText = font.render(self.menuItems[i], True, color)
+            tmpTextRect = tmpText.get_rect()
+            tmpTextRect.center = (self.posX+75, self.posY+(50 * (i+1)))
+            self.window.blit(tmpText, tmpTextRect)
+        
 
 
