@@ -1,5 +1,7 @@
 from cursor import Cursor
 from Menu import Menu
+
+red = (255, 0, 0)
 class Game(object):
 
     def __init__(self, window, currentMap):
@@ -13,6 +15,7 @@ class Game(object):
         self.selectedUnitTilesInRange = []
         self.selectedUnitAttackRangeTiles = []
         self.unitIsPlaced = False
+        self.unitsInRange = set()
 
     def selectUnit(self):
         if (self.getTileCursorIsOn().currentUnit != None):
@@ -27,6 +30,7 @@ class Game(object):
             self.getTileCursorIsOn().setCurrentUnit(self.cursor.unitSelected)
             self.menu.checkPos(self.getTileCursorIsOn())
             self.unitIsPlaced =True
+            self.getUnitsInAttackRange()
 
     def resetSelectedUnit(self):
         for tile in self.selectedUnitAttackRangeTiles:
@@ -42,7 +46,8 @@ class Game(object):
         self.selectedUnitPrevPos = None
         self.cursor.setUnitSelected(None)
         self.unitIsPlaced = False
-        
+        self.unitsInRange = set()
+
     ## finds the tiles that the current unit can move to and changes their color,
     ## then finds the tiles that a unit can attack (but not move to) and makes them a different color
     def showMovementAndAttackRange(self):
@@ -89,7 +94,32 @@ class Game(object):
             tmpVal-=1
 
     def getUnitsInAttackRange(self):
-        print(self.cursor.unitSelected.attackRange)
+        for tile in self.selectedUnitAttackRangeTiles:
+            tile.setColor(tile.defaultColor)
+        #print(self.cursor.unitSelected.attackRange)
+        attackRange = self.cursor.unitSelected.attackRange
+        startPos = self.cursor.pos
+
+        unitsInRange = set()
+        unitsInRange.add(1)
+        for i in range(1, attackRange+1):
+            print(str(i))
+            self.currentMap.Tiles[startPos[0]+i][startPos[1]].setColor(red)
+            if self.currentMap.Tiles[startPos[0]+i][startPos[1]].currentUnit != None:
+                unitsInRange.add(self.currentMap.Tiles[startPos[0]+i][startPos[1]].currentUnit)
+            self.currentMap.Tiles[startPos[0]][startPos[1]+i].setColor(red)
+            if self.currentMap.Tiles[startPos[0]][startPos[1]+i].currentUnit != None:
+                unitsInRange.add(self.currentMap.Tiles[startPos[0]][startPos[1]+i].currentUnit)
+            self.currentMap.Tiles[startPos[0]-i][startPos[1]].setColor(red)
+            if self.currentMap.Tiles[startPos[0]-i][startPos[1]].currentUnit != None:
+                unitsInRange.add(self.currentMap.Tiles[startPos[0]-i][startPos[1]].currentUnit)
+            self.currentMap.Tiles[startPos[0]][startPos[1]-i].setColor(red)
+            if self.currentMap.Tiles[startPos[0]][startPos[1]-i].currentUnit != None:
+                unitsInRange.add(self.currentMap.Tiles[startPos[0]][startPos[1]-i].currentUnit)
+
+        print(unitsInRange)
+        self.unitsInRange = unitsInRange
+
     def unitSelectedCursor(self):
         self.cursor.setUnitSelected(self.getTileCursorIsOn().currentUnit)
         

@@ -30,7 +30,7 @@ class Menu(object):
             self.posX = 800
         else:
             self.posX = 100
-
+        
     
     def draw(self):
         font = pygame.font.Font('freesansbold.ttf', 32)

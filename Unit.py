@@ -8,7 +8,7 @@ class Unit(object):
         self.window = window
         self.currentTile = currTile
         self.mov = 5
-        self.attackRange = 1
+        self.attackRange = 2
         
         self.hp = 23
         self.stength = 6
