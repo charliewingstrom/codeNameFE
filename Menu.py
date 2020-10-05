@@ -12,7 +12,7 @@ class Menu(object):
         self.posX = 100
         self.posY = 100
         self.selectedIndex = 0
-        self.menuItems = ["Attack", "Items", "Wait"]
+        self.menuItems = ["Wait"]
 
     def highlightDown(self):
         self.selectedIndex+=1

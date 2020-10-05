@@ -1,6 +1,6 @@
 from cursor import Cursor
 from Menu import Menu
-
+from EnemyUnit import EnemyUnit
 red = (255, 0, 0)
 class Game(object):
 
@@ -24,14 +24,15 @@ class Game(object):
             self.selectedUnitPrevPos = [self.cursor.pos[0], self.cursor.pos[1]]
 
     def placeUnit(self):
-        if (self.getTileCursorIsOn() in self.selectedUnitTilesInRange and self.getTileCursorIsOn().currentUnit == None):
+        if (self.getTileCursorIsOn() in self.selectedUnitTilesInRange and (self.getTileCursorIsOn().currentUnit == None or self.getTileCursorIsOn().currentUnit == self.cursor.unitSelected)):
             self.cursor.unitSelected.currentTile.setCurrentUnit(None)
             self.cursor.unitSelected.setCurrentTile(self.getTileCursorIsOn())
             self.getTileCursorIsOn().setCurrentUnit(self.cursor.unitSelected)
             self.menu.checkPos(self.getTileCursorIsOn())
             self.unitIsPlaced =True
             self.getUnitsInAttackRange()
-
+            if (len(self.unitsInRange) > 0):
+                print("yes")
     def resetSelectedUnit(self):
         for tile in self.selectedUnitAttackRangeTiles:
             tile.setColor(tile.defaultColor)
@@ -97,26 +98,31 @@ class Game(object):
         for tile in self.selectedUnitAttackRangeTiles:
             tile.setColor(tile.defaultColor)
         #print(self.cursor.unitSelected.attackRange)
-        attackRange = self.cursor.unitSelected.attackRange
-        startPos = self.cursor.pos
-
+        attackRange = self.cursor.unitSelected.attackRange+1
+        cursorPosX = self.cursor.pos[0]
+        cursorPosY = self.cursor.pos[1]
         unitsInRange = set()
-        unitsInRange.add(1)
-        for i in range(1, attackRange+1):
-            print(str(i))
-            self.currentMap.Tiles[startPos[0]+i][startPos[1]].setColor(red)
-            if self.currentMap.Tiles[startPos[0]+i][startPos[1]].currentUnit != None:
-                unitsInRange.add(self.currentMap.Tiles[startPos[0]+i][startPos[1]].currentUnit)
-            self.currentMap.Tiles[startPos[0]][startPos[1]+i].setColor(red)
-            if self.currentMap.Tiles[startPos[0]][startPos[1]+i].currentUnit != None:
-                unitsInRange.add(self.currentMap.Tiles[startPos[0]][startPos[1]+i].currentUnit)
-            self.currentMap.Tiles[startPos[0]-i][startPos[1]].setColor(red)
-            if self.currentMap.Tiles[startPos[0]-i][startPos[1]].currentUnit != None:
-                unitsInRange.add(self.currentMap.Tiles[startPos[0]-i][startPos[1]].currentUnit)
-            self.currentMap.Tiles[startPos[0]][startPos[1]-i].setColor(red)
-            if self.currentMap.Tiles[startPos[0]][startPos[1]-i].currentUnit != None:
-                unitsInRange.add(self.currentMap.Tiles[startPos[0]][startPos[1]-i].currentUnit)
-
+        tmpVal = attackRange
+        for i in range(attackRange):
+            for j in range(tmpVal):
+                print(str(j))
+                if (cursorPosX+i <= self.currentMap.width and cursorPosY+j < self.currentMap.height):
+                    self.currentMap.Tiles[cursorPosX+i][cursorPosY+j].setColor((255, 0, 0))
+                    if (type(self.currentMap.Tiles[cursorPosX+i][cursorPosY+j].currentUnit) == EnemyUnit):
+                        unitsInRange.add(self.currentMap.Tiles[cursorPosX+i][cursorPosY+j].currentUnit)
+                if (cursorPosX-i >= 0 and cursorPosY-j >= 0):
+                    self.currentMap.Tiles[cursorPosX-i][cursorPosY-j].setColor((255, 0, 0))
+                    if (type(self.currentMap.Tiles[cursorPosX-i][cursorPosY-j].currentUnit) == EnemyUnit):
+                        unitsInRange.add(self.currentMap.Tiles[cursorPosX-i][cursorPosY-j].currentUnit)
+                if (cursorPosX+i < self.currentMap.width and cursorPosY - j >= 0):
+                    self.currentMap.Tiles[cursorPosX+i][cursorPosY-j].setColor((255, 0, 0))
+                    if (type(self.currentMap.Tiles[cursorPosX+i][cursorPosY-j].currentUnit) == EnemyUnit):
+                        unitsInRange.add(self.currentMap.Tiles[cursorPosX+i][cursorPosY-j].currentUnit)
+                if (cursorPosX-i >= 0 and cursorPosY+j < self.currentMap.height):
+                    self.currentMap.Tiles[cursorPosX-i][cursorPosY+j].setColor((255, 0, 0))
+                    if (type(self.currentMap.Tiles[cursorPosX-i][cursorPosY+j].currentUnit) == EnemyUnit):
+                        unitsInRange.add(self.currentMap.Tiles[cursorPosX-i][cursorPosY+j].currentUnit)
+            tmpVal-=1
         print(unitsInRange)
         self.unitsInRange = unitsInRange
 
