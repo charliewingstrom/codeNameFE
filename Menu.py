@@ -12,7 +12,7 @@ class Menu(object):
         self.posX = 100
         self.posY = 100
         self.selectedIndex = 0
-        self.menuItems = ["Wait"]
+        self.menuItems = ["Items", "Wait"]
 
     def highlightDown(self):
         self.selectedIndex+=1
@@ -34,7 +34,7 @@ class Menu(object):
     
     def draw(self):
         font = pygame.font.Font('freesansbold.ttf', 32)
-        pygame.draw.rect(self.window, white, (self.posX, self.posY, 150, 200))
+        pygame.draw.rect(self.window, white, (self.posX, self.posY, 150, (100*len(self.menuItems))))
 
         for i in range(len(self.menuItems)):
             if i == self.selectedIndex:
