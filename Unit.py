@@ -10,8 +10,9 @@ class Unit(object):
         self.mov = 5
         self.attackRange = 2
         
-        self.hp = 23
-        self.stength = 6
+        self.maxHp = 23
+        self.hp = self.maxHp
+        self.strength = 6
         self.defense = 4
 
     def setCurrentTile(self, tile):

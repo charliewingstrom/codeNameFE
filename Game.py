@@ -28,11 +28,13 @@ class Game(object):
             self.cursor.unitSelected.currentTile.setCurrentUnit(None)
             self.cursor.unitSelected.setCurrentTile(self.getTileCursorIsOn())
             self.getTileCursorIsOn().setCurrentUnit(self.cursor.unitSelected)
+            self.menu.reset()
             self.menu.checkPos(self.getTileCursorIsOn())
             self.unitIsPlaced =True
             self.getUnitsInAttackRange()
             if (len(self.unitsInRange) > 0):
-                print("yes")
+                self.menu.addAttack()
+
     def resetSelectedUnit(self):
         for tile in self.selectedUnitAttackRangeTiles:
             tile.setColor(tile.defaultColor)
@@ -48,6 +50,15 @@ class Game(object):
         self.cursor.setUnitSelected(None)
         self.unitIsPlaced = False
         self.unitsInRange = set()
+
+    def selectMenuOption(self):
+        
+        if (self.menu.menuItems[self.menu.selectedIndex] == "Attack"):
+            print("Attack")
+            units = list(self.unitsInRange)
+            currentHP = units[0].hp
+            units[0].hp -= (self.cursor.unitSelected.strength - units[0].defense)
+            print("Units hp was " +str(currentHP) + " now it is " + str(units[0].hp))
 
     ## finds the tiles that the current unit can move to and changes their color,
     ## then finds the tiles that a unit can attack (but not move to) and makes them a different color
@@ -105,7 +116,6 @@ class Game(object):
         tmpVal = attackRange
         for i in range(attackRange):
             for j in range(tmpVal):
-                print(str(j))
                 if (cursorPosX+i <= self.currentMap.width and cursorPosY+j < self.currentMap.height):
                     self.currentMap.Tiles[cursorPosX+i][cursorPosY+j].setColor((255, 0, 0))
                     if (type(self.currentMap.Tiles[cursorPosX+i][cursorPosY+j].currentUnit) == EnemyUnit):
@@ -123,7 +133,6 @@ class Game(object):
                     if (type(self.currentMap.Tiles[cursorPosX-i][cursorPosY+j].currentUnit) == EnemyUnit):
                         unitsInRange.add(self.currentMap.Tiles[cursorPosX-i][cursorPosY+j].currentUnit)
             tmpVal-=1
-        print(unitsInRange)
         self.unitsInRange = unitsInRange
 
     def unitSelectedCursor(self):

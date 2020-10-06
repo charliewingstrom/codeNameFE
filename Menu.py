@@ -12,7 +12,14 @@ class Menu(object):
         self.posX = 100
         self.posY = 100
         self.selectedIndex = 0
-        self.menuItems = ["Items", "Wait"]
+        self.menuItems = ["Wait"]
+
+    def reset(self):
+        self.selectedIndex = 0
+        self.menuItems = ["Wait"]
+
+    def addAttack(self):
+        self.menuItems.insert(0, "Attack")
 
     def highlightDown(self):
         self.selectedIndex+=1
@@ -30,7 +37,6 @@ class Menu(object):
             self.posX = 800
         else:
             self.posX = 100
-        
     
     def draw(self):
         font = pygame.font.Font('freesansbold.ttf', 32)
