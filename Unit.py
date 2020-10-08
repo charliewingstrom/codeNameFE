@@ -19,4 +19,5 @@ class Unit(object):
         self.currentTile = tile
 
     def draw(self):
-        pygame.draw.circle(self.window, (255, 255, 0), self.currentTile.getCenter(), 10)
+        pygame.draw.circle(self.window, (0, 0, 0), self.currentTile.getCenter(), 25)
+        pygame.draw.circle(self.window, (0, 0, 255), self.currentTile.getCenter(), 15)

@@ -7,6 +7,7 @@ class EnemyUnit(Unit):
         super().__init__(window)
 
     def draw(self):
-        pygame.draw.circle(self.window, (255, 0, 0), self.currentTile.getCenter(), 10)
+        pygame.draw.circle(self.window, (0, 0, 0), self.currentTile.getCenter(), 25)
+        pygame.draw.circle(self.window, (255, 0, 0), self.currentTile.getCenter(), 15)
 
         

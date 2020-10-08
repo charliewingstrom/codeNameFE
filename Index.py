@@ -30,17 +30,33 @@ Bandit = EnemyUnit(window)
 map1.addUnit(Bandit, 1, 4)
 unitArray.append(Bandit)
 startGame = Game(window, map1)
-
 run = True
 while run:
     
     pygame.time.delay(60)
     keys = pygame.key.get_pressed()
     
+    ## put key here if you don't want a held key to repeat the action
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False
-    if not startGame.unitIsPlaced:
+        elif event.type == pygame.KEYDOWN:
+            key = event.key
+            if startGame.unitIsPlaced:
+                if pygame.K_z == key:
+                    startGame.selectMenuOption()
+            elif not startGame.unitIsPlaced:
+                if pygame.K_z == key and startGame.cursor.unitSelected:
+                    startGame.placeUnit()
+                elif pygame.K_z == key and not startGame.cursor.unitSelected:
+                    startGame.selectUnit()
+    ## if you do want a held key to repeat the action (such as scrolling a list) put the key here
+    if startGame.unitIsPlaced:
+        if keys[pygame.K_UP]:
+            startGame.menu.highlightUp()
+        if keys[pygame.K_DOWN]:
+            startGame.menu.highlightDown()
+    elif not startGame.unitIsPlaced:
         if keys[pygame.K_LEFT] and startGame.cursor.pos[1] > 0:
             startGame.selectLeft()
         if keys[pygame.K_RIGHT] and startGame.cursor.pos[1] < startGame.currentMap.width-1:
@@ -49,18 +65,9 @@ while run:
             startGame.selectUp()
         if keys[pygame.K_DOWN] and startGame.cursor.pos[0] < startGame.currentMap.height-1:
             startGame.selectDown()
-        if keys[pygame.K_z] and startGame.cursor.unitSelected:
-            startGame.placeUnit()
-        elif keys[pygame.K_z] and not startGame.cursor.unitSelected:
-            startGame.selectUnit()
         
-    elif startGame.unitIsPlaced:
-        if keys[pygame.K_UP]:
-            startGame.menu.highlightUp()
-        if keys[pygame.K_DOWN]:
-            startGame.menu.highlightDown()
-        if keys[pygame.K_z]:
-            startGame.selectMenuOption()
+        
+    
     if keys[pygame.K_x] and startGame.cursor.unitSelected:
         startGame.resetSelectedUnit()
     
@@ -72,7 +79,7 @@ while run:
         unit.draw()
     pygame.display.update()
     
-        
+    pygame.time.delay(60)
         
         
 pygame.quit()
