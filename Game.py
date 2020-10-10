@@ -4,10 +4,12 @@ from EnemyUnit import EnemyUnit
 red = (185, 0, 0)
 class Game(object):
 
-    def __init__(self, window, currentMap):
+    def __init__(self, window, currentMap, playerUnits, enemyUnits):
         
         self.window = window
         self.currentMap = currentMap
+        self.playerUnits = playerUnits
+        self.enemyUnits = enemyUnits
         self.cursor = Cursor()
         self.menu = Menu(window, currentMap.screenWidth)
         self.getTileCursorIsOn().highlighted()
@@ -19,9 +21,10 @@ class Game(object):
 
     def selectUnit(self):
         if (self.getTileCursorIsOn().currentUnit != None):
-            self.unitSelectedCursor()
-            self.showMovementAndAttackRange()
-            self.selectedUnitPrevPos = [self.cursor.pos[0], self.cursor.pos[1]]
+            if (self.getTileCursorIsOn().currentUnit.active):
+                self.unitSelectedCursor()
+                self.showMovementAndAttackRange()
+                self.selectedUnitPrevPos = [self.cursor.pos[0], self.cursor.pos[1]]
 
     def placeUnit(self):
         if (self.getTileCursorIsOn() in self.selectedUnitTilesInRange and (self.getTileCursorIsOn().currentUnit == None or self.getTileCursorIsOn().currentUnit == self.cursor.unitSelected)):
@@ -36,29 +39,32 @@ class Game(object):
                 self.menu.addAttack()
 
     def resetSelectedUnit(self):
-        for tile in self.selectedUnitAttackRangeTiles:
-            tile.setColor(tile.defaultColor)
-        self.selectedUnitTilesInRange = []
-        self.selectedUnitAttackRangeTiles = []
-        self.cursor.unitSelected.currentTile.setCurrentUnit(None)
         self.cursor.unitSelected.setCurrentTile(self.currentMap.Tiles[self.selectedUnitPrevPos[0]][self.selectedUnitPrevPos[1]])
         self.currentMap.Tiles[self.selectedUnitPrevPos[0]][self.selectedUnitPrevPos[1]].setCurrentUnit(self.cursor.unitSelected)
         self.getTileCursorIsOn().unhighlighted()
         self.cursor.pos = self.selectedUnitPrevPos
         self.getTileCursorIsOn().highlighted()
+        self.cleanupAfterAction()
+        
+    def cleanupAfterAction(self): 
+        for tile in self.selectedUnitAttackRangeTiles:
+            tile.setColor(tile.defaultColor)
+        self.selectedUnitTilesInRange = []
+        self.selectedUnitAttackRangeTiles = []
         self.selectedUnitPrevPos = None
         self.cursor.setUnitSelected(None)
         self.unitIsPlaced = False
         self.unitsInRange = set()
 
     def selectMenuOption(self):
-        
         if (self.menu.menuItems[self.menu.selectedIndex] == "Attack"):
             print("Attack")
             units = list(self.unitsInRange)
             currentHP = units[0].hp
             units[0].hp -= (self.cursor.unitSelected.strength - units[0].defense)
             print("Units hp was " +str(currentHP) + " now it is " + str(units[0].hp))
+            self.cursor.unitSelected.active = False
+            self.cleanupAfterAction()
 
     ## finds the tiles that the current unit can move to and changes their color,
     ## then finds the tiles that a unit can attack (but not move to) and makes them a different color
@@ -171,6 +177,10 @@ class Game(object):
 
     def draw(self):
         self.currentMap.draw()
+        for unit in self.playerUnits:
+            unit.draw()
+        for unit in self.enemyUnits:
+            unit.draw()
         if (self.unitIsPlaced):
             self.menu.draw()
 

@@ -15,6 +15,8 @@ class Unit(object):
         self.strength = 6
         self.defense = 4
 
+        self.active = True
+
     def setCurrentTile(self, tile):
         self.currentTile = tile
 

@@ -19,17 +19,17 @@ window = pygame.display.set_mode((screenWidth, screenHeight))
 
 pygame.display.set_caption("codeFE")
 
-unitArray = []        
+unitArray = []    
+enemyArray = []    
 map1 = Map(window, screenWidth, screenHeight)
 
 robin = Unit(window)
 map1.addUnit(robin, 1, 1)
 unitArray.append(robin)
-
 Bandit = EnemyUnit(window)
 map1.addUnit(Bandit, 1, 4)
-unitArray.append(Bandit)
-startGame = Game(window, map1)
+enemyArray.append(Bandit)
+startGame = Game(window, map1, unitArray, enemyArray)
 run = True
 while run:
     
@@ -75,8 +75,6 @@ while run:
     window.fill((0,0,0))
     
     startGame.draw()
-    for unit in unitArray:
-        unit.draw()
     pygame.display.update()
     
     pygame.time.delay(60)
