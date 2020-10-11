@@ -4,12 +4,14 @@ Created on Tue Jun 16 22:03:13 2020
 
 @author: Charlie
 """
+import sys
+sys.path.append('./Units')
 
 import pygame
 import math
 import random
 from Map import Map
-from Unit import Unit
+from PlayerUnit import PlayerUnit
 from EnemyUnit import EnemyUnit
 from Game import Game
 screenWidth = 1080
@@ -23,9 +25,12 @@ unitArray = []
 enemyArray = []    
 map1 = Map(window, screenWidth, screenHeight)
 
-robin = Unit(window)
+robin = PlayerUnit(window)
 map1.addUnit(robin, 1, 1)
 unitArray.append(robin)
+Byleth = PlayerUnit(window)
+map1.addUnit(Byleth, 2, 2)
+unitArray.append(Byleth)
 Bandit = EnemyUnit(window)
 map1.addUnit(Bandit, 1, 4)
 enemyArray.append(Bandit)

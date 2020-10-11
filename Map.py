@@ -19,7 +19,7 @@ class Map(object):
             for i in range(height):
                 tmp = []
                 for j in range(width):
-                    tmp.append(Tile(window, posX, posY))
+                    tmp.append(Tile(window, posX, posY, i, j))
                     posX += tileSize
                 posY += tileSize
                 posX = 0

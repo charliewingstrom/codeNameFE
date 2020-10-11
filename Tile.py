@@ -2,8 +2,10 @@ import pygame
 
 class Tile(object):
     
-    def __init__(self, window, posX, posY, width = 100, height = 100, defaultColor = (0,0,0), borderColor =(255, 255, 255)):
+    def __init__(self, window, posX, posY, verticalIndex, horizontalIndex, width = 100, height = 100, defaultColor = (0,0,0), borderColor =(255, 255, 255)):
         self.window = window
+        self.heightIndex = verticalIndex
+        self.widthIndex = horizontalIndex
         self.posX = posX
         self.posY = posY
         self.width = width
