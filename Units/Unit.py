@@ -12,7 +12,7 @@ class Unit(object):
         
         self.maxHp = 23
         self.hp = self.maxHp
-        self.strength = 6
+        self.strength = 20
         self.defense = 4
 
         self.active = False
