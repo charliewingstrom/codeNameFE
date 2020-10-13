@@ -4,8 +4,9 @@ from Tile import Tile
 
 class Unit(object):
 
-    def __init__(self, window, currTile = None):
+    def __init__(self, window, name, currTile = None):
         self.window = window
+        self.name = name
         self.currentTile = currTile
         self.mov = 5
         self.attackRange = 2
@@ -17,6 +18,8 @@ class Unit(object):
 
         self.active = False
 
+    def __str__(self):
+        return self.name
     def setCurrentTile(self, tile):
         self.currentTile = tile
 

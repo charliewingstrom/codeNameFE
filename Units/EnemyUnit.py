@@ -4,7 +4,7 @@ from Unit import Unit
 class EnemyUnit(Unit):
 
     def __init__(self, window):
-        super().__init__(window)
+        super().__init__(window, "Generic")
 
     def draw(self):
         pygame.draw.circle(self.window, (0, 0, 0), self.currentTile.getCenter(), 25)

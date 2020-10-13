@@ -79,16 +79,19 @@ class Game(object):
             units = list(self.unitsInRange)
             unit = units[0]
             currentHP = unit.hp
-            unit.hp -= (playerUnit.strength - unit.defense)
+            unit.hp -= max(0, playerUnit.strength - unit.defense)
             print("Units hp was " +str(currentHP) + " now it is " + str(unit.hp))
             if (unit.hp <= 0):
                 self.removeUnit(unit)
             else:
                 enemyRange = self.getUnitsInAttackRange(unit)
-                print(playerUnit)
-                print(enemyRange)
                 if (playerUnit in enemyRange):
                     print("Counter Attack")
+                    playerUnit.hp -= max(0, unit.strength - playerUnit.defense)
+                    print("Player unit hit for " + str(max(0, unit.strength - playerUnit.defense)) + " damage")
+                    if (playerUnit.hp <= 0):
+                        self.removeUnit(playerUnit)
+                        print(str(playerUnit) + " Died")
         if (action == "Wait"):
             pass
         playerUnit.active = False
@@ -208,7 +211,10 @@ class Game(object):
         return self.currentMap.Tiles[self.cursor.pos[0]][self.cursor.pos[1]]
 
     def removeUnit(self, unit):
-        self.enemyUnits.remove(unit)
+        if (type(unit) == EnemyUnit):
+            self.enemyUnits.remove(unit)
+        else:
+            self.playerUnits.remove(unit)
         currentTile = unit.currentTile
         currentTile.setCurrentUnit(None)
         unit.setCurrentTile(None)
