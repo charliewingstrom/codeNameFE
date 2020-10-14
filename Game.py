@@ -2,6 +2,7 @@ from cursor import Cursor
 from ActionMenu import ActionMenu
 from EnemyUnit import EnemyUnit
 from PlayerUnit import PlayerUnit
+from TurnManager import TurnManager
 red = (185, 0, 0)
 class Game(object):
 
@@ -13,15 +14,21 @@ class Game(object):
         self.enemyUnits = enemyUnits
         self.cursor = Cursor()
         self.menu = ActionMenu(window, currentMap.screenWidth)
+        self.TurnManager = TurnManager()
+        self.activeUnits = set()
         self.getTileCursorIsOn().highlighted()
         self.selectedUnitPrevPos = None
         self.selectedUnitTilesInRange = []
         self.selectedUnitAttackRangeTiles = []
         self.unitIsPlaced = False
         self.unitsInRange = set()
-        self.activeUnits = set()
+        
         self.startTurn()
 
+    """ 
+        Turn state -- related to who's turn it is and what to do when a turn 
+        begins or ends
+    """
     def startTurn(self):
         print("Turn Start")
         for unit in self.playerUnits:
@@ -31,6 +38,16 @@ class Game(object):
     def endTurn(self):
         print("Turn Over")
 
+    def startEnemyPhase(self):
+        print("start enemy phase")
+        
+    """
+        End Turn State
+    """
+
+    """
+        Movement -- Functions related to the selection and placement of units
+    """
     def selectUnit(self):
         if (self.getTileCursorIsOn().currentUnit != None):
             if (self.getTileCursorIsOn().currentUnit.active):
@@ -97,7 +114,9 @@ class Game(object):
         playerUnit.active = False
         self.activeUnits.remove(self.cursor.unitSelected)
         self.cleanupAfterAction()
-    
+    """
+        End Movement
+    """
     ## finds the tiles that the current unit can move to and changes their color,
     ## then finds the tiles that a unit can attack (but not move to) and makes them a different color
     def showMovementAndAttackRange(self):
@@ -176,9 +195,6 @@ class Game(object):
             tmpVal-=1
         return unitsInRange
 
-    def unitSelectedCursor(self):
-        self.cursor.setUnitSelected(self.getTileCursorIsOn().currentUnit)
-        
     def selectLeft(self):
         self.getTileCursorIsOn().unhighlighted()
         self.cursor.pos[1] -= 1
@@ -210,6 +226,9 @@ class Game(object):
     def getTileCursorIsOn(self):
         return self.currentMap.Tiles[self.cursor.pos[0]][self.cursor.pos[1]]
 
+    def unitSelectedCursor(self):
+        self.cursor.setUnitSelected(self.getTileCursorIsOn().currentUnit)
+        
     def removeUnit(self, unit):
         if (type(unit) == EnemyUnit):
             self.enemyUnits.remove(unit)
