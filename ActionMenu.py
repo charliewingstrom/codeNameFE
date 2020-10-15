@@ -9,7 +9,7 @@ class ActionMenu(Menu):
         super().__init__(window, screenWidth, screenHeight)
         self.selectedIndex = 0
         self.menuItems = ["Wait"]
-
+        self.posY = 100
     def reset(self):
         self.selectedIndex = 0
         self.menuItems = ["Wait"]
@@ -36,7 +36,10 @@ class ActionMenu(Menu):
     
     def draw(self):
         font = pygame.font.Font('freesansbold.ttf', 32)
-        pygame.draw.rect(self.window, white, (self.posX, self.posY, 150, (100*len(self.menuItems))))
+        if (len(self.menuItems) == 1):
+            pygame.draw.rect(self.window, white, (self.posX, self.posY, 150, (100)))
+        else:
+            pygame.draw.rect(self.window, white, (self.posX, self.posY, 150, (75*len(self.menuItems))))
 
         for i in range(len(self.menuItems)):
             if i == self.selectedIndex:

@@ -21,8 +21,6 @@ window = pygame.display.set_mode((screenWidth, screenHeight))
 
 pygame.display.set_caption("codeFE")
 
-
- 
 map1 = Map(window, screenWidth, screenHeight)
 
 unitArray = []    
@@ -68,9 +66,9 @@ while run:
     ## if you do want a held key to repeat the action (such as scrolling a list) put the key here
     if startGame.unitIsPlaced:
         if keys[pygame.K_UP]:
-            startGame.menu.highlightUp()
+            startGame.actionMenu.highlightUp()
         if keys[pygame.K_DOWN]:
-            startGame.menu.highlightDown()
+            startGame.actionMenu.highlightDown()
     elif not startGame.unitIsPlaced:
         if keys[pygame.K_LEFT] and startGame.cursor.pos[1] > 0:
             startGame.selectLeft()

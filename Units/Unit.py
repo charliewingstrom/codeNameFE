@@ -20,6 +20,7 @@ class Unit(object):
 
     def __str__(self):
         return self.name
+        
     def setCurrentTile(self, tile):
         self.currentTile = tile
 
