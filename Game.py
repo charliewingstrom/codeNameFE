@@ -16,9 +16,11 @@ class Game(object):
         self.cursor = Cursor()
         self.actionMenu = ActionMenu(window, currentMap.screenWidth, currentMap.screenHeight)
         self.mapHealthMenu = MapHealthMenu(window, currentMap.screenWidth, currentMap.screenHeight)
+        self.mapHealthMenu.setCurrentUnit(self.getTileCursorIsOn().currentUnit)
         self.TurnManager = TurnManager()
         self.activeUnits = set()
         self.getTileCursorIsOn().highlighted()
+
         self.selectedUnitPrevPos = None
         self.selectedUnitTilesInRange = []
         self.selectedUnitAttackRangeTiles = []
@@ -197,33 +199,28 @@ class Game(object):
             tmpVal-=1
         return unitsInRange
 
-    def selectLeft(self):
+    def moveCursor(self, direction):
         self.getTileCursorIsOn().unhighlighted()
-        self.cursor.pos[1] -= 1
-        self.getTileCursorIsOn().highlighted()
+        if (direction == "left"):
+            self.cursor.pos[1] -= 1
+        elif (direction == "right"):
+            self.cursor.pos[1] += 1
+        elif (direction == "up"):
+            self.cursor.pos[0] -= 1
+        elif (direction == "down"):
+            self.cursor.pos[0] += 1
         if (self.getTileCursorIsOn().posX < self.currentMap.tileSize ):
             self.currentMap.scrollLeft()
-
-    def selectRight(self):
-        self.getTileCursorIsOn().unhighlighted()
-        self.cursor.pos[1] += 1
-        self.getTileCursorIsOn().highlighted()
-        if (self.getTileCursorIsOn().posX > self.currentMap.screenWidth - self.currentMap.tileSize):
+        elif (self.getTileCursorIsOn().posX > self.currentMap.screenWidth - self.currentMap.tileSize):
             self.currentMap.scrollRight()
-
-    def selectUp(self):
-        self.getTileCursorIsOn().unhighlighted()
-        self.cursor.pos[0] -= 1
-        self.getTileCursorIsOn().highlighted()
-        if (self.getTileCursorIsOn().posY < self.currentMap.tileSize ):
+        elif (self.getTileCursorIsOn().posY < self.currentMap.tileSize ):
             self.currentMap.scrollUp()
-            
-    def selectDown(self):
-        self.getTileCursorIsOn().unhighlighted()
-        self.cursor.pos[0] += 1
-        self.getTileCursorIsOn().highlighted()
-        if (self.getTileCursorIsOn().posY > self.currentMap.screenHeight - self.currentMap.tileSize):
+        elif (self.getTileCursorIsOn().posY > self.currentMap.screenHeight - self.currentMap.tileSize):
             self.currentMap.scrollDown()
+        self.getTileCursorIsOn().highlighted()
+        if (self.getTileCursorIsOn().currentUnit!=None):
+            self.mapHealthMenu.checkPos(self.getTileCursorIsOn())
+            self.mapHealthMenu.setCurrentUnit(self.getTileCursorIsOn().currentUnit)
 
     def getTileCursorIsOn(self):
         return self.currentMap.Tiles[self.cursor.pos[0]][self.cursor.pos[1]]
@@ -248,7 +245,6 @@ class Game(object):
             unit.draw()
         if (self.getTileCursorIsOn().currentUnit!=None):
             self.mapHealthMenu.checkPos(self.getTileCursorIsOn())
-            self.mapHealthMenu.setCurrentUnit(self.getTileCursorIsOn().currentUnit)
             self.mapHealthMenu.draw()
         if (self.unitIsPlaced):
             self.actionMenu.draw()

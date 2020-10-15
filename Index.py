@@ -71,13 +71,13 @@ while run:
             startGame.actionMenu.highlightDown()
     elif not startGame.unitIsPlaced:
         if keys[pygame.K_LEFT] and startGame.cursor.pos[1] > 0:
-            startGame.selectLeft()
+            startGame.moveCursor("left")
         if keys[pygame.K_RIGHT] and startGame.cursor.pos[1] < startGame.currentMap.width-1:
-            startGame.selectRight()
+            startGame.moveCursor("right")
         if keys[pygame.K_UP] and startGame.cursor.pos[0] > 0:
-            startGame.selectUp()
+            startGame.moveCursor("up")
         if keys[pygame.K_DOWN] and startGame.cursor.pos[0] < startGame.currentMap.height-1:
-            startGame.selectDown()
+            startGame.moveCursor("down")
         
         
     
