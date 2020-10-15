@@ -1,5 +1,6 @@
 from cursor import Cursor
 from ActionMenu import ActionMenu
+from MapHealthMenu import MapHealthMenu
 from EnemyUnit import EnemyUnit
 from PlayerUnit import PlayerUnit
 from TurnManager import TurnManager
@@ -13,7 +14,8 @@ class Game(object):
         self.playerUnits = playerUnits
         self.enemyUnits = enemyUnits
         self.cursor = Cursor()
-        self.menu = ActionMenu(window, currentMap.screenWidth)
+        self.actionMenu = ActionMenu(window, currentMap.screenWidth, currentMap.screenHeight)
+        self.mapHealthMenu = MapHealthMenu(window, currentMap.screenWidth, currentMap.screenHeight)
         self.TurnManager = TurnManager()
         self.activeUnits = set()
         self.getTileCursorIsOn().highlighted()
@@ -60,12 +62,12 @@ class Game(object):
             self.cursor.unitSelected.currentTile.setCurrentUnit(None)
             self.cursor.unitSelected.setCurrentTile(self.getTileCursorIsOn())
             self.getTileCursorIsOn().setCurrentUnit(self.cursor.unitSelected)
-            self.menu.reset()
-            self.menu.checkPos(self.getTileCursorIsOn())
+            self.actionMenu.reset()
+            self.actionMenu.checkPos(self.getTileCursorIsOn())
             self.unitIsPlaced =True
             self.unitsInRange = self.getUnitsInAttackRange(self.cursor.unitSelected)
             if (len(self.unitsInRange) > 0):
-                self.menu.addAttack()
+                self.actionMenu.addAttack()
 
     def resetSelectedUnit(self):
         self.cursor.unitSelected.setCurrentTile(self.currentMap.Tiles[self.selectedUnitPrevPos[0]][self.selectedUnitPrevPos[1]])
@@ -89,7 +91,7 @@ class Game(object):
             self.startTurn()
         
     def selectMenuOption(self):
-        action = self.menu.menuItems[self.menu.selectedIndex]
+        action = self.actionMenu.menuItems[self.actionMenu.selectedIndex]
         playerUnit = self.cursor.unitSelected
         if (action == "Attack"):
             print("Attack")
@@ -201,6 +203,8 @@ class Game(object):
         self.getTileCursorIsOn().highlighted()
         if (self.getTileCursorIsOn().posX < self.currentMap.tileSize ):
             self.currentMap.scrollLeft()
+        if (self.getTileCursorIsOn().currentUnit != None):
+            self.mapHealthMenu.checkPos(self.getTileCursorIsOn())
 
     def selectRight(self):
         self.getTileCursorIsOn().unhighlighted()
@@ -208,7 +212,9 @@ class Game(object):
         self.getTileCursorIsOn().highlighted()
         if (self.getTileCursorIsOn().posX > self.currentMap.screenWidth - self.currentMap.tileSize):
             self.currentMap.scrollRight()
-    
+        if (self.getTileCursorIsOn().currentUnit != None):
+            self.mapHealthMenu.checkPos(self.getTileCursorIsOn())
+
     def selectUp(self):
         self.getTileCursorIsOn().unhighlighted()
         self.cursor.pos[0] -= 1
@@ -244,7 +250,9 @@ class Game(object):
             unit.draw()
         for unit in self.enemyUnits:
             unit.draw()
+        if (self.getTileCursorIsOn().currentUnit!=None):
+            self.mapHealthMenu.draw()
         if (self.unitIsPlaced):
-            self.menu.draw()
+            self.actionMenu.draw()
 
     

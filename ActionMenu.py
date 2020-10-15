@@ -1,16 +1,12 @@
 import pygame
-
+from Menu import Menu
 white = (255, 255, 255)
 black = (0, 0, 0)
 green = (0, 255, 0)
-class ActionMenu(object):
+class ActionMenu(Menu):
 
-    def __init__(self, window, screenWidth):
-        pygame.init()
-        self.window = window
-        self.screenWidth = screenWidth
-        self.posX = 100
-        self.posY = 100
+    def __init__(self, window, screenWidth, screenHeight):
+        super().__init__(window, screenWidth, screenHeight)
         self.selectedIndex = 0
         self.menuItems = ["Wait"]
 
