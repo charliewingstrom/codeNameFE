@@ -19,7 +19,7 @@ class Map(object):
             for i in range(height):
                 tmp = []
                 for j in range(width):
-                    tmp.append(Tile(window, posX, posY, i, j))
+                    tmp.append(Tile(window, self, posX, posY, i, j))
                     posX += tileSize
                 posY += tileSize
                 posX = 0
@@ -28,7 +28,9 @@ class Map(object):
             self.Tiles = tmpTiles
         else:
             self.Tiles = Tiles
-        
+        for row in self.Tiles:
+            for tile in row:
+                tile.getAdjList()
     def scrollDown(self):
         for row in self.Tiles:
             for tile in row:
