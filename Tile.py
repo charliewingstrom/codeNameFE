@@ -22,15 +22,11 @@ class Tile(object):
         
     def getAdjList(self):
         Tiles = self.currentMap.Tiles
-        if (self.heightIndex < len(Tiles)-1):
-            self.adjList.append(self.currentMap.Tiles[self.heightIndex+1][self.widthIndex])
-        if (self.heightIndex < len(Tiles)):
-            self.adjList.append(self.currentMap.Tiles[self.heightIndex-1][self.widthIndex])
-        if (self.widthIndex < len(Tiles[0])-1):
-            self.adjList.append(self.currentMap.Tiles[self.heightIndex][self.widthIndex+1])    
-        if (self.widthIndex < len(Tiles[0])):
-            self.adjList.append(self.currentMap.Tiles[self.heightIndex][self.widthIndex-1])    
-       #self.currentMap.Tiles[self.heightIndex-1][self.widthIndex],self.currentMap.Tiles[self.heightIndex][self.widthIndex+1],self.currentMap.Tiles[self.heightIndex][self.widthIndex-1]]    
+        if (self.heightIndex < self.currentMap.height-1 and self.heightIndex > 0 and self.widthIndex < self.currentMap.width-1 and self.widthIndex > 0):
+            self.adjList.append(Tiles[self.heightIndex+1][self.widthIndex])
+            self.adjList.append(Tiles[self.heightIndex-1][self.widthIndex])
+            self.adjList.append(Tiles[self.heightIndex][self.widthIndex+1])
+            self.adjList.append(Tiles[self.heightIndex][self.widthIndex-1])   
     
     def __str__(self):
         return (str(self.posX) + ", " + str(self.posY))
