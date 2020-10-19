@@ -83,6 +83,7 @@ class Game(object):
     def cleanupAfterAction(self): 
         for tile in self.selectedUnitAttackRangeTiles:
             tile.setColor(tile.defaultColor)
+            tile.reset()
         self.selectedUnitTilesInRange = []
         self.selectedUnitAttackRangeTiles = []
         self.selectedUnitPrevPos = None
@@ -124,26 +125,51 @@ class Game(object):
     """
 
     def showMovementAndAttackRange(self):
+        currentTile = self.getTileCursorIsOn()
+        attackRange = self.cursor.unitSelected.attackRange
+        movement = self.cursor.unitSelected.mov 
+        queue = []
+        queue.append(currentTile)
+        currentTile.setColor(blue)
+        self.selectedUnitTilesInRange.append(currentTile)
+        self.selectedUnitAttackRangeTiles.append(currentTile)
+        while (len(queue) > 0):
+            currentTile = queue.pop(0)
+            if (currentTile.distance < movement):
+                for tile in currentTile.adjList:
+                    if not tile.visited:
+                        tile.visited = True
+                        tile.distance = currentTile.distance+1
+                        tile.setColor(blue)
+                        queue.append(tile)
+                        self.selectedUnitTilesInRange.append(tile)
+                        self.selectedUnitAttackRangeTiles.append(tile)
+            elif (currentTile.distance < movement+attackRange):
+                for tile in currentTile.adjList:
+                    if not tile.visited:
+                        tile.visited = True
+                        tile.distance = currentTile.distance+1
+                        tile.setColor(red)
+                        queue.append(tile)   
+                        self.selectedUnitAttackRangeTiles.append(tile)
+
+    """ 
+    def showMovementAndAttackRange(self):
         self.showMovementAndAttackRangeHelper(self.getTileCursorIsOn(), self.cursor.unitSelected.mov+1, self.cursor.unitSelected.attackRange, set())
     def showMovementAndAttackRangeHelper(self, currentTile, movement, attackRange, visited):
+        visited.add(currentTile)
+        currentTile.setColor(blue)
         if (movement <= 0 and attackRange <= 0):
             return
         elif (movement > 0):
             for tile in currentTile.adjList:
                 if (tile not in visited):
-                    visited.add(tile)
-                    currentTile.setColor(blue)
-                    self.selectedUnitTilesInRange.append(currentTile)
-                    self.selectedUnitAttackRangeTiles.append(currentTile)
                     self.showMovementAndAttackRangeHelper(tile, movement-1, attackRange, visited)
         else:
             for tile in currentTile.adjList:
                 if (tile not in visited):
-                    visited.add(tile)
-                    currentTile.setColor(red)
-                    self.selectedUnitAttackRangeTiles.append(currentTile)
                     self.showMovementAndAttackRangeHelper(tile, movement, attackRange-1, visited)
-        
+ """
     ## finds the tiles that the current unit can move to and changes their color,
     ## then finds the tiles that a unit can attack (but not move to) and makes them a different color
     """ def showMovementAndAttackRange(self):

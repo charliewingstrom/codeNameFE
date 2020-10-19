@@ -12,6 +12,10 @@ class Tile(object):
         self.currentUnit = None
         self.adjList = []
         
+        ## for BFS
+        self.visited = False
+        self.distance = 0
+
         ## all stuff for drawing
         self.width = width
         self.height = height
@@ -22,15 +26,22 @@ class Tile(object):
         
     def getAdjList(self):
         Tiles = self.currentMap.Tiles
-        if (self.heightIndex < self.currentMap.height-1 and self.heightIndex > 0 and self.widthIndex < self.currentMap.width-1 and self.widthIndex > 0):
+        if (self.heightIndex < self.currentMap.height-1):# and self.heightIndex > 0 and self.widthIndex < self.currentMap.width-1 and self.widthIndex > 0):
             self.adjList.append(Tiles[self.heightIndex+1][self.widthIndex])
+        if (self.heightIndex > 0):
             self.adjList.append(Tiles[self.heightIndex-1][self.widthIndex])
+        if (self.widthIndex < self.currentMap.width-1):
             self.adjList.append(Tiles[self.heightIndex][self.widthIndex+1])
+        if (self.widthIndex > 0):
             self.adjList.append(Tiles[self.heightIndex][self.widthIndex-1])   
     
     def __str__(self):
         return (str(self.posX) + ", " + str(self.posY))
     
+    def reset(self):
+        self.visited = False
+        self.distance = 0
+
     def draw(self):
         pygame.draw.rect(self.window, self.borderColor,(self.posX, self.posY, self.width, self.height))
         pygame.draw.rect(self.window, self.currentColor, (self.posX+5, self.posY+5, self.width-10, self.height-10))
