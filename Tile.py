@@ -1,5 +1,5 @@
 import pygame
-
+cursorColor = (255,140,25)
 class Tile(object):
     
     def __init__(self, window, currentMap, posX, posY, verticalIndex, horizontalIndex, width = 100, height = 100, defaultColor = (0,0,0), borderColor =(255, 255, 255)):
@@ -57,9 +57,9 @@ class Tile(object):
         
     def highlighted(self):
         self.getAdjList()
-        self.borderColor = (0, 255, 0)
+        self.borderColor = cursorColor
         for tile in self.adjList:
-            tile.borderColor = (0, 255, 0)
+            tile.borderColor = cursorColor
     def unhighlighted(self):
         self.borderColor = self.defaultBorderColor
         for tile in self.adjList:

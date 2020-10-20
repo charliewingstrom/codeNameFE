@@ -55,13 +55,12 @@ class Game(object):
     """
     def selectUnit(self):
         if (self.getTileCursorIsOn().currentUnit != None):
-            if (self.getTileCursorIsOn().currentUnit.active):
-                self.unitSelectedCursor()
-                self.showMovementAndAttackRange()
-                self.selectedUnitPrevPos = [self.cursor.pos[0], self.cursor.pos[1]]
+            self.unitSelectedCursor()
+            self.showMovementAndAttackRange()
+            self.selectedUnitPrevPos = [self.cursor.pos[0], self.cursor.pos[1]]
 
     def placeUnit(self):
-        if (self.getTileCursorIsOn() in self.selectedUnitTilesInRange and (self.getTileCursorIsOn().currentUnit == None or self.getTileCursorIsOn().currentUnit == self.cursor.unitSelected)):
+        if (type(self.cursor.unitSelected) == PlayerUnit and self.getTileCursorIsOn() in self.selectedUnitTilesInRange and (self.getTileCursorIsOn().currentUnit == None or self.getTileCursorIsOn().currentUnit == self.cursor.unitSelected)):
             self.cursor.unitSelected.currentTile.setCurrentUnit(None)
             self.cursor.unitSelected.setCurrentTile(self.getTileCursorIsOn())
             self.getTileCursorIsOn().setCurrentUnit(self.cursor.unitSelected)
@@ -123,98 +122,64 @@ class Game(object):
     """
         End Movement
     """
-
+    ## finds the tiles that the current unit can move to and changes their color,
+    ## then finds the tiles that a unit can attack (but not move to) and makes them a different color
     def showMovementAndAttackRange(self):
+        oppositeType = EnemyUnit
+        if type(self.cursor.unitSelected) == EnemyUnit:
+            oppositeType = PlayerUnit
         currentTile = self.getTileCursorIsOn()
         attackRange = self.cursor.unitSelected.attackRange
         movement = self.cursor.unitSelected.mov 
         queue = []
+        attackQueue = []
+
         queue.append(currentTile)
         currentTile.setColor(blue)
         self.selectedUnitTilesInRange.append(currentTile)
         self.selectedUnitAttackRangeTiles.append(currentTile)
         while (len(queue) > 0):
             currentTile = queue.pop(0)
-            if (currentTile.distance < movement):
+            if currentTile.distance < movement:
                 for tile in currentTile.adjList:
                     if not tile.visited:
-                        tile.visited = True
-                        tile.distance = currentTile.distance+1
-                        tile.setColor(blue)
-                        queue.append(tile)
-                        self.selectedUnitTilesInRange.append(tile)
-                        self.selectedUnitAttackRangeTiles.append(tile)
-            elif (currentTile.distance < movement+attackRange):
+                        if type(tile.currentUnit) != oppositeType:
+                            tile.visited = True
+                            tile.distance = currentTile.distance+1
+                            tile.setColor(blue)
+                            self.selectedUnitTilesInRange.append(tile)
+                            self.selectedUnitAttackRangeTiles.append(tile)
+                            queue.append(tile)
+                        else:
+                            tile.visited = True
+                            tile.setColor(red)
+                            self.selectedUnitAttackRangeTiles.append(tile)
+                            attackQueue.append(tile)
+            if currentTile.distance < movement+attackRange:
                 for tile in currentTile.adjList:
                     if not tile.visited:
                         tile.visited = True
                         tile.distance = currentTile.distance+1
                         tile.setColor(red)
-                        queue.append(tile)   
                         self.selectedUnitAttackRangeTiles.append(tile)
+                        queue.append(tile)
+        ## run bfs again on each of the tiles in the attack queue
+        ## this is to get any tiles that can be attacked but were hidden behind an enemy
+        for startingTile in attackQueue:
+            tmpQueue = []
+            tmpQueue.append(startingTile)
+            while(len(tmpQueue) > 0):
+                currentTile = tmpQueue.pop(0)
+                if (currentTile.distance < attackRange-1):
+                    for tile in currentTile.adjList:
+                        if not tile.visited:
+                            tile.visited = True
+                            tile.distance = currentTile.distance+1
+                            tile.setColor(red)
+                            self.selectedUnitAttackRangeTiles.append(tile)
+                            tmpQueue.append(tile)
 
-    """ 
-    def showMovementAndAttackRange(self):
-        self.showMovementAndAttackRangeHelper(self.getTileCursorIsOn(), self.cursor.unitSelected.mov+1, self.cursor.unitSelected.attackRange, set())
-    def showMovementAndAttackRangeHelper(self, currentTile, movement, attackRange, visited):
-        visited.add(currentTile)
-        currentTile.setColor(blue)
-        if (movement <= 0 and attackRange <= 0):
-            return
-        elif (movement > 0):
-            for tile in currentTile.adjList:
-                if (tile not in visited):
-                    self.showMovementAndAttackRangeHelper(tile, movement-1, attackRange, visited)
-        else:
-            for tile in currentTile.adjList:
-                if (tile not in visited):
-                    self.showMovementAndAttackRangeHelper(tile, movement, attackRange-1, visited)
- """
-    ## finds the tiles that the current unit can move to and changes their color,
-    ## then finds the tiles that a unit can attack (but not move to) and makes them a different color
-    """ def showMovementAndAttackRange(self):
-        attackRange = self.cursor.unitSelected.attackRange
-        movement = self.cursor.unitSelected.mov +1
-        cursorPosX = self.cursor.pos[0]
-        cursorPosY = self.cursor.pos[1]
-        tmpVal = movement
-        for i in range(movement):
-            for j in range(tmpVal):
-                if (cursorPosX+i <= self.currentMap.width and cursorPosY+j < self.currentMap.height):
-                    self.currentMap.Tiles[cursorPosX+i][cursorPosY+j].setColor((0, 0, 255))
-                    self.selectedUnitTilesInRange.append(self.currentMap.Tiles[cursorPosX+i][cursorPosY+j])
-                    self.selectedUnitAttackRangeTiles.append(self.currentMap.Tiles[cursorPosX+i][cursorPosY+j])
-                if (cursorPosX+i < self.currentMap.width and cursorPosY - j >= 0):
-                    self.currentMap.Tiles[cursorPosX+i][cursorPosY-j].setColor((0, 0, 255))
-                    self.selectedUnitTilesInRange.append(self.currentMap.Tiles[cursorPosX+i][cursorPosY-j])
-                    self.selectedUnitAttackRangeTiles.append(self.currentMap.Tiles[cursorPosX+i][cursorPosY-j])
-                if (cursorPosX-i >= 0 and cursorPosY-j >= 0):
-                    self.currentMap.Tiles[cursorPosX-i][cursorPosY-j].setColor((0, 0, 255))
-                    self.selectedUnitTilesInRange.append(self.currentMap.Tiles[cursorPosX-i][cursorPosY-j])
-                    self.selectedUnitAttackRangeTiles.append(self.currentMap.Tiles[cursorPosX-i][cursorPosY-j])
-                if (cursorPosX-i >= 0 and cursorPosY+j < self.currentMap.height):
-                    self.currentMap.Tiles[cursorPosX-i][cursorPosY+j].setColor((0, 0, 255))
-                    self.selectedUnitTilesInRange.append(self.currentMap.Tiles[cursorPosX-i][cursorPosY+j])
-                    self.selectedUnitAttackRangeTiles.append(self.currentMap.Tiles[cursorPosX-i][cursorPosY+j])
-                
-            tmpVal-=1
-        tmpVal = attackRange
-        for i in range(movement+1):
-            for j in range(movement-i, movement+tmpVal):
-                if (cursorPosX+i <= self.currentMap.width and cursorPosY+j < self.currentMap.height):
-                    self.currentMap.Tiles[cursorPosX+i][cursorPosY+j].setColor(red)
-                    self.selectedUnitAttackRangeTiles.append(self.currentMap.Tiles[cursorPosX+i][cursorPosY+j])
-                if (cursorPosX-i >= 0 and cursorPosY-j >= 0):
-                    self.currentMap.Tiles[cursorPosX-i][cursorPosY-j].setColor(red)
-                    self.selectedUnitAttackRangeTiles.append(self.currentMap.Tiles[cursorPosX-i][cursorPosY-j])
-                if (cursorPosX+i < self.currentMap.width and cursorPosY - j >= 0):
-                    self.currentMap.Tiles[cursorPosX+i][cursorPosY-j].setColor(red)
-                    self.selectedUnitAttackRangeTiles.append(self.currentMap.Tiles[cursorPosX+i][cursorPosY-j])
-                if (cursorPosX-i >= 0 and cursorPosY+j < self.currentMap.height):
-                    self.currentMap.Tiles[cursorPosX-i][cursorPosY+j].setColor(red)
-                    self.selectedUnitAttackRangeTiles.append(self.currentMap.Tiles[cursorPosX-i][cursorPosY+j])
-            tmpVal-=1
- """
+    
 
     def getUnitsInAttackRange(self, unit):
         for tile in self.selectedUnitAttackRangeTiles:
