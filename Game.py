@@ -45,6 +45,8 @@ class Game(object):
 
     def startEnemyPhase(self):
         print("start enemy phase")
+        for enemy in self.enemyUnits:
+            findNearestTarget(enemy)
         
     """
         End Turn State
@@ -53,10 +55,16 @@ class Game(object):
     """
         Movement -- Functions related to the selection and placement of units
     """
+    def findNearestTarget(self, unit):
+        print("finding nearest target for " + unit + " ... ")
+        movement = unit.mov
+        attackRange = unit.attackRange
+        
+
     def selectUnit(self):
         if (self.getTileCursorIsOn().currentUnit != None):
             self.unitSelectedCursor()
-            self.showMovementAndAttackRange()
+            self.showMovementAndAttackRange(self.getTileCursorIsOn().currentUnit)
             self.selectedUnitPrevPos = [self.cursor.pos[0], self.cursor.pos[1]]
 
     def placeUnit(self):
@@ -124,13 +132,13 @@ class Game(object):
     """
     ## finds the tiles that the current unit can move to and changes their color,
     ## then finds the tiles that a unit can attack (but not move to) and makes them a different color
-    def showMovementAndAttackRange(self):
+    def showMovementAndAttackRange(self, unit):
         oppositeType = EnemyUnit
-        if type(self.cursor.unitSelected) == EnemyUnit:
+        if type(unit) == EnemyUnit:
             oppositeType = PlayerUnit
         currentTile = self.getTileCursorIsOn()
-        attackRange = self.cursor.unitSelected.attackRange
-        movement = self.cursor.unitSelected.mov 
+        attackRange = unit.attackRange
+        movement = unit.mov 
         queue = []
         attackQueue = []
 
@@ -178,8 +186,6 @@ class Game(object):
                             tile.setColor(red)
                             self.selectedUnitAttackRangeTiles.append(tile)
                             tmpQueue.append(tile)
-
-    
 
     def getUnitsInAttackRange(self, unit):
         for tile in self.selectedUnitAttackRangeTiles:

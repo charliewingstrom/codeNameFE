@@ -26,7 +26,7 @@ class Tile(object):
         
     def getAdjList(self):
         Tiles = self.currentMap.Tiles
-        if (self.heightIndex < self.currentMap.height-1):# and self.heightIndex > 0 and self.widthIndex < self.currentMap.width-1 and self.widthIndex > 0):
+        if (self.heightIndex < self.currentMap.height-1):
             self.adjList.append(Tiles[self.heightIndex+1][self.widthIndex])
         if (self.heightIndex > 0):
             self.adjList.append(Tiles[self.heightIndex-1][self.widthIndex])
@@ -56,11 +56,7 @@ class Tile(object):
         self.currentColor = color
         
     def highlighted(self):
-        self.getAdjList()
         self.borderColor = cursorColor
-        for tile in self.adjList:
-            tile.borderColor = cursorColor
+
     def unhighlighted(self):
         self.borderColor = self.defaultBorderColor
-        for tile in self.adjList:
-            tile.borderColor = tile.defaultBorderColor
