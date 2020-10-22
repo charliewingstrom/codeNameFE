@@ -4,8 +4,11 @@ from MapHealthMenu import MapHealthMenu
 from EnemyUnit import EnemyUnit
 from PlayerUnit import PlayerUnit
 from TurnManager import TurnManager
+from movement import Movement
+import copy
 red = (185, 0, 0)
 blue = (0, 0, 255)
+
 class Game(object):
 
     def __init__(self, window, currentMap, playerUnits, enemyUnits):
@@ -21,13 +24,12 @@ class Game(object):
         self.TurnManager = TurnManager()
         self.activeUnits = set()
         self.getTileCursorIsOn().highlighted()
-
-        self.selectedUnitPrevPos = None
-        self.selectedUnitTilesInRange = []
-        self.selectedUnitAttackRangeTiles = []
+        self.currentSelectedUnit = None
+        self.selectedUnitPreviousTile = None
         self.unitIsPlaced = False
         self.unitsInRange = set()
         
+        self.movement = Movement(self.currentMap)
         self.startTurn()
 
     """ 
@@ -53,85 +55,41 @@ class Game(object):
         End Turn State
     """
 
-    """
-        Movement -- Functions related to the selection and placement of units
-    """
-    """ def findPath(self, currentTile, target):
-        
-        openList = []
-        closedList = []
-        openList.append(currentTile)
-        currentTile.h = self.findDistanceBetweenTiles(currentTile, target)
-        currentTile.f = currentTile.h
-
-        while(len(openList) > 0):
-            tmpTile = self.findLowestF(openList)
-            closedList.append(tmpTile)
-            if (tmpTile == target):
-                ## move to the target
-
-    def findLowestF(self, tileList):
-        lowest = tileList[0]
-
-        for tile in tileList:
-            if (tile.f < lowest.f):
-                lowest = tile
-            
-        tileList.remove(lowest)
-        return lowest
-
-    def findNearestTarget(self, unit):
-        print("finding nearest target for " + unit + " ... ")
-        movement = unit.mov
-        attackRange = unit.attackRange
-        unitsToAttack = self.playerUnits
-        minDistance = 200
-        closestUnit = None
-        for playerUnit in unitsToAttack:
-            tmpDistance = self.findDistanceBetweenTiles(playerUnit.currentTile, unit.currentTile)
-            if tmpDistance < minDistance:
-                minDistance = tmpDistance
-                closestUnit = playerUnit
-        return closestUnit.currentTile
-
-    def findDistanceBetweenTiles(self, tile1, tile2):
-        return abs(tile1.verticalIndex - tile2.verticalIndex) + abs(tile1.horizontalIndex - tile2.horizontalIndex)
- """
     def selectUnit(self):
-        if (self.getTileCursorIsOn().currentUnit != None):
-            self.findTilesInRange(self.getTileCursorIsOn().currentUnit)
-            """ self.unitSelectedCursor()
-            self.showMovementAndAttackRange(self.getTileCursorIsOn().currentUnit)
-            self.selectedUnitPrevPos = [self.cursor.pos[0], self.cursor.pos[1]] """
+        if (self.getTileCursorIsOn().currentUnit != None and self.getTileCursorIsOn().currentUnit.active):
+            self.currentSelectedUnit = self.getTileCursorIsOn().currentUnit
+            self.cursor.selectedUnitPreviousPos = copy.deepcopy(self.cursor.pos)
+            self.selectedUnitPreviousTile = self.getTileCursorIsOn()
+            self.movement.findTilesInRange(self.getTileCursorIsOn().currentUnit)
 
     def placeUnit(self):
-        if (type(self.cursor.unitSelected) == PlayerUnit and self.getTileCursorIsOn() in self.selectedUnitTilesInRange and (self.getTileCursorIsOn().currentUnit == None or self.getTileCursorIsOn().currentUnit == self.cursor.unitSelected)):
-            self.cursor.unitSelected.currentTile.setCurrentUnit(None)
-            self.cursor.unitSelected.setCurrentTile(self.getTileCursorIsOn())
-            self.getTileCursorIsOn().setCurrentUnit(self.cursor.unitSelected)
+        if (self.getTileCursorIsOn().selectable == True):
+            self.currentSelectedUnit.currentTile.setCurrentUnit(None)
+            self.currentSelectedUnit.setCurrentTile(self.getTileCursorIsOn())
+            self.getTileCursorIsOn().setCurrentUnit(self.currentSelectedUnit)
             self.actionMenu.reset()
             self.actionMenu.checkPos(self.getTileCursorIsOn())
             self.unitIsPlaced =True
-            self.unitsInRange = self.getUnitsInAttackRange(self.cursor.unitSelected)
+            #self.unitsInRange = self.getUnitsInAttackRange(self.cursor.unitSelected)
             if (len(self.unitsInRange) > 0):
                 self.actionMenu.addAttack()
 
     def resetSelectedUnit(self):
-        self.cursor.unitSelected.setCurrentTile(self.currentMap.Tiles[self.selectedUnitPrevPos[0]][self.selectedUnitPrevPos[1]])
-        self.currentMap.Tiles[self.selectedUnitPrevPos[0]][self.selectedUnitPrevPos[1]].setCurrentUnit(self.cursor.unitSelected)
+        print("reset called")
+        self.currentSelectedUnit.setCurrentTile(self.selectedUnitPreviousTile)
+        self.selectedUnitPreviousTile.setCurrentUnit(self.currentSelectedUnit)
         self.getTileCursorIsOn().unhighlighted()
-        self.cursor.pos = self.selectedUnitPrevPos
+        self.cursor.pos = self.cursor.selectedUnitPreviousPos
         self.getTileCursorIsOn().highlighted()
-        self.cleanupAfterAction()
+        self.currentMap.reset()
+        self.unitIsPlaced = False
+        self.currentSelectedUnit = None
+
         
     def cleanupAfterAction(self): 
-        for tile in self.selectedUnitAttackRangeTiles:
-            tile.setColor(tile.defaultColor)
-            tile.reset()
-        self.selectedUnitTilesInRange = []
-        self.selectedUnitAttackRangeTiles = []
+        self.currentMap.reset()
         self.selectedUnitPrevPos = None
-        self.cursor.setUnitSelected(None)
+        self.currentSelectedUnit = None
         self.unitIsPlaced = False
         self.unitsInRange = set()
         if (len(self.activeUnits) <= 0):
@@ -140,7 +98,7 @@ class Game(object):
         
     def selectMenuOption(self):
         action = self.actionMenu.menuItems[self.actionMenu.selectedIndex]
-        playerUnit = self.cursor.unitSelected
+        playerUnit = self.currentSelectedUnit
         if (action == "Attack"):
             print("Attack")
             units = list(self.unitsInRange)
@@ -162,28 +120,13 @@ class Game(object):
         if (action == "Wait"):
             pass
         playerUnit.active = False
-        self.activeUnits.remove(self.cursor.unitSelected)
+        self.activeUnits.remove(playerUnit)
         self.cleanupAfterAction()
-    """
-        End Movement
-    """
-    ## finds the tiles that the current unit can move to and changes their color,
-    ## then finds the tiles that a unit can attack (but not move to) and makes them a different color
-    def findTilesInRange(self, unit):
-        oppositeType = EnemyUnit
-        if type(unit) == EnemyUnit:
-            oppositeType = PlayerUnit
-        currentTile = unit.currentTile
-        attackRange = unit.attackRange
-        currentTile.visited = True
-        currentTile.setColor(blue)
-        branchTiles = []
-        for tile in currentTile.adjList:
-            if not tile.visited:
-                branchTiles.append(tile)
+ 
+   
 
-        branchTiles.sort(key=lambda tile: tile.movPenalty)
-        
+
+    """ 
     def showMovementAndAttackRange(self, unit):
         oppositeType = EnemyUnit
         if type(unit) == EnemyUnit:
@@ -239,6 +182,8 @@ class Game(object):
                             self.selectedUnitAttackRangeTiles.append(tile)
                             tmpQueue.append(tile)
 
+    """
+    """    
     def getUnitsInAttackRange(self, unit):
         for tile in self.selectedUnitAttackRangeTiles:
             tile.setColor(tile.defaultColor)
@@ -271,6 +216,7 @@ class Game(object):
                         unitsInRange.add(self.currentMap.Tiles[cursorPosX-i][cursorPosY+j].currentUnit)
             tmpVal-=1
         return unitsInRange
+    """
 
     def moveCursor(self, direction):
         self.getTileCursorIsOn().unhighlighted()
@@ -298,9 +244,6 @@ class Game(object):
     def getTileCursorIsOn(self):
         return self.currentMap.Tiles[self.cursor.pos[0]][self.cursor.pos[1]]
 
-    def unitSelectedCursor(self):
-        self.cursor.setUnitSelected(self.getTileCursorIsOn().currentUnit)
-        
     def removeUnit(self, unit):
         if (type(unit) == EnemyUnit):
             self.enemyUnits.remove(unit)

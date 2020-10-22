@@ -1,5 +1,6 @@
 import pygame
 cursorColor = (255,140,25)
+maxDistance = 1024
 class Tile(object):
     
     def __init__(self, window, currentMap, posX, posY, verticalIndex, horizontalIndex, width = 100, height = 100, defaultColor = (0,0,0), borderColor =(255, 255, 255)):
@@ -11,11 +12,12 @@ class Tile(object):
         self.widthIndex = horizontalIndex
         self.currentUnit = None
         self.adjList = []
-        
-        ## for BFS
+        self.selectable = False
+        ## for searching algo
         self.visited = False
-        self.distance = 0
+        self.distance = maxDistance
         self.movPenalty = 1
+        self.parent = None
 
         ## for A* path finding algo
         f = 0.0
@@ -45,8 +47,11 @@ class Tile(object):
         return (str(self.heightIndex) + ", " + str(self.widthIndex))
     
     def reset(self):
+        self.setColor(self.defaultColor)
+        self.parent = None
+        self.selectable = False
         self.visited = False
-        self.distance = 0
+        self.distance = maxDistance
         self.f = 0.0
         self.g = 0.0
         self.h = 0.0

@@ -31,6 +31,12 @@ class Map(object):
         for row in self.Tiles:
             for tile in row:
                 tile.getAdjList()
+
+    def reset(self):
+        for row in self.Tiles:
+            for tile in row:
+                tile.reset()
+
     def scrollDown(self):
         for row in self.Tiles:
             for tile in row:
