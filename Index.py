@@ -16,7 +16,7 @@ from EnemyUnit import EnemyUnit
 from Game import Game
 screenWidth = 1080
 screenHeight = 720
-
+green = (0, 255, 0)
 window = pygame.display.set_mode((screenWidth, screenHeight))
 
 pygame.display.set_caption("codeFE")
@@ -42,6 +42,9 @@ Bandit3 = EnemyUnit(window)
 map1.addUnit(Bandit3, 0, 3)
 enemyArray.append(Bandit3)
 
+map1.Tiles[3][1].defaultBorderColor = green
+map1.Tiles[3][1].movPenalty = 2
+map1.Tiles[2][1].movPenalty = 2
 startGame = Game(window, map1, unitArray, enemyArray)
 run = True
 while run:

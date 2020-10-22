@@ -46,7 +46,8 @@ class Game(object):
     def startEnemyPhase(self):
         print("start enemy phase")
         for enemy in self.enemyUnits:
-            findNearestTarget(enemy)
+            target = findNearestTarget(enemy)
+
         
     """
         End Turn State
@@ -55,17 +56,53 @@ class Game(object):
     """
         Movement -- Functions related to the selection and placement of units
     """
+    """ def findPath(self, currentTile, target):
+        
+        openList = []
+        closedList = []
+        openList.append(currentTile)
+        currentTile.h = self.findDistanceBetweenTiles(currentTile, target)
+        currentTile.f = currentTile.h
+
+        while(len(openList) > 0):
+            tmpTile = self.findLowestF(openList)
+            closedList.append(tmpTile)
+            if (tmpTile == target):
+                ## move to the target
+
+    def findLowestF(self, tileList):
+        lowest = tileList[0]
+
+        for tile in tileList:
+            if (tile.f < lowest.f):
+                lowest = tile
+            
+        tileList.remove(lowest)
+        return lowest
+
     def findNearestTarget(self, unit):
         print("finding nearest target for " + unit + " ... ")
         movement = unit.mov
         attackRange = unit.attackRange
-        
+        unitsToAttack = self.playerUnits
+        minDistance = 200
+        closestUnit = None
+        for playerUnit in unitsToAttack:
+            tmpDistance = self.findDistanceBetweenTiles(playerUnit.currentTile, unit.currentTile)
+            if tmpDistance < minDistance:
+                minDistance = tmpDistance
+                closestUnit = playerUnit
+        return closestUnit.currentTile
 
+    def findDistanceBetweenTiles(self, tile1, tile2):
+        return abs(tile1.verticalIndex - tile2.verticalIndex) + abs(tile1.horizontalIndex - tile2.horizontalIndex)
+ """
     def selectUnit(self):
         if (self.getTileCursorIsOn().currentUnit != None):
-            self.unitSelectedCursor()
+            self.findTilesInRange(self.getTileCursorIsOn().currentUnit)
+            """ self.unitSelectedCursor()
             self.showMovementAndAttackRange(self.getTileCursorIsOn().currentUnit)
-            self.selectedUnitPrevPos = [self.cursor.pos[0], self.cursor.pos[1]]
+            self.selectedUnitPrevPos = [self.cursor.pos[0], self.cursor.pos[1]] """
 
     def placeUnit(self):
         if (type(self.cursor.unitSelected) == PlayerUnit and self.getTileCursorIsOn() in self.selectedUnitTilesInRange and (self.getTileCursorIsOn().currentUnit == None or self.getTileCursorIsOn().currentUnit == self.cursor.unitSelected)):
@@ -132,6 +169,21 @@ class Game(object):
     """
     ## finds the tiles that the current unit can move to and changes their color,
     ## then finds the tiles that a unit can attack (but not move to) and makes them a different color
+    def findTilesInRange(self, unit):
+        oppositeType = EnemyUnit
+        if type(unit) == EnemyUnit:
+            oppositeType = PlayerUnit
+        currentTile = unit.currentTile
+        attackRange = unit.attackRange
+        currentTile.visited = True
+        currentTile.setColor(blue)
+        branchTiles = []
+        for tile in currentTile.adjList:
+            if not tile.visited:
+                branchTiles.append(tile)
+
+        branchTiles.sort(key=lambda tile: tile.movPenalty)
+        
     def showMovementAndAttackRange(self, unit):
         oppositeType = EnemyUnit
         if type(unit) == EnemyUnit:

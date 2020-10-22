@@ -15,6 +15,12 @@ class Tile(object):
         ## for BFS
         self.visited = False
         self.distance = 0
+        self.movPenalty = 1
+
+        ## for A* path finding algo
+        f = 0.0
+        g = 0.0
+        h = 0.0
 
         ## all stuff for drawing
         self.width = width
@@ -36,11 +42,14 @@ class Tile(object):
             self.adjList.append(Tiles[self.heightIndex][self.widthIndex-1])   
     
     def __str__(self):
-        return (str(self.posX) + ", " + str(self.posY))
+        return (str(self.heightIndex) + ", " + str(self.widthIndex))
     
     def reset(self):
         self.visited = False
         self.distance = 0
+        self.f = 0.0
+        self.g = 0.0
+        self.h = 0.0
 
     def draw(self):
         pygame.draw.rect(self.window, self.borderColor,(self.posX, self.posY, self.width, self.height))
