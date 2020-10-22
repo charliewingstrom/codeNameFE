@@ -73,4 +73,70 @@ class Movement(object):
                             tile.distance = currentTile.distance+1
                             tmpQueue.append(tile)
 
-    #def findPath(self, unit, target):
+    def findPath(self, unit, target):
+        oppositeType = EnemyUnit
+        if type(unit) == EnemyUnit:
+            oppositeType = PlayerUnit
+        currentTile = unit.currentTile
+        movement = unit.mov
+        attackRange = unit.attackRange
+        currentTile.visited = True
+        currentTile.selectable = True
+        currentTile.distance = 0
+        queue = []
+        visited = []
+        for row in self.currentMap.Tiles:
+            for tile in row:
+                queue.append(tile)
+        while (len(queue) > 0):
+            queue.sort(key=lambda tile: tile.distance)
+            currentTile = queue.pop(0)
+            if currentTile==target:
+                break
+            if (type(currentTile.currentUnit) != oppositeType):
+                currentTile.selectable = True
+                currentTile.visited = True
+                visited.append(currentTile)
+                for tile in currentTile.adjList:
+                    altDist = currentTile.distance + tile.movPenalty
+                    if (altDist < tile.distance):
+                        tile.parent = currentTile
+                        tile.distance = altDist
+        path = []
+        while currentTile.parent != None:
+            path.insert(0, currentTile)
+            currentTile = currentTile.parent
+        for tile in path:
+            print(tile)
+
+    def findClosestOppositeUnit(self, unit):
+        oppositeType = EnemyUnit
+        if type(unit) == EnemyUnit:
+            oppositeType = PlayerUnit
+        currentTile = unit.currentTile
+        movement = unit.mov
+        attackRange = unit.attackRange
+        currentTile.visited = True
+        currentTile.selectable = True
+        currentTile.distance = 0
+        queue = []
+        visited = []
+        for row in self.currentMap.Tiles:
+            for tile in row:
+                queue.append(tile)
+        while (len(queue) > 0):
+            queue.sort(key=lambda tile: tile.distance)
+            currentTile = queue.pop(0)
+            if type(currentTile.currentUnit) == oppositeType:
+                return currentTile.currentUnit
+            currentTile.selectable = True
+            currentTile.visited = True
+            visited.append(currentTile)
+            for tile in currentTile.adjList:
+                altDist = currentTile.distance + tile.movPenalty
+                if (altDist < tile.distance):
+                    tile.parent = currentTile
+                    tile.distance = altDist
+
+    
+    

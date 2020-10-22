@@ -44,13 +44,23 @@ class Game(object):
 
     def endTurn(self):
         print("Turn Over")
+        self.startEnemyPhase()
 
     def startEnemyPhase(self):
         print("start enemy phase")
-        for enemy in self.enemyUnits:
-            target = findNearestTarget(enemy)
-
         
+        for enemy in self.enemyUnits:
+            self.currentMap.reset()
+            ## TODO find closest unit to enemy
+            closestUnit = self.movement.findClosestOppositeUnit(enemy)
+            ## find path to closest unit
+            self.currentMap.reset()
+            path = self.movement.findPath(enemy, closestUnit.currentTile)
+            print(path)
+            ## TODO move unit to closest possible tile
+
+            ## TODO if possible, Attack!!
+
     """
         End Turn State
     """
