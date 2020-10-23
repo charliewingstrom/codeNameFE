@@ -42,10 +42,6 @@ Bandit3 = EnemyUnit(window)
 map1.addUnit(Bandit3, 0, 3)
 enemyArray.append(Bandit3)
 
-
-map1.Tiles[2][1].movPenalty = 2
-map1.Tiles[2][1].borderColor = green
-map1.Tiles[2][1].defaultBorderColor = green
 startGame = Game(window, map1, unitArray, enemyArray)
 run = True
 while run:
@@ -59,13 +55,18 @@ while run:
             run = False
         elif event.type == pygame.KEYDOWN:
             key = event.key
-            if startGame.unitIsPlaced:
+            if startGame.attacking:
+                if pygame.K_LEFT == key or pygame.K_RIGHT == key:
+                    startGame.combat.changeAttackTarget()
+                if pygame.K_z == key:
+                    startGame.combat.attack()
+            elif startGame.unitIsPlaced:
                 if pygame.K_z == key:
                     startGame.selectMenuOption()
             elif not startGame.unitIsPlaced:
-                if pygame.K_z == key and startGame.currentSelectedUnit:
+                if pygame.K_z == key and startGame.unitSelected:
                     startGame.placeUnit()
-                elif pygame.K_z == key and not startGame.currentSelectedUnit:
+                elif pygame.K_z == key and not startGame.unitSelected:
                     startGame.selectUnit()
     ## if you do want a held key to repeat the action (such as scrolling a list) put the key here
     if startGame.unitIsPlaced:
@@ -73,7 +74,7 @@ while run:
             startGame.actionMenu.highlightUp()
         if keys[pygame.K_DOWN]:
             startGame.actionMenu.highlightDown()
-    elif not startGame.unitIsPlaced:
+    else:
         if keys[pygame.K_LEFT] and startGame.cursor.pos[1] > 0:
             startGame.moveCursor("left")
         if keys[pygame.K_RIGHT] and startGame.cursor.pos[1] < startGame.currentMap.width-1:
@@ -85,7 +86,7 @@ while run:
         
         
     
-    if keys[pygame.K_x] and startGame.unitIsPlaced:
+    if keys[pygame.K_x] and startGame.unitSelected:
         startGame.resetSelectedUnit()
     
 

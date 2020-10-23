@@ -9,10 +9,12 @@ class Movement(object):
     def __init__(self, currentMap):
         self.currentMap = currentMap
         self.currentUnit = None
+        self.selectedUnitPreviousTile = None
 
     ## finds the tiles that the current unit can move to and changes their color,
     ## then finds the tiles that a unit can attack (but not move to) and makes them a different color
     def findTilesInRange(self, unit):
+        self.currentMap.reset()
         oppositeType = EnemyUnit
         if type(unit) == EnemyUnit:
             oppositeType = PlayerUnit
@@ -74,6 +76,7 @@ class Movement(object):
                             tmpQueue.append(tile)
 
     def findPath(self, unit, target):
+        self.currentMap.reset()
         oppositeType = EnemyUnit
         if type(unit) == EnemyUnit:
             oppositeType = PlayerUnit
@@ -91,7 +94,7 @@ class Movement(object):
         while (len(queue) > 0):
             queue.sort(key=lambda tile: tile.distance)
             currentTile = queue.pop(0)
-            if currentTile==target:
+            if currentTile in target.adjList and currentTile.currentUnit == None:
                 break
             if (type(currentTile.currentUnit) != oppositeType):
                 currentTile.selectable = True
@@ -106,8 +109,7 @@ class Movement(object):
         while currentTile.parent != None:
             path.insert(0, currentTile)
             currentTile = currentTile.parent
-        for tile in path:
-            print(tile)
+        return path
 
     def findClosestOppositeUnit(self, unit):
         oppositeType = EnemyUnit
@@ -138,5 +140,5 @@ class Movement(object):
                     tile.parent = currentTile
                     tile.distance = altDist
 
-    
+
     

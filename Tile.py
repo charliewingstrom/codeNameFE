@@ -48,6 +48,7 @@ class Tile(object):
     
     def reset(self):
         self.setColor(self.defaultColor)
+        self.borderColor = self.defaultBorderColor
         self.parent = None
         self.selectable = False
         self.visited = False
