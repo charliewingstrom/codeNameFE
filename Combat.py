@@ -10,16 +10,19 @@ class Combat(object):
         self.unitsInRange = []
         self.targetIndex = 0
 
-    def startCombat(self):
+    def startCombat(self, unit):
         self.targetIndex = 0
         self.unitsInRange[self.targetIndex].currentTile.borderColor = yellow
-
+        self.currentUnit = unit
+        
     def attack(self):
-        print("Here")
+        pass
+
+
         
     def endCombat(self):
         self.unitsInRange[self.targetIndex].currentTile.borderColor = self.unitsInRange[self.targetIndex].currentTile.defaultBorderColor
-
+        self.currentUnit = None
         
     def changeAttackTarget(self):
         currentTargetTile = self.unitsInRange[self.targetIndex].currentTile

@@ -59,7 +59,7 @@ while run:
                 if pygame.K_LEFT == key or pygame.K_RIGHT == key:
                     startGame.combat.changeAttackTarget()
                 if pygame.K_z == key:
-                    startGame.combat.attack()
+                    startGame.initCombat()
             elif startGame.unitIsPlaced:
                 if pygame.K_z == key:
                     startGame.selectMenuOption()

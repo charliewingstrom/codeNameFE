@@ -33,10 +33,6 @@ class Game(object):
         self.combat = Combat(self.currentMap)
         self.startTurn()
 
-    """ 
-        Turn state -- related to who's turn it is and what to do when a turn 
-        begins or ends
-    """
     def startTurn(self):
         print("Turn Start")
         for unit in self.playerUnits:
@@ -63,6 +59,9 @@ class Game(object):
 
             ## TODO if possible, Attack!!
 
+    def attack(self):
+        print("actually attacking here")
+        
     def selectUnit(self):
         if (self.getTileCursorIsOn().currentUnit != None and self.getTileCursorIsOn().currentUnit.active):
             self.unitSelected = True
@@ -90,8 +89,8 @@ class Game(object):
         self.movement.selectedUnitPreviousTile.setCurrentUnit(self.movement.currentUnit)
         self.getTileCursorIsOn().unhighlighted()
         self.cursor.pos = self.cursor.selectedUnitPreviousPos
-        self.getTileCursorIsOn().highlighted()
         self.currentMap.reset()
+        self.getTileCursorIsOn().highlighted()
         self.unitIsPlaced = False
         self.movement.currentUnit = None
         if self.attacking:
@@ -114,13 +113,12 @@ class Game(object):
         if (action == "Attack"):
             print("Attack")
             self.combat.unitsInRange[0].currentTile.borderColor = (red)
-            self.combat.startCombat()
+            self.combat.startCombat(playerUnit)
             self.attacking = True
         if (action == "Wait"):
             self.cleanupAfterAction()
             playerUnit.active = False
-            self.activeUnits.remove(playerUnit)
-        
+            self.activeUnits.remove(playerUnit)    
  
     def moveCursor(self, direction):
         self.getTileCursorIsOn().unhighlighted()
