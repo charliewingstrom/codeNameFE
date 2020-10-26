@@ -8,14 +8,20 @@ class Unit(object):
         self.window = window
         self.name = name
         self.currentTile = currTile
+        
         self.mov = 5
         self.attackRange = 2
         
+        self.inventory = []
+        self.equipedWeapon = None
+        
         self.maxHp = 23
         self.hp = self.maxHp
-        self.strength = 20
+        self.strength = 6
         self.defense = 4
-
+        self.dex = 5
+        self.spd = 5
+        
         self.active = False
 
     def __str__(self):

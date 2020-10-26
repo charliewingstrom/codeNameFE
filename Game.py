@@ -164,5 +164,7 @@ class Game(object):
         if (self.getTileCursorIsOn().currentUnit!=None):
             self.mapHealthMenu.checkPos(self.getTileCursorIsOn())
             self.mapHealthMenu.draw()
-        if (self.unitIsPlaced):
-            self.actionMenu.draw()    
+        if (self.unitIsPlaced and not self.attacking):
+            self.actionMenu.draw() 
+        elif (self.attacking):
+            self.combat.draw()

@@ -6,6 +6,7 @@ Created on Tue Jun 16 22:03:13 2020
 """
 import sys
 sys.path.append('./Units')
+sys.path.append('./weapons')
 
 import pygame
 import math
@@ -14,6 +15,8 @@ from Map import Map
 from PlayerUnit import PlayerUnit
 from EnemyUnit import EnemyUnit
 from Game import Game
+from sword import sword
+
 screenWidth = 1080
 screenHeight = 720
 green = (0, 255, 0)
@@ -31,6 +34,8 @@ Byleth = PlayerUnit(window, "Byleth")
 map1.addUnit(Byleth, 2, 2)
 unitArray.append(Byleth)
 
+for unit in unitArray: unit.inventory.append(sword())
+
 enemyArray = []   
 Bandit = EnemyUnit(window)
 map1.addUnit(Bandit, 1, 4)
@@ -41,6 +46,12 @@ enemyArray.append(Bandit2)
 Bandit3 = EnemyUnit(window)
 map1.addUnit(Bandit3, 0, 3)
 enemyArray.append(Bandit3)
+
+for enemy in enemyArray: enemy.inventory.append(sword())
+
+for unit in unitArray:
+    print(str(unit) + " holds a " + str(unit.inventory[0]))
+
 
 startGame = Game(window, map1, unitArray, enemyArray)
 run = True
