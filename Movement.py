@@ -90,7 +90,7 @@ class Movement(object):
             oppositeType = PlayerUnit
         currentTile = unit.currentTile
         movement = unit.mov
-        attackRange = unit.attackRange
+        attackRange = unit.weapons[unit.equippedWeaponIndex]
         currentTile.visited = True
         currentTile.selectable = True
         currentTile.distance = 0
@@ -125,7 +125,7 @@ class Movement(object):
             oppositeType = PlayerUnit
         currentTile = unit.currentTile
         movement = unit.mov
-        attackRange = unit.attackRange
+        attackRange = unit.weapons[unit.equippedWeaponIndex]
         currentTile.visited = True
         currentTile.selectable = True
         currentTile.distance = 0

@@ -7,9 +7,12 @@ from TurnManager import TurnManager
 from movement import Movement
 from Combat import Combat
 import copy
+import random
+
 red = (185, 0, 0)
 blue = (0, 0, 255)
 white = (255, 255, 255)
+
 class Game(object):
 
     def __init__(self, window, currentMap, playerUnits, enemyUnits):
@@ -29,8 +32,8 @@ class Game(object):
         self.unitSelected = False
         self.unitIsPlaced = False
         self.attacking = False
-        self.movement = Movement(self.currentMap)
-        self.combat = Combat(self.currentMap)
+        self.movement = Movement(currentMap)
+        self.combat = Combat(window, currentMap)
         self.startTurn()
 
     def startTurn(self):
@@ -60,8 +63,37 @@ class Game(object):
             ## TODO if possible, Attack!!
 
     def attack(self):
-        print("actually attacking here")
-        
+        print(self.combat.currentUnit.name + " attacks with a " + str(self.combat.currentUnit.weapons[self.combat.currentUnit.equippedWeaponIndex]))
+        if (self.combat.hit > random.randint(1,101)):
+            print("Hit!")
+            if (self.combat.crit > random.randint(1,101)):
+                print("Crit!!")
+                self.combat.damage *= 3
+            self.combat.currentTarget.hp -= self.combat.damage
+        else:
+            print("Miss!")
+        # if target unit died
+        if (self.combat.currentTarget.hp <= 0):
+            self.removeUnit(self.combat.currentTarget)
+        # check for possible counter attack
+        else:
+            targetUnitsInRange = self.combat.getUnitsInAttackRange(self.combat.currentTarget)
+            if self.combat.currentUnit in targetUnitsInRange:
+                print(self.combat.currentTarget.name + " counters")
+                self.combat.doMathForAttack(self.combat.currentTarget, self.combat.currentUnit)
+                if (self.combat.hit > random.randint(1,101)):
+                    print("Hit!")
+                    if (self.combat.crit > random.randint(1,101)):
+                        print("Crit!!")
+                        self.combat.damage *= 3
+                    self.combat.currentUnit.hp -= self.combat.damage  
+        self.attacking = False              
+        self.currentMap.reset()
+        self.combat.currentUnit.active = False
+        self.activeUnits.remove(self.combat.currentUnit)
+        self.combat.endCombat()
+        self.cleanupAfterAction()
+
     def selectUnit(self):
         if (self.getTileCursorIsOn().currentUnit != None and self.getTileCursorIsOn().currentUnit.active):
             self.unitSelected = True
@@ -112,7 +144,6 @@ class Game(object):
         playerUnit = self.movement.currentUnit
         if (action == "Attack"):
             print("Attack")
-            self.combat.unitsInRange[0].currentTile.borderColor = (red)
             self.combat.startCombat(playerUnit)
             self.attacking = True
         if (action == "Wait"):

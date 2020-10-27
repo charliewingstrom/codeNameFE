@@ -12,8 +12,8 @@ class PlayerUnit(Unit):
             self.equippedWeaponIndex+= 1
             if (self.equippedWeaponIndex > len(self.weapons) - 1):
                 self.equippedWeaponIndex = 0
+            
         else:
             self.equippedWeaponIndex -= 1
-            if (self.equippedWeaponIndex <= 0):
+            if (self.equippedWeaponIndex < 0):
                 self.equippedWeaponIndex = len(self.weapons)-1
-                

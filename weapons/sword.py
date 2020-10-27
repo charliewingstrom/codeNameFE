@@ -9,4 +9,4 @@ class sword(weapon):
         self.crit = 3
 
     def __str__(self):
-        return "sword"
+        return "Sword"

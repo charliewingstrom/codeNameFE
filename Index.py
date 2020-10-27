@@ -45,7 +45,7 @@ Bandit = EnemyUnit(window)
 map1.addUnit(Bandit, 1, 4)
 enemyArray.append(Bandit)
 Bandit2 = EnemyUnit(window)
-map1.addUnit(Bandit2, 2, 5)
+map1.addUnit(Bandit2, 2, 4)
 enemyArray.append(Bandit2)
 Bandit3 = EnemyUnit(window)
 map1.addUnit(Bandit3, 0, 3)
@@ -77,7 +77,7 @@ while run:
                 elif pygame.K_UP == key:
                     startGame.combat.changeEquippedWeaponCurrentUnit(0)
                 elif pygame.K_z == key:
-                    pass
+                    startGame.attack()
             elif startGame.unitIsPlaced:
                 if pygame.K_z == key:
                     startGame.selectMenuOption()
