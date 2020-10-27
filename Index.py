@@ -9,13 +9,16 @@ sys.path.append('./Units')
 sys.path.append('./weapons')
 
 import pygame
-import math
-import random
+
+from Game import Game
 from Map import Map
+
 from PlayerUnit import PlayerUnit
 from EnemyUnit import EnemyUnit
-from Game import Game
+
 from sword import sword
+from javelin import javelin
+from weapon import weapon
 
 screenWidth = 1080
 screenHeight = 720
@@ -31,10 +34,11 @@ robin = PlayerUnit(window, "Robin")
 map1.addUnit(robin, 1, 1)
 unitArray.append(robin)
 Byleth = PlayerUnit(window, "Byleth")
+Byleth.weapons.append(javelin())
 map1.addUnit(Byleth, 2, 2)
 unitArray.append(Byleth)
 
-for unit in unitArray: unit.inventory.append(sword())
+for unit in unitArray: unit.weapons.append(sword())
 
 enemyArray = []   
 Bandit = EnemyUnit(window)
@@ -47,11 +51,10 @@ Bandit3 = EnemyUnit(window)
 map1.addUnit(Bandit3, 0, 3)
 enemyArray.append(Bandit3)
 
-for enemy in enemyArray: enemy.inventory.append(sword())
+for enemy in enemyArray: enemy.weapons.append(sword())
 
 for unit in unitArray:
-    print(str(unit) + " holds a " + str(unit.inventory[0]))
-
+    print(str(unit) + " holds a " + str(unit.weapons[0]))
 
 startGame = Game(window, map1, unitArray, enemyArray)
 run = True
@@ -69,8 +72,12 @@ while run:
             if startGame.attacking:
                 if pygame.K_LEFT == key or pygame.K_RIGHT == key:
                     startGame.combat.changeAttackTarget()
-                if pygame.K_z == key:
-                    startGame.initCombat()
+                elif pygame.K_DOWN == key:
+                    startGame.combat.changeEquippedWeaponCurrentUnit(1)
+                elif pygame.K_UP == key:
+                    startGame.combat.changeEquippedWeaponCurrentUnit(0)
+                elif pygame.K_z == key:
+                    pass
             elif startGame.unitIsPlaced:
                 if pygame.K_z == key:
                     startGame.selectMenuOption()

@@ -10,10 +10,10 @@ class Unit(object):
         self.currentTile = currTile
         
         self.mov = 5
-        self.attackRange = 2
         
         self.inventory = []
-        self.equipedWeapon = None
+        self.weapons = []
+        self.equippedWeaponIndex = 0
         
         self.maxHp = 23
         self.hp = self.maxHp
@@ -23,6 +23,8 @@ class Unit(object):
         self.spd = 5
         
         self.active = False
+
+    
 
     def __str__(self):
         return self.name

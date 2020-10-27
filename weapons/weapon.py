@@ -5,6 +5,9 @@ class weapon(object):
         self.strength = 5
         self.hit = 50
         self.crit = 1
+
+        self.range = 1
+        
         self.durability = 40
         self.price = 50
         

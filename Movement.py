@@ -20,7 +20,15 @@ class Movement(object):
             oppositeType = PlayerUnit
         currentTile = unit.currentTile
         movement = unit.mov
-        attackRange = unit.attackRange
+
+        ## get the max range of the units weapons
+        maxRange = 0
+        for i in range(len(unit.weapons)):
+            tmpRange = unit.weapons[i].range
+            if unit.weapons[i].range > maxRange:
+                maxRange = tmpRange
+        attackRange = maxRange
+
         currentTile.visited = True
         currentTile.selectable = True
         currentTile.setColor(blue)
