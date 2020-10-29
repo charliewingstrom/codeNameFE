@@ -54,13 +54,20 @@ class Game(object):
             ## find path to closest unit
             path = self.movement.findPath(enemy, closestUnit.currentTile)
             ## TODO move unit to closest possible tile
+            ## this area needs a lot of work ... 
             index = min(len(path)-1, enemy.mov)
+            while(path[index].currentUnit != None or path[index].currentUnit == enemy):
+                index-=1
             tileToMoveTo = path[index]
             enemy.currentTile.setCurrentUnit(None)
             enemy.setCurrentTile(tileToMoveTo)
-            enemy.currentTile.setCurrentUnit(enemy)
+            tileToMoveTo.setCurrentUnit(enemy)
 
             ## TODO if possible, Attack!!
+
+            ## get targets in range of enemy
+            targets = self.combat.getUnitsInAttackRange(enemy)
+            
 
     def attack(self):
         print(self.combat.currentUnit.name + " attacks with a " + str(self.combat.currentUnit.weapons[self.combat.currentUnit.equippedWeaponIndex]))
@@ -87,6 +94,12 @@ class Game(object):
                         print("Crit!!")
                         self.combat.damage *= 3
                     self.combat.currentUnit.hp -= self.combat.damage  
+                    if (self.combat.currentUnit.hp <= 0):
+                        self.removeUnit(self.combat.currentUnit)
+                        print(self.combat.currentUnit.name + " died")
+                else:
+                    print("Miss!")
+                
         self.attacking = False              
         self.currentMap.reset()
         self.combat.currentUnit.active = False
@@ -147,9 +160,10 @@ class Game(object):
             self.combat.startCombat(playerUnit)
             self.attacking = True
         if (action == "Wait"):
-            self.cleanupAfterAction()
             playerUnit.active = False
-            self.activeUnits.remove(playerUnit)    
+            self.activeUnits.remove(playerUnit) 
+            self.cleanupAfterAction()
+               
  
     def moveCursor(self, direction):
         self.getTileCursorIsOn().unhighlighted()

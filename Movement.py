@@ -102,7 +102,7 @@ class Movement(object):
         while (len(queue) > 0):
             queue.sort(key=lambda tile: tile.distance)
             currentTile = queue.pop(0)
-            if currentTile in target.adjList and currentTile.currentUnit == None:
+            if target in currentTile.adjList and currentTile.currentUnit == None:
                 break
             if (type(currentTile.currentUnit) != oppositeType):
                 currentTile.selectable = True

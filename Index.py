@@ -20,8 +20,8 @@ from sword import sword
 from javelin import javelin
 from weapon import weapon
 
-screenWidth = 1080
-screenHeight = 720
+screenWidth = 1920
+screenHeight = 1080
 green = (0, 255, 0)
 window = pygame.display.set_mode((screenWidth, screenHeight))
 
