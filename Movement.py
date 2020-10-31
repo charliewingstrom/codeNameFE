@@ -102,7 +102,7 @@ class Movement(object):
         while (len(queue) > 0):
             queue.sort(key=lambda tile: tile.distance)
             currentTile = queue.pop(0)
-            if target in currentTile.adjList and currentTile.currentUnit == None:
+            if target in currentTile.adjList and currentTile.currentUnit == None and currentTile.walkable:
                 break
             if (type(currentTile.currentUnit) != oppositeType and currentTile.walkable):
                 currentTile.selectable = True
@@ -143,10 +143,11 @@ class Movement(object):
             currentTile.visited = True
             visited.append(currentTile)
             for tile in currentTile.adjList:
-                altDist = currentTile.distance + tile.movPenalty
-                if (altDist < tile.distance):
-                    tile.parent = currentTile
-                    tile.distance = altDist
+                if (tile.walkable):
+                    altDist = currentTile.distance + tile.movPenalty
+                    if (altDist < tile.distance):
+                        tile.parent = currentTile
+                        tile.distance = altDist
 
 
     

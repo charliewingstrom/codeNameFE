@@ -29,7 +29,6 @@ class Combat(object):
         self.checkPos()
 
     def endCombat(self):
-        self.currentTarget.currentTile.borderColor = self.currentTarget.currentTile.defaultBorderColor
         self.unitsInRange = []
         self.targetIndex = 0
         self.currentUnit = None

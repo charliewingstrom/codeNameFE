@@ -55,7 +55,7 @@ class Game(object):
             path = self.movement.findPath(enemy, closestUnit.currentTile)
             ## TODO move unit to closest possible tile
             ## this area needs a lot of work ... 
-            index = min(len(path)-1, enemy.mov)
+            index = min(len(path)-1, enemy.mov-1)
             while(path[index].currentUnit != None or path[index].currentUnit == enemy):
                 index-=1
             tileToMoveTo = path[index]
@@ -151,7 +151,7 @@ class Game(object):
             self.movement.findTilesInRange(self.getTileCursorIsOn().currentUnit)
 
     def placeUnit(self):
-        if (self.getTileCursorIsOn().selectable == True and self.getTileCursorIsOn().currentUnit == None):
+        if (self.getTileCursorIsOn().selectable == True and (self.getTileCursorIsOn().currentUnit == None or self.getTileCursorIsOn().currentUnit == self.movement.currentUnit)):
             self.movement.currentUnit.currentTile.setCurrentUnit(None)
             self.movement.currentUnit.setCurrentTile(self.getTileCursorIsOn())
             self.getTileCursorIsOn().setCurrentUnit(self.movement.currentUnit)
