@@ -13,6 +13,7 @@ class Tile(object):
         self.currentUnit = None
         self.adjList = []
         self.selectable = False
+        self.walkable = True
         ## for searching algo
         self.visited = False
         self.distance = maxDistance
@@ -23,6 +24,7 @@ class Tile(object):
         f = 0.0
         g = 0.0
         h = 0.0
+
 
         ## all stuff for drawing
         self.width = width

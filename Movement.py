@@ -43,7 +43,7 @@ class Movement(object):
         while (len(queue) > 0):
             queue.sort(key=lambda tile: tile.distance)
             currentTile = queue.pop(0)
-            if (currentTile.distance <= movement):
+            if (currentTile.distance <= movement and currentTile.walkable == True):
                 
                 if (type(currentTile.currentUnit) != oppositeType):
                     currentTile.setColor(blue)
@@ -104,7 +104,7 @@ class Movement(object):
             currentTile = queue.pop(0)
             if target in currentTile.adjList and currentTile.currentUnit == None:
                 break
-            if (type(currentTile.currentUnit) != oppositeType):
+            if (type(currentTile.currentUnit) != oppositeType and currentTile.walkable):
                 currentTile.selectable = True
                 currentTile.visited = True
                 visited.append(currentTile)

@@ -67,7 +67,40 @@ class Game(object):
 
             ## get targets in range of enemy
             targets = self.combat.getUnitsInAttackRange(enemy)
-            
+            if (len(targets) > 0):
+                self.combat.currentUnit = enemy
+                self.combat.currentTarget = targets[0]
+                print(self.combat.currentUnit.name + " attacks with a " + str(self.combat.currentUnit.weapons[self.combat.currentUnit.equippedWeaponIndex]))
+                if (self.combat.hit > random.randint(1,101)):
+                    print("Hit!")
+                    if (self.combat.crit > random.randint(1,101)):
+                        print("Crit!!")
+                        self.combat.damage *= 3
+                    self.combat.currentTarget.hp -= self.combat.damage
+                else:
+                    print("Miss!")
+                # if target unit died
+                if (self.combat.currentTarget.hp <= 0):
+                    self.removeUnit(self.combat.currentTarget)
+                # check for possible counter attack
+                else:
+                    targetUnitsInRange = self.combat.getUnitsInAttackRange(self.combat.currentTarget)
+                    if self.combat.currentUnit in targetUnitsInRange:
+                        print(self.combat.currentTarget.name + " counters")
+                        self.combat.doMathForAttack(self.combat.currentTarget, self.combat.currentUnit)
+                        if (self.combat.hit > random.randint(1,101)):
+                            print("Hit!")
+                            if (self.combat.crit > random.randint(1,101)):
+                                print("Crit!!")
+                                self.combat.damage *= 3
+                            self.combat.currentUnit.hp -= self.combat.damage  
+                            if (self.combat.currentUnit.hp <= 0):
+                                self.removeUnit(self.combat.currentUnit)
+                                print(self.combat.currentUnit.name + " died")
+                        else:
+                            print("Miss!")
+        self.currentMap.reset()
+
 
     def attack(self):
         print(self.combat.currentUnit.name + " attacks with a " + str(self.combat.currentUnit.weapons[self.combat.currentUnit.equippedWeaponIndex]))
@@ -114,9 +147,11 @@ class Game(object):
             self.cursor.selectedUnitPreviousPos = copy.deepcopy(self.cursor.pos)
             self.movement.selectedUnitPreviousTile = self.getTileCursorIsOn()
             self.movement.findTilesInRange(self.getTileCursorIsOn().currentUnit)
+        elif (type(self.getTileCursorIsOn().currentUnit) == EnemyUnit):
+            self.movement.findTilesInRange(self.getTileCursorIsOn().currentUnit)
 
     def placeUnit(self):
-        if (self.getTileCursorIsOn().selectable == True):
+        if (self.getTileCursorIsOn().selectable == True and self.getTileCursorIsOn().currentUnit == None):
             self.movement.currentUnit.currentTile.setCurrentUnit(None)
             self.movement.currentUnit.setCurrentTile(self.getTileCursorIsOn())
             self.getTileCursorIsOn().setCurrentUnit(self.movement.currentUnit)
@@ -130,8 +165,10 @@ class Game(object):
     def resetSelectedUnit(self):
         print("reset called")
         self.unitSelected = False
-        self.movement.currentUnit.setCurrentTile(self.movement.selectedUnitPreviousTile)
-        self.movement.selectedUnitPreviousTile.setCurrentUnit(self.movement.currentUnit)
+        currentUnit = self.movement.currentUnit
+        currentUnit.currentTile.setCurrentUnit(None)
+        currentUnit.setCurrentTile(self.movement.selectedUnitPreviousTile)
+        self.movement.selectedUnitPreviousTile.setCurrentUnit(currentUnit)
         self.getTileCursorIsOn().unhighlighted()
         self.cursor.pos = self.cursor.selectedUnitPreviousPos
         self.currentMap.reset()

@@ -23,6 +23,7 @@ from weapon import weapon
 screenWidth = 1920
 screenHeight = 1080
 green = (0, 255, 0)
+grey = (192,190,194)
 window = pygame.display.set_mode((screenWidth, screenHeight))
 
 pygame.display.set_caption("codeFE")
@@ -42,19 +43,29 @@ for unit in unitArray: unit.weapons.append(sword())
 
 enemyArray = []   
 Bandit = EnemyUnit(window)
-map1.addUnit(Bandit, 1, 4)
+map1.addUnit(Bandit, 1, 10)
 enemyArray.append(Bandit)
 Bandit2 = EnemyUnit(window)
-map1.addUnit(Bandit2, 2, 4)
+map1.addUnit(Bandit2, 2, 10)
 enemyArray.append(Bandit2)
 Bandit3 = EnemyUnit(window)
-map1.addUnit(Bandit3, 0, 3)
+map1.addUnit(Bandit3, 0, 10)
 enemyArray.append(Bandit3)
 
 for enemy in enemyArray: enemy.weapons.append(sword())
 
 for unit in unitArray:
     print(str(unit) + " holds a " + str(unit.weapons[0]))
+
+for i in range(5):
+    map1.Tiles[i][4].walkable = False
+    map1.Tiles[i][4].defaultColor = grey
+    map1.Tiles[i][4].setColor(grey)
+
+for i in range(5, 10):
+    map1.Tiles[5][i].walkable = False
+    map1.Tiles[5][i].defaultColor = grey
+    map1.Tiles[5][i].setColor(grey)
 
 startGame = Game(window, map1, unitArray, enemyArray)
 run = True
