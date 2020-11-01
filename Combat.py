@@ -15,9 +15,14 @@ class Combat(object):
         self.currentUnit = None
 
         ## for attack menu calculation
+        # for attacking unit
         self.damage = 0
         self.hit = 0
         self.crit = 0
+        # defending unit
+        self.counterDmg = 0
+        self.counterHit = 0
+        self.counterCrit = 0
 
         self.posX = currentMap.screenWidth - 300
         self.posY = 50
@@ -36,21 +41,29 @@ class Combat(object):
         self.damage = 0
         self.hit = 0
         self.crit = 0
-        
+        self.counterDmg = 0
+        self.counterHit = 0
+        self.counterCrit = 0
+
     def doMathForAttack(self, attackingUnit, defendingUnit):
         #get damage
         equippedWeapon = attackingUnit.weapons[attackingUnit.equippedWeaponIndex]
         self.damage = max(0, attackingUnit.strength + equippedWeapon.strength - defendingUnit.defense)
         #get hit chance
-        self.hit = (attackingUnit.dex * 2) + equippedWeapon.hit - (defendingUnit.dex * 2)
+        self.hit = (attackingUnit.dex * 2) + equippedWeapon.hit + (attackingUnit.luck //2)
         #get crit chance
-        self.crit = (equippedWeapon.crit + attackingUnit.spd) - defendingUnit.spd
+        self.crit = (equippedWeapon.crit) + (attackingUnit.dex // 2)
+        if (attackingUnit in self.getUnitsInAttackRange(defendingUnit)):
+            equippedWeapon = defendingUnit.weapons[defendingUnit.equippedWeaponIndex]
+            self.counterDmg = max(0, defendingUnit.strength + equippedWeapon.strength - attackingUnit.defense)
+            self.counterHit = (defendingUnit.dex*2) + equippedWeapon.hit + (defendingUnit.luck // 2)
+            self.counterCrit = (equippedWeapon.crit) + (attackingUnit.dex // 2)
 
     def getUnitsInAttackRange(self, unit):
-        self.currentMap.reset()
         for row in self.currentMap.Tiles:
             for tile in row:
                 tile.distance = 0
+                tile.visited = False
         oppositeType = EnemyUnit
         if type(unit) == EnemyUnit:
             oppositeType = PlayerUnit
@@ -63,8 +76,6 @@ class Combat(object):
         while (len(queue) > 0):
             currentTile = queue.pop(0)
             if (currentTile.distance <= unit.weapons[unit.equippedWeaponIndex].range):
-
-                currentTile.setColor(red)
                 if (type(currentTile.currentUnit) == oppositeType):
                     unitsInRange.append(currentTile.currentUnit)
                 for tile in currentTile.adjList:
@@ -140,6 +151,27 @@ class Combat(object):
         critRect = crit.get_rect()
         critRect.center = (self.posX+25, self.posY + 280)
 
+        ## counter 
+        counterName = font.render(self.currentTarget.name, True, (0, 0, 0))
+        counterNameRect = counterName.get_rect()
+        counterNameRect.center = (self.posX + 75, self.posY + 375)
+
+        counterHp = font.render(str(self.currentTarget.hp), True, (0,0,0))
+        counterHpRect = counterHp.get_rect()
+        counterHpRect.center = (self.posX + 125, self.posY + 100)
+
+        counterDmg = font.render(str(self.counterDmg), True, (0,0,0))
+        counterDmgRect = counterDmg.get_rect()
+        counterDmgRect.center = (self.posX + 125, self.posY + 160)
+
+        counterHit = font.render(str(self.counterHit), True, (0,0,0))
+        counterHitRect = counterHit.get_rect()
+        counterHitRect.center = (self.posX + 125, self.posY + 220)
+
+        counterCrit = font.render(str(self.counterCrit), True, (0,0,0))
+        counterCritRect = counterCrit.get_rect()
+        counterCritRect.center = (self.posX + 125, self.posY + 280)
+
         pygame.draw.rect(self.window, (255,255,255), (self.posX, self.posY, 150, 400))
 
         self.window.blit(unitName, unitNameRect)
@@ -149,5 +181,10 @@ class Combat(object):
         self.window.blit(hit, hitRect)
         self.window.blit(crit, critRect)
 
+        self.window.blit(counterName, counterNameRect)
+        self.window.blit(counterHp, counterHpRect)
+        self.window.blit(counterDmg, counterDmgRect)
+        self.window.blit(counterHit, counterHitRect)
+        self.window.blit(counterCrit, counterCritRect)
 
         

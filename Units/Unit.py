@@ -20,6 +20,7 @@ class Unit(object):
         self.strength = 6
         self.defense = 4
         self.dex = 5
+        self.luck = 5
         self.spd = 5
         
         self.active = False

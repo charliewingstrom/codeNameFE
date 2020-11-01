@@ -159,6 +159,7 @@ class Game(object):
             self.actionMenu.checkPos(self.getTileCursorIsOn())
             self.unitIsPlaced =True
             self.combat.unitsInRange = self.combat.getUnitsInAttackRange(self.movement.currentUnit)
+            print(len(self.combat.unitsInRange))
             if (len(self.combat.unitsInRange) > 0):
                 self.actionMenu.addAttack()
 
