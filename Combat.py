@@ -1,4 +1,5 @@
 import pygame
+import random
 from EnemyUnit import EnemyUnit
 from PlayerUnit import PlayerUnit
 
@@ -7,7 +8,7 @@ yellow = (255, 255, 23)
 class Combat(object):
 
     def __init__(self,window, currentMap):
-        self.window = window
+        self.__window = window
         self.currentMap = currentMap
         self.unitsInRange = []
         self.targetIndex = 0
@@ -45,6 +46,37 @@ class Combat(object):
         self.counterHit = 0
         self.counterCrit = 0
 
+    def attack(self):
+        print(self.currentUnit.name + " attacks with a " + str(self.currentUnit.weapons[self.currentUnit.equippedWeaponIndex]))
+        if (self.hit > random.randint(1,101)):
+            print("Hit!")
+            if (self.crit > random.randint(1,101)):
+                print("Crit!!")
+                self.damage *= 3
+            self.currentTarget.hp -= self.damage
+        else:
+            print("Miss!")
+        # if target unit died
+        if (self.currentTarget.hp <= 0):
+            self.removeUnit(self.currentTarget)
+        # check for possible counter attack
+        else:
+            targetUnitsInRange = self.getUnitsInAttackRange(self.currentTarget)
+            if self.currentUnit in targetUnitsInRange:
+                print(self.currentTarget.name + " counters")
+                self.doMathForAttack(self.currentTarget, self.currentUnit)
+                if (self.hit > random.randint(1,101)):
+                    print("Hit!")
+                    if (self.crit > random.randint(1,101)):
+                        print("Crit!!")
+                        self.damage *= 3
+                    self.currentUnit.hp -= self.damage  
+                    if (self.currentUnit.hp <= 0):
+                        self.removeUnit(self.currentUnit)
+                        print(self.currentUnit.name + " died")
+                else:
+                    print("Miss!")
+    
     def doMathForAttack(self, attackingUnit, defendingUnit):
         #get damage
         equippedWeapon = attackingUnit.weapons[attackingUnit.equippedWeaponIndex]
@@ -172,19 +204,19 @@ class Combat(object):
         counterCritRect = counterCrit.get_rect()
         counterCritRect.center = (self.posX + 125, self.posY + 280)
 
-        pygame.draw.rect(self.window, (255,255,255), (self.posX, self.posY, 150, 400))
+        pygame.draw.rect(self.__window, (255,255,255), (self.posX, self.posY, 150, 400))
 
-        self.window.blit(unitName, unitNameRect)
-        self.window.blit(unitWeapon, unitWeaponRect)
-        self.window.blit(hp, hpRect)
-        self.window.blit(dmg, dmgRect)
-        self.window.blit(hit, hitRect)
-        self.window.blit(crit, critRect)
+        self.__window.blit(unitName, unitNameRect)
+        self.__window.blit(unitWeapon, unitWeaponRect)
+        self.__window.blit(hp, hpRect)
+        self.__window.blit(dmg, dmgRect)
+        self.__window.blit(hit, hitRect)
+        self.__window.blit(crit, critRect)
 
-        self.window.blit(counterName, counterNameRect)
-        self.window.blit(counterHp, counterHpRect)
-        self.window.blit(counterDmg, counterDmgRect)
-        self.window.blit(counterHit, counterHitRect)
-        self.window.blit(counterCrit, counterCritRect)
+        self.__window.blit(counterName, counterNameRect)
+        self.__window.blit(counterHp, counterHpRect)
+        self.__window.blit(counterDmg, counterDmgRect)
+        self.__window.blit(counterHit, counterHitRect)
+        self.__window.blit(counterCrit, counterCritRect)
 
         

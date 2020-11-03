@@ -83,6 +83,11 @@ class Movement(object):
                             tile.distance = currentTile.distance+1
                             tmpQueue.append(tile)
 
+    def moveCurrentUnitToTile(self, tile):
+        self.currentUnit.currentTile.setCurrentUnit(None)
+        self.currentUnit.setCurrentTile(tile)
+        tile.setCurrentUnit(self.currentUnit)
+        
     def findPath(self, unit, target):
         self.currentMap.reset()
         oppositeType = EnemyUnit

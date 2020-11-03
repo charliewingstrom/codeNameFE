@@ -103,35 +103,7 @@ class Game(object):
 
 
     def attack(self):
-        print(self.combat.currentUnit.name + " attacks with a " + str(self.combat.currentUnit.weapons[self.combat.currentUnit.equippedWeaponIndex]))
-        if (self.combat.hit > random.randint(1,101)):
-            print("Hit!")
-            if (self.combat.crit > random.randint(1,101)):
-                print("Crit!!")
-                self.combat.damage *= 3
-            self.combat.currentTarget.hp -= self.combat.damage
-        else:
-            print("Miss!")
-        # if target unit died
-        if (self.combat.currentTarget.hp <= 0):
-            self.removeUnit(self.combat.currentTarget)
-        # check for possible counter attack
-        else:
-            targetUnitsInRange = self.combat.getUnitsInAttackRange(self.combat.currentTarget)
-            if self.combat.currentUnit in targetUnitsInRange:
-                print(self.combat.currentTarget.name + " counters")
-                self.combat.doMathForAttack(self.combat.currentTarget, self.combat.currentUnit)
-                if (self.combat.hit > random.randint(1,101)):
-                    print("Hit!")
-                    if (self.combat.crit > random.randint(1,101)):
-                        print("Crit!!")
-                        self.combat.damage *= 3
-                    self.combat.currentUnit.hp -= self.combat.damage  
-                    if (self.combat.currentUnit.hp <= 0):
-                        self.removeUnit(self.combat.currentUnit)
-                        print(self.combat.currentUnit.name + " died")
-                else:
-                    print("Miss!")
+        self.combat.attack()
                 
         self.attacking = False              
         self.currentMap.reset()
@@ -152,9 +124,7 @@ class Game(object):
 
     def placeUnit(self):
         if (self.getTileCursorIsOn().selectable == True and (self.getTileCursorIsOn().currentUnit == None or self.getTileCursorIsOn().currentUnit == self.movement.currentUnit)):
-            self.movement.currentUnit.currentTile.setCurrentUnit(None)
-            self.movement.currentUnit.setCurrentTile(self.getTileCursorIsOn())
-            self.getTileCursorIsOn().setCurrentUnit(self.movement.currentUnit)
+            self.movement.moveCurrentUnitToTile(self.getTileCursorIsOn())
             self.actionMenu.reset()
             self.actionMenu.checkPos(self.getTileCursorIsOn())
             self.unitIsPlaced =True
@@ -166,10 +136,7 @@ class Game(object):
     def resetSelectedUnit(self):
         print("reset called")
         self.unitSelected = False
-        currentUnit = self.movement.currentUnit
-        currentUnit.currentTile.setCurrentUnit(None)
-        currentUnit.setCurrentTile(self.movement.selectedUnitPreviousTile)
-        self.movement.selectedUnitPreviousTile.setCurrentUnit(currentUnit)
+        self.movement.moveCurrentUnitToTile(self.movement.selectedUnitPreviousTile)
         self.getTileCursorIsOn().unhighlighted()
         self.cursor.pos = self.cursor.selectedUnitPreviousPos
         self.currentMap.reset()
