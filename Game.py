@@ -103,8 +103,11 @@ class Game(object):
 
 
     def attack(self):
-        self.combat.attack()
-                
+        self.combat.startAttack()
+        if (self.combat.currentUnit.hp <=0):
+            self.removeUnit(self.combat.currentUnit)
+        if (self.combat.currentTarget.hp <= 0):
+            self.removeUnit(self.combat.currentTarget)
         self.attacking = False              
         self.currentMap.reset()
         self.combat.currentUnit.active = False

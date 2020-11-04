@@ -10,6 +10,7 @@ class ActionMenu(Menu):
         self.selectedIndex = 0
         self.menuItems = ["Wait"]
         self.posY = 100
+        
     def reset(self):
         self.selectedIndex = 0
         self.menuItems = ["Wait"]
@@ -30,7 +31,7 @@ class ActionMenu(Menu):
     def checkPos(self, currentTile):
         self.selectedIndex = 0
         if (currentTile.posX < self.screenWidth // 2):
-            self.posX = 800
+            self.posX = self.screenWidth-200
         else:
             self.posX = 100
     

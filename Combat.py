@@ -46,7 +46,36 @@ class Combat(object):
         self.counterHit = 0
         self.counterCrit = 0
 
-    def attack(self):
+    def attack(self, attackingUnit, defendingUnit):
+        print(attackingUnit.name + " attacks with a " + str(attackingUnit.weapons[attackingUnit.equippedWeaponIndex]))
+        if (self.hit > random.randint(1,101)):
+            print("Hit!")
+            if (self.crit > random.randint(1,101)):
+                print("Crit!!")
+                self.damage *= 3
+            defendingUnit.hp -= self.damage
+        else:
+            print("Miss!")
+        # if target unit died
+        if (self.currentTarget.hp <= 0):
+            self.removeUnit(self.currentTarget)
+            print(self.currentTarget.name + " died")
+
+    def startAttack(self):
+
+        if (type(self.currentUnit) == PlayerUnit):
+            self.playerAttack()
+        else:
+            self.enemyAttack()
+        ### possible out comes
+        ## I attack and kill
+        ## I attack and miss (0) 
+        ## I attack hit but don't kill
+        ## I get attacked and kill on the counter
+        ## I get attacked and counter but miss ( or don't have a weapon equipped / am out of range )
+        ## I get attacked and hit on the counter but don't kill
+        ## 
+        """ 
         print(self.currentUnit.name + " attacks with a " + str(self.currentUnit.weapons[self.currentUnit.equippedWeaponIndex]))
         if (self.hit > random.randint(1,101)):
             print("Hit!")
@@ -59,6 +88,7 @@ class Combat(object):
         # if target unit died
         if (self.currentTarget.hp <= 0):
             self.removeUnit(self.currentTarget)
+            print(self.currentTarget.name + " died")
         # check for possible counter attack
         else:
             targetUnitsInRange = self.getUnitsInAttackRange(self.currentTarget)
@@ -71,12 +101,83 @@ class Combat(object):
                         print("Crit!!")
                         self.damage *= 3
                     self.currentUnit.hp -= self.damage  
+
+                    ## killed on counter attack
                     if (self.currentUnit.hp <= 0):
                         self.removeUnit(self.currentUnit)
                         print(self.currentUnit.name + " died")
                 else:
                     print("Miss!")
+         """
+
+    def playerAttack(self):
+        print(self.currentUnit.name + " attacks with a " + str(self.currentUnit.weapons[self.currentUnit.equippedWeaponIndex]))
+        if (self.hit > random.randint(1,101)):
+            print("Hit!")
+            if (self.crit > random.randint(1,101)):
+                print("Crit!!")
+                self.damage *= 3
+            self.currentTarget.hp -= self.damage
+        else:
+            print("Miss!")
+        # if target unit died
+        if (self.currentTarget.hp <= 0):
+            print(self.currentTarget.name + " died")
+        # check for possible counter attack
+        else:
+            targetUnitsInRange = self.getUnitsInAttackRange(self.currentTarget)
+            if self.currentUnit in targetUnitsInRange:
+                print(self.currentTarget.name + " counters")
+                self.doMathForAttack(self.currentTarget, self.currentUnit)
+                if (self.hit > random.randint(1,101)):
+                    print("Hit!")
+                    if (self.crit > random.randint(1,101)):
+                        print("Crit!!")
+                        self.damage *= 3
+                    self.currentUnit.hp -= self.damage  
+
+                    ## killed on counter attack
+                    if (self.currentUnit.hp <= 0):
+                        print(self.currentUnit.name + " died")
+                        return
+                else:
+                    print("Miss!")
+        self.currentUnit.calculateExp(self.currentTarget, self.damage, (self.currentTarget.hp <= 0))
     
+    def enemyAttack(self):
+        print(self.currentUnit.name + " attacks with a " + str(self.currentUnit.weapons[self.currentUnit.equippedWeaponIndex]))
+        if (self.hit > random.randint(1,101)):
+            print("Hit!")
+            if (self.crit > random.randint(1,101)):
+                print("Crit!!")
+                self.damage *= 3
+            self.currentTarget.hp -= self.damage
+        else:
+            print("Miss!")
+        # if target unit died
+        if (self.currentTarget.hp <= 0):
+            print(self.currentTarget.name + " died")
+        # check for possible counter attack
+        else:
+            targetUnitsInRange = self.getUnitsInAttackRange(self.currentTarget)
+            if self.currentUnit in targetUnitsInRange:
+                print(self.currentTarget.name + " counters")
+                self.doMathForAttack(self.currentTarget, self.currentUnit)
+                if (self.counterHit > random.randint(1,101)):
+                    print("Hit!")
+                    if (self.counterCrit > random.randint(1,101)):
+                        print("Crit!!")
+                        self.counterDmg *= 3
+                    self.currentUnit.hp -= self.damage  
+
+                    ## killed on counter attack
+                    if (self.currentUnit.hp <= 0):
+                        print(self.currentUnit.name + " died")
+                    self.currentTarget.calculateExp(self.currentUnit, self.counterDmg, self.currentUnit.hp <= 0)
+                else:
+                    print("Miss!")
+                
+
     def doMathForAttack(self, attackingUnit, defendingUnit):
         #get damage
         equippedWeapon = attackingUnit.weapons[attackingUnit.equippedWeaponIndex]
@@ -183,6 +284,11 @@ class Combat(object):
         critRect = crit.get_rect()
         critRect.center = (self.posX+25, self.posY + 280)
 
+        ## stat names 
+        hpName = font.render("HP", True, (0,0,0))
+        hpNameRect = hpName.get_rect()
+        hpNameRect.center = (self.posX + 75, self.posY + 100)
+
         ## counter 
         counterName = font.render(self.currentTarget.name, True, (0, 0, 0))
         counterNameRect = counterName.get_rect()
@@ -212,6 +318,8 @@ class Combat(object):
         self.__window.blit(dmg, dmgRect)
         self.__window.blit(hit, hitRect)
         self.__window.blit(crit, critRect)
+
+        self.__window.blit(hpName, hpNameRect)
 
         self.__window.blit(counterName, counterNameRect)
         self.__window.blit(counterHp, counterHpRect)

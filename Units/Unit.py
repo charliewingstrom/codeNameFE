@@ -44,14 +44,21 @@ class Unit(object):
     def setCurrentTile(self, tile):
         self.currentTile = tile
 
-    def addExp(self, exp):
+    def calculateExp(self, attackedUnit, damageDealt, didKill):
+        if damageDealt <=0:
+            return
+        exp = 40
+        if (didKill):
+            exp+=70
         self.exp += exp
+        print(self.name + " gained " + str(exp) + " EXP")
         if (self.exp > 99):
             self.exp -= 100
             self.level+=1
             self.levelUp()
+
     def levelUp(self):
-        print(self.name + " Levels up")
+        print(self.name + " Levels up!")
         if (random.randint(1, 100) <= self.hpG):
             self.hp+=1
             print("Hp + 1")
