@@ -53,6 +53,9 @@ class Game(object):
             closestUnit = self.movement.findClosestOppositeUnit(enemy)
             ## find path to closest unit
             path = self.movement.findPath(enemy, closestUnit.currentTile)
+            print("path for " + enemy.name)
+            for tile in path:
+                print(tile)
             ## TODO move unit to closest possible tile
             ## this area needs a lot of work ... 
             index = min(len(path)-1, enemy.mov-1)

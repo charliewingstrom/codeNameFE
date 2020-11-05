@@ -42,14 +42,14 @@ unitArray.append(Byleth)
 for unit in unitArray: unit.weapons.append(sword())
 
 enemyArray = []   
-Bandit = EnemyUnit(window)
-map1.addUnit(Bandit, 1, 10)
+Bandit = EnemyUnit(window, "Pirate")
+map1.addUnit(Bandit, 1, 5)
 enemyArray.append(Bandit)
-Bandit2 = EnemyUnit(window)
-map1.addUnit(Bandit2, 2, 10)
+Bandit2 = EnemyUnit(window, "Bandit")
+map1.addUnit(Bandit2, 2, 5)
 enemyArray.append(Bandit2)
-Bandit3 = EnemyUnit(window)
-map1.addUnit(Bandit3, 0, 10)
+Bandit3 = EnemyUnit(window, "Knight")
+map1.addUnit(Bandit3, 0, 5)
 enemyArray.append(Bandit3)
 
 for enemy in enemyArray: enemy.weapons.append(sword())
@@ -57,7 +57,7 @@ for enemy in enemyArray: enemy.weapons.append(sword())
 for unit in unitArray:
     print(str(unit) + " holds a " + str(unit.weapons[0]))
 
-for i in range(5):
+for i in range(6):
     map1.Tiles[i][4].walkable = False
     map1.Tiles[i][4].defaultColor = grey
     map1.Tiles[i][4].setColor(grey)
@@ -67,6 +67,15 @@ for i in range(5, 10):
     map1.Tiles[5][i].defaultColor = grey
     map1.Tiles[5][i].setColor(grey)
 
+for i in range(5, 10):
+    map1.Tiles[7][i].walkable = False
+    map1.Tiles[7][i].defaultColor = grey
+    map1.Tiles[7][i].setColor(grey)
+
+for i in range(7, 10):
+    map1.Tiles[i][4].walkable = False
+    map1.Tiles[i][4].defaultColor = grey
+    map1.Tiles[i][4].setColor(grey)
 startGame = Game(window, map1, unitArray, enemyArray)
 run = True
 while run:

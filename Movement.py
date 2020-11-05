@@ -125,6 +125,7 @@ class Movement(object):
         return path
 
     def findClosestOppositeUnit(self, unit):
+        self.currentMap.reset()
         oppositeType = EnemyUnit
         if type(unit) == EnemyUnit:
             oppositeType = PlayerUnit
