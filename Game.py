@@ -51,6 +51,7 @@ class Game(object):
         for enemy in self.enemyUnits:
             ## TODO find closest unit to enemy
             closestUnit = self.movement.findClosestOppositeUnit(enemy)
+            print("Closest unit : " + closestUnit.name)
             ## find path to closest unit
             path = self.movement.findPath(enemy, closestUnit.currentTile)
             print("path for " + enemy.name)
@@ -58,50 +59,29 @@ class Game(object):
                 print(tile)
             ## TODO move unit to closest possible tile
             ## this area needs a lot of work ... 
-            index = min(len(path)-1, enemy.mov-1)
-            while(path[index].currentUnit != None or path[index].currentUnit == enemy):
-                index-=1
-            tileToMoveTo = path[index]
-            enemy.currentTile.setCurrentUnit(None)
-            enemy.setCurrentTile(tileToMoveTo)
-            tileToMoveTo.setCurrentUnit(enemy)
+            if (closestUnit not in self.combat.getUnitsInAttackRange(enemy)):
+                index = min(len(path)-1, enemy.mov-1)
+                while(index > 0 and (path[index].currentUnit != None or path[index].currentUnit == enemy)):
+                    index-=1
+                    
+                print(index)
+                if (index < 0):
+                    index = 0
+                tileToMoveTo = path[index]
+                enemy.currentTile.setCurrentUnit(None)
+                enemy.setCurrentTile(tileToMoveTo)
+                tileToMoveTo.setCurrentUnit(enemy)
 
-            ## TODO if possible, Attack!!
+                ## TODO if possible, Attack!!
 
             ## get targets in range of enemy
             targets = self.combat.getUnitsInAttackRange(enemy)
             if (len(targets) > 0):
                 self.combat.currentUnit = enemy
                 self.combat.currentTarget = targets[0]
-                print(self.combat.currentUnit.name + " attacks with a " + str(self.combat.currentUnit.weapons[self.combat.currentUnit.equippedWeaponIndex]))
-                if (self.combat.hit > random.randint(1,101)):
-                    print("Hit!")
-                    if (self.combat.crit > random.randint(1,101)):
-                        print("Crit!!")
-                        self.combat.damage *= 3
-                    self.combat.currentTarget.hp -= self.combat.damage
-                else:
-                    print("Miss!")
-                # if target unit died
-                if (self.combat.currentTarget.hp <= 0):
-                    self.removeUnit(self.combat.currentTarget)
-                # check for possible counter attack
-                else:
-                    targetUnitsInRange = self.combat.getUnitsInAttackRange(self.combat.currentTarget)
-                    if self.combat.currentUnit in targetUnitsInRange:
-                        print(self.combat.currentTarget.name + " counters")
-                        self.combat.doMathForAttack(self.combat.currentTarget, self.combat.currentUnit)
-                        if (self.combat.hit > random.randint(1,101)):
-                            print("Hit!")
-                            if (self.combat.crit > random.randint(1,101)):
-                                print("Crit!!")
-                                self.combat.damage *= 3
-                            self.combat.currentUnit.hp -= self.combat.damage  
-                            if (self.combat.currentUnit.hp <= 0):
-                                self.removeUnit(self.combat.currentUnit)
-                                print(self.combat.currentUnit.name + " died")
-                        else:
-                            print("Miss!")
+                self.combat.doMathForAttack(enemy, targets[0])
+                self.combat.startAttack()
+                
         self.currentMap.reset()
 
 
