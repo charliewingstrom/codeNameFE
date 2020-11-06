@@ -46,21 +46,6 @@ class Combat(object):
         self.counterHit = 0
         self.counterCrit = 0
 
-    def attack(self, attackingUnit, defendingUnit):
-        print(attackingUnit.name + " attacks with a " + str(attackingUnit.weapons[attackingUnit.equippedWeaponIndex]))
-        if (self.hit > random.randint(1,101)):
-            print("Hit!")
-            if (self.crit > random.randint(1,101)):
-                print("Crit!!")
-                self.damage *= 3
-            defendingUnit.hp -= self.damage
-        else:
-            print("Miss!")
-        # if target unit died
-        if (self.currentTarget.hp <= 0):
-            self.removeUnit(self.currentTarget)
-            print(self.currentTarget.name + " died")
-
     def startAttack(self):
         ### possible out comes
         ## I attack and kill
@@ -70,7 +55,7 @@ class Combat(object):
         ## I get attacked and counter but miss ( or don't have a weapon equipped / am out of range )
         ## I get attacked and hit on the counter but don't kill
         ## 
-        print(self.currentUnit.name + " attacks with a " + str(self.currentUnit.weapons[self.currentUnit.equippedWeaponIndex]))
+        print(self.currentUnit.name + " attacks with a " + str(self.currentUnit.getEquippedWeapon()))
         if (self.hit > random.randint(1,101)):
             print("Hit!")
             if (self.crit > random.randint(1,101)):

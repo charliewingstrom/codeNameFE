@@ -44,6 +44,9 @@ class Unit(object):
     def setCurrentTile(self, tile):
         self.currentTile = tile
 
+    def getEquippedWeapon(self):
+        return self.weapons[self.equippedWeaponIndex]
+        
     def calculateExp(self, attackedUnit, damageDealt, didKill):
         if damageDealt <=0:
             return

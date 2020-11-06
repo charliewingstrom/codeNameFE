@@ -1,9 +1,9 @@
 from cursor import Cursor
 from ActionMenu import ActionMenu
 from MapHealthMenu import MapHealthMenu
+from inventory import Inventory
 from EnemyUnit import EnemyUnit
 from PlayerUnit import PlayerUnit
-from TurnManager import TurnManager
 from movement import Movement
 from Combat import Combat
 import copy
@@ -25,13 +25,14 @@ class Game(object):
         self.actionMenu = ActionMenu(window, currentMap.screenWidth, currentMap.screenHeight)
         self.mapHealthMenu = MapHealthMenu(window, currentMap.screenWidth, currentMap.screenHeight)
         self.mapHealthMenu.setCurrentUnit(self.getTileCursorIsOn().currentUnit)
-        self.TurnManager = TurnManager()
+        self.inventory = Inventory(window, currentMap.screenWidth, currentMap.screenHeight)
         self.activeUnits = set()
         self.getTileCursorIsOn().highlighted()
         
         self.unitSelected = False
         self.unitIsPlaced = False
         self.attacking = False
+        self.inventoryOpen = False
         self.movement = Movement(currentMap)
         self.combat = Combat(window, currentMap)
         self.startTurn()
@@ -118,6 +119,8 @@ class Game(object):
             print(len(self.combat.unitsInRange))
             if (len(self.combat.unitsInRange) > 0):
                 self.actionMenu.addAttack()
+            if (len(self.movement.currentUnit.inventory) > 0 or len(self.movement.currentUnit.weapons) > 0):
+                self.actionMenu.addInventory()
 
     def resetSelectedUnit(self):
         print("reset called")
@@ -147,9 +150,11 @@ class Game(object):
         action = self.actionMenu.menuItems[self.actionMenu.selectedIndex]
         playerUnit = self.movement.currentUnit
         if (action == "Attack"):
-            print("Attack")
             self.combat.startCombat(playerUnit)
             self.attacking = True
+        if (action == "Items"):
+            self.inventoryOpen = True
+            self.inventory.setCurrentUnit(playerUnit)
         if (action == "Wait"):
             playerUnit.active = False
             self.activeUnits.remove(playerUnit) 
@@ -200,7 +205,9 @@ class Game(object):
         if (self.getTileCursorIsOn().currentUnit!=None):
             self.mapHealthMenu.checkPos(self.getTileCursorIsOn())
             self.mapHealthMenu.draw()
-        if (self.unitIsPlaced and not self.attacking):
+        if (self.unitIsPlaced and not self.attacking and not self.inventoryOpen):
             self.actionMenu.draw() 
         elif (self.attacking):
             self.combat.draw()
+        elif (self.inventoryOpen):
+            self.inventory.draw()

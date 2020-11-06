@@ -18,6 +18,9 @@ class ActionMenu(Menu):
     def addAttack(self):
         self.menuItems.insert(0, "Attack")
 
+    def addInventory(self):
+        self.menuItems.insert(0, "Items")
+
     def highlightDown(self):
         self.selectedIndex+=1
         if (self.selectedIndex > len(self.menuItems) - 1):
