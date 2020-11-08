@@ -132,6 +132,7 @@ class Game(object):
         self.getTileCursorIsOn().highlighted()
         self.unitIsPlaced = False
         self.movement.currentUnit = None
+        self.inventoryOpen = False
         if self.attacking:
             self.attacking = False
             self.combat.endCombat()
@@ -155,6 +156,7 @@ class Game(object):
         if (action == "Items"):
             self.inventoryOpen = True
             self.inventory.setCurrentUnit(playerUnit)
+            self.inventory.checkPos(self.getTileCursorIsOn())
         if (action == "Wait"):
             playerUnit.active = False
             self.activeUnits.remove(playerUnit) 

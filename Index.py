@@ -107,6 +107,11 @@ while run:
                 elif pygame.K_z == key and not startGame.unitSelected:
                     startGame.selectUnit()
     ## if you do want a held key to repeat the action (such as scrolling a list) put the key here
+    if startGame.inventoryOpen:
+        if keys[pygame.K_UP]:
+            startGame.inventory.highlightUp()
+        if keys[pygame.K_DOWN]:
+            startGame.inventory.highlightDown()
     if startGame.unitIsPlaced:
         if keys[pygame.K_UP]:
             startGame.actionMenu.highlightUp()
