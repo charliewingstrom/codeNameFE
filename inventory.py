@@ -11,6 +11,8 @@ class Inventory(Menu):
         self.posY = 100
         self.posX = 100
         self.selectedIndex = 0
+        self.itemSelected = False
+
     def setCurrentUnit(self, unit):
         self.__currentUnit = unit
 
@@ -30,25 +32,35 @@ class Inventory(Menu):
             self.posX = self.screenWidth-200
         else:
             self.posX = 100
+    
+    def selectOption(self):
+        if (not self.itemSelected):
+            self.selectItem()
+    def selectItem(self):
+        self.itemSelected = True
+
     def draw(self):
         font = pygame.font.Font('freesansbold.ttf', 32)
 
         unitInventory = self.__currentUnit.inventory
         unitWeapons = self.__currentUnit.weapons
-        if (len(unitInventory) + len(unitWeapons) <= 1):
-            pygame.draw.rect(self.window, white, (self.posX, self.posY, 150, (100)))
+        if (self.itemSelected):
+            pass
         else:
-            pygame.draw.rect(self.window, white, (self.posX, self.posY, 150, (75*(len(unitInventory) + len(unitWeapons)))))
-        weaponsText = font.render("Weapons", True, black)
-        for i in range(len(unitInventory) + len(unitWeapons)):
-            if i == self.selectedIndex:
-                color = green
+            if (len(unitInventory) + len(unitWeapons) <= 1):
+                pygame.draw.rect(self.window, white, (self.posX, self.posY, 150, (100)))
             else:
-                color = black
-            if i < len(unitInventory):
-                text = font.render(str(unitInventory[i]), True, color)
-            else:
-                text = font.render(str(unitWeapons[i - len(unitInventory)]), True, color)
-            textRect = text.get_rect() 
-            textRect.center = (self.posX+75, self.posY +(50 * (i+1)))
-            self.window.blit(text, textRect)
+                pygame.draw.rect(self.window, white, (self.posX, self.posY, 150, (75*(len(unitInventory) + len(unitWeapons)))))
+            weaponsText = font.render("Weapons", True, black)
+            for i in range(len(unitInventory) + len(unitWeapons)):
+                if i == self.selectedIndex:
+                    color = green
+                else:
+                    color = black
+                if i < len(unitInventory):
+                    text = font.render(unitInventory[i].name, True, color)
+                else:
+                    text = font.render(str(unitWeapons[i - len(unitInventory)]), True, color)
+                textRect = text.get_rect() 
+                textRect.center = (self.posX+75, self.posY +(50 * (i+1)))
+                self.window.blit(text, textRect)

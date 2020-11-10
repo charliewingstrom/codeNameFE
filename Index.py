@@ -7,7 +7,7 @@ Created on Tue Jun 16 22:03:13 2020
 import sys
 sys.path.append('./Units')
 sys.path.append('./weapons')
-
+sys.path.append('./consumables')
 import pygame
 
 from Game import Game
@@ -19,6 +19,8 @@ from EnemyUnit import EnemyUnit
 from sword import sword
 from javelin import javelin
 from weapon import weapon
+from estus import Estus
+
 
 screenWidth = 1500
 screenHeight = 1000
@@ -56,6 +58,7 @@ for enemy in enemyArray: enemy.weapons.append(sword())
 
 for unit in unitArray:
     print(str(unit) + " holds a " + str(unit.weapons[0]))
+    unit.inventory.append(Estus())
 
 for i in range(6):
     map1.Tiles[i][4].walkable = False
@@ -89,7 +92,10 @@ while run:
             run = False
         elif event.type == pygame.KEYDOWN:
             key = event.key
-            if startGame.attacking:
+            if startGame.inventoryOpen:
+                if keys[pygame.K_z] == key:
+                    startGame.inventory.selectOption()
+            elif startGame.attacking:
                 if pygame.K_LEFT == key or pygame.K_RIGHT == key:
                     startGame.combat.changeAttackTarget()
                 elif pygame.K_DOWN == key:

@@ -121,6 +121,7 @@ class Game(object):
                 self.actionMenu.addAttack()
             if (len(self.movement.currentUnit.inventory) > 0 or len(self.movement.currentUnit.weapons) > 0):
                 self.actionMenu.addInventory()
+            self.getTileCursorIsOn().highlighted()
 
     def resetSelectedUnit(self):
         print("reset called")
