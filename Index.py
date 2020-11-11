@@ -93,7 +93,7 @@ while run:
         elif event.type == pygame.KEYDOWN:
             key = event.key
             if startGame.inventoryOpen:
-                if keys[pygame.K_z] == key:
+                if pygame.K_z == key:
                     startGame.inventory.selectOption()
             elif startGame.attacking:
                 if pygame.K_LEFT == key or pygame.K_RIGHT == key:

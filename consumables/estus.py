@@ -7,4 +7,4 @@ class Estus(Consumable):
         self.name = "Estus"
 
     def consume(self, unit):
-        self.unit.hp = min(self.unit.maxHp, self.unit.hp + 10)
+        unit.hp = min(unit.maxHp, unit.hp + 10)
