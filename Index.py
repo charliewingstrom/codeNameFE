@@ -95,6 +95,8 @@ while run:
             if startGame.inventoryOpen:
                 if pygame.K_z == key:
                     startGame.inventory.selectOption()
+                if pygame.K_LEFT == key or pygame.K_RIGHT == key:
+                    startGame.inventory.toggleWeaponsOrInv()
             elif startGame.attacking:
                 if pygame.K_LEFT == key or pygame.K_RIGHT == key:
                     startGame.combat.changeAttackTarget()
