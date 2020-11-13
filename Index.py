@@ -94,7 +94,12 @@ while run:
             key = event.key
             if startGame.inventoryOpen:
                 if pygame.K_z == key:
+                    tmp = False
+                    if (startGame.inventory.itemSelected):
+                        tmp = True
                     startGame.inventory.selectOption()
+                    if tmp:
+                        startGame.cleanupAfterAction()
                 if pygame.K_LEFT == key or pygame.K_RIGHT == key:
                     startGame.inventory.toggleWeaponsOrInv()
             elif startGame.attacking:

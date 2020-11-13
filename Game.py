@@ -133,7 +133,9 @@ class Game(object):
         self.getTileCursorIsOn().highlighted()
         self.unitIsPlaced = False
         self.movement.currentUnit = None
-        self.inventoryOpen = False
+        if self.inventoryOpen:
+            self.inventoryOpen = False
+            self.inventory.reset()
         if self.attacking:
             self.attacking = False
             self.combat.endCombat()
@@ -144,6 +146,9 @@ class Game(object):
         self.movement.currentUnit = None
         self.unitIsPlaced = False
         self.unitSelected = False
+        if self.inventoryOpen:
+            self.inventoryOpen = False
+            self.inventory.reset()
         if (len(self.activeUnits) <= 0):
             self.endTurn()
             self.startTurn()

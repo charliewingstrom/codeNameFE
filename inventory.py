@@ -64,6 +64,15 @@ class Inventory(Menu):
             selectedItem = self.__currentUnit.inventory[self.selectedIndex]
             selectedItem.consume(self.__currentUnit)
             self.__currentUnit.inventory.remove(selectedItem)
+
+        self.reset()
+
+    def reset(self):
+        self.onInventory = False
+        self.itemSelected = False
+        self.selectedIndex = 0
+
+
     def draw(self):
         font = pygame.font.Font('freesansbold.ttf', 24)
 
