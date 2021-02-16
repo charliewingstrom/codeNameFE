@@ -4,7 +4,7 @@ from MapHealthMenu import MapHealthMenu
 from inventory import Inventory
 from EnemyUnit import EnemyUnit
 from PlayerUnit import PlayerUnit
-from movement import Movement
+from Movement import Movement
 from Combat import Combat
 import copy
 import random

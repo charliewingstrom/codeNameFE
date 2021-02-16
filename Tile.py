@@ -1,10 +1,13 @@
+
 import pygame
+grassTile = pygame.image.load("C:/Users/Charlie/Desktop/codeNameFE/assets/grassTile.png")
 cursorColor = (255,140,25)
 maxDistance = 1024
 class Tile(object):
     
     def __init__(self, window, currentMap, posX, posY, verticalIndex, horizontalIndex, width = 100, height = 100, defaultColor = (0,0,0), borderColor =(255, 255, 255)):
         self.window = window
+        self.pic = pygame.transform.scale(grassTile, (width-10, height-10))
         self.currentMap = currentMap
         self.posX = posX
         self.posY = posY
@@ -61,7 +64,7 @@ class Tile(object):
 
     def draw(self):
         pygame.draw.rect(self.window, self.borderColor,(self.posX, self.posY, self.width, self.height))
-        pygame.draw.rect(self.window, self.currentColor, (self.posX+5, self.posY+5, self.width-10, self.height-10))
+        self.window.blit(self.pic, (self.posX+5, self.posY+5))
     
     def setCurrentUnit(self, Unit):
         self.currentUnit = Unit
@@ -70,10 +73,13 @@ class Tile(object):
         return (self.posX + (self.width//2), self.posY + (self.height//2))
 
     def setColor(self, color):
-        self.currentColor = color
+        self.borderColor = color
         
     def highlighted(self):
         self.borderColor = cursorColor
 
     def unhighlighted(self):
-        self.borderColor = self.defaultBorderColor
+        if self.selectable:
+            self.borderColor = (0, 0, 255)
+        else:
+            self.borderColor = self.defaultBorderColor
