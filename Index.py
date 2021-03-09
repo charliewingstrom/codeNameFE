@@ -62,22 +62,22 @@ for unit in unitArray:
 
 for i in range(6):
     map1.Tiles[i][4].walkable = False
-    map1.Tiles[i][4].defaultColor = grey
+    map1.Tiles[i][4].defaultBorderColor = grey
     map1.Tiles[i][4].setColor(grey)
 
 for i in range(5, 10):
     map1.Tiles[5][i].walkable = False
-    map1.Tiles[5][i].defaultColor = grey
+    map1.Tiles[5][i].defaultBorderColor = grey
     map1.Tiles[5][i].setColor(grey)
 
 for i in range(5, 10):
     map1.Tiles[7][i].walkable = False
-    map1.Tiles[7][i].defaultColor = grey
+    map1.Tiles[7][i].defaultBorderColor = grey
     map1.Tiles[7][i].setColor(grey)
 
 for i in range(7, 20):
     map1.Tiles[i][4].walkable = False
-    map1.Tiles[i][4].defaultColor = grey
+    map1.Tiles[i][4].defaultBorderColor = grey
     map1.Tiles[i][4].setColor(grey)
 startGame = Game(window, map1, unitArray, enemyArray)
 run = True
