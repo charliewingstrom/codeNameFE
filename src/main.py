@@ -20,7 +20,12 @@ cursorPic = pygame.image.load("C:/Users/Charlie/Desktop/tryingThisAgain/assets/c
 protagPicA = pygame.image.load("C:/Users/Charlie/Desktop/tryingThisAgain/assets/protag_A.png")
 protagPicB = pygame.image.load("C:/Users/Charlie/Desktop/tryingThisAgain/assets/protag_B.png")
 
-combatUnit = pygame.image.load("C:/Users/Charlie/Desktop/tryingThisAgain/assets/combat-unit.png")
+combatUnit1 = pygame.image.load("C:/Users/Charlie/Desktop/tryingThisAgain/assets/combat-unit-1.png")
+combatUnit2 = pygame.image.load("C:/Users/Charlie/Desktop/tryingThisAgain/assets/combat-unit-2.png")
+combatUnit3 = pygame.image.load("C:/Users/Charlie/Desktop/tryingThisAgain/assets/combat-unit-3.png")
+combatUnit4 = pygame.image.load("C:/Users/Charlie/Desktop/tryingThisAgain/assets/combat-unit-4.png")
+combatUnit5 = pygame.image.load("C:/Users/Charlie/Desktop/tryingThisAgain/assets/combat-unit-5.png")
+
 ## Menu
 waitButton = pygame.image.load("C:/Users/Charlie/Desktop/tryingThisAgain/assets/wait-button.png")
 attackButton = pygame.image.load("C:/Users/Charlie/Desktop/tryingThisAgain/assets/attack-button.png")
@@ -178,11 +183,11 @@ class BattleForcast():
         self.defendingUnitHit = int((75 + (defendingUnit.skill * 2) + defendingUnit.luck / 2) - ((attackingUnit.speed * 2) + attackingUnit.luck))
 
     def roll(self):
-        if random.randint(0, 100) < self.attackingUnitHit:
+        if random.randint(0, 100) <= self.attackingUnitHit:
             self.attackingUnitWillHit = True
         else:
             self.attackingUnitWillHit = False
-        if random.randint(0, 100) < self.defendingUnitHit:
+        if random.randint(0, 100) <= self.defendingUnitHit:
             self.defendingUnitWillHit = True
         else:
             self.defendingUnitWillHit = False
@@ -232,36 +237,27 @@ class BattleForcast():
         screen.blit(eHitText, eHitRect)
         screen.blit(eCritText, eCritRect)
         
-class CombatAnimation():
+class Animation():
+    
+    def __init__(self, frames):
+        ## list of frames for the animation
+        self.frames = frames
+        ## index for which frame we are on
+        self.index = 0
 
-    def __init__(self):
-        self.attackingUnitAnimation = []
-        self.defendingUnitAnimation = []
-        self.animationRunning = True
-        self.AUAindex = 0
-        self.DUAindex = 0
-
-    def setup(self, attackingUnitAnimation, defendingUnitAnimation):
-        self.attackingUnitAnimation = attackingUnitAnimation
-        self.defendingUnitAnimation = defendingUnitAnimation
-        self.AUAindex = 0
-        self.DUAindex = 0
-        self.animationRunning = True
-
-    def draw(self, screen):
-        screen.blit(attacingBackground, (0,0))
-        ## go through each frame in attackingUnitAnimation unit there is none left
-        if self.AUAindex <= len(self.attackingUnitAnimation)-1:
-            screen.blit(self.attackingUnitAnimation[self.AUAindex], (200, 200))
-            screen.blit(self.defendingUnitAnimation[self.DUAindex], (1500, 200))
-            self.AUAindex += 1
-        elif self.DUAindex <= len(self.defendingUnitAnimation)-1:
-            screen.blit(self.attackingUnitAnimation[self.AUAindex-1], (200, 200))
-            screen.blit(self.defendingUnitAnimation[self.DUAindex], (1500, 200))
-            self.DUAindex += 1
+    ## draws 1 frame each call, if animation is finished, resets index and returns true, else returns false
+    def draw(self, screen, x, y, reverse):
+        if reverse:
+            screen.blit(pygame.transform.flip(self.frames[self.index], True, False), (x, y))
         else:
-            self.animationRunning = False
-        
+            screen.blit(self.frames[self.index], (x, y))
+        self.index+=1
+        if self.index == len(self.frames):
+            self.index = 0
+            return True
+        else:
+            return False
+
 
 class Unit():
 
@@ -281,21 +277,10 @@ class Unit():
         self.fieldPics = [pygame.transform.scale(protagPicA, (tileSize, tileSize)), pygame.transform.scale(protagPicB, (tileSize, tileSize))] 
         self.aniTimer = 5
 
-
-        self.combatPics = [combatUnit]
-        self.combatAniTimer = 20
+        self.combatAnimation = Animation([combatUnit1, combatUnit2, combatUnit3, combatUnit4, combatUnit5, combatUnit4, combatUnit3, combatUnit2, combatUnit1])
 
         self.active = True
 
-    ## return False if animation is done, else return True
-    def playCombatAnimation(self, screen, x, y):
-        screen.blit(self.combatPics[0], (x, y))
-        self.combatAniTimer -=1
-        if self.combatAniTimer <= 0:
-            self.combatAniTimer = 20
-            return False
-        else:
-            return True
 
     def draw(self, screen):
         screen.blit(self.fieldPics[0], (self.X*tileSize, self.Y*tileSize))
@@ -322,16 +307,23 @@ currentUnitTile = None
 currentUnitStartingTile = None
 path = []
 
+## combat
+currentUnitAttacking = True
+defendingUnitAttacking = True
+
+
 ## player state
 playerTurn = True
 selectingTile = False
 selectingAction = False
 selectingAttack = False
 attacking = False
+
 ## menu items
 menuOptions = []
 menuOptions.append("wait")
 menuSelectionIndex = 0
+
 ## unit arrays
 playerUnits = []
 enemyUnits = []
@@ -346,7 +338,6 @@ font = pygame.font.Font('freesansbold.ttf', 52)
 ## custom classes
 map1 = Map(mapWidth, mapHeight)
 myBattleForcast = BattleForcast()
-myCombatAnimation = CombatAnimation()
 
 mainCursor = Cursor()
 ## width first, height second (width goes from left to right, height goes from top to bottom)
@@ -517,7 +508,6 @@ while running:
                     if event.type == pygame.KEYDOWN and event.key == pygame.K_z:
                         attacking = True
                         myBattleForcast.roll()
-                        myCombatAnimation.setup(currentUnit.combatPics, defendingUnit.combatPics)
 
                     if event.type == pygame.KEYDOWN and (event.key == pygame.K_RIGHT or event.key == pygame.K_UP):
                         if attackUnitIndex < len(unitsInRange) - 1:
@@ -638,41 +628,48 @@ while running:
                                 
 
     if attacking:
-        
+        screen.blit(attacingBackground, (0, 0))
 
-        ## play currentUnit attacking animation
-        if myCombatAnimation.animationRunning:
-            myCombatAnimation.draw(screen)
-        ## if current unit will miss, play defending unit dodge animation
-        ## else play defending unit hit animation
+        # if current player attacking, 
+        ## if player will hit, play hit animation and remove the required health from the opponent
+        ### then set current player attacking to false
+        #### if the unit died, remove the unit and end combat
+        ### if the opposing unit is still alive and will counter
+        #### if the unit will hit
+        ##### play opposing unit attack animation and remove required health
+        #### if the unit will miss
+        ##### play miss animation 
 
-        ## if defending unit died or can't counter, end attack
-        ## else play counter attack animation
-        ## if 
+        if currentUnitAttacking:
+            screen.blit(pygame.transform.flip(combatUnit1, True, False), (1000, 200))
+            if myBattleForcast.attackingUnitWillHit:
+                if currentUnit.combatAnimation.draw(screen, 200, 200, False):
+                    ## remove health
+                    currentUnitAttacking = False
+            ## unit will miss, play miss animation
+            else:
+                pass
+
+        elif defendingUnitAttacking:
+            if defendingUnit.hp > 0:
+                screen.blit(combatUnit1, (200, 200))
+                if myBattleForcast.defendingUnitWillHit:
+                    if defendingUnit.combatAnimation.draw(screen, 1000, 200, True):
+                        # remove health
+                        defendingUnitAttacking = False
+                ## unit will miss, play miss animation
+                else:
+                    defendingUnitAttacking = False
+                    pass
+            else:
+                defendingUnitAttacking = False
+                ## remove unit from game
+
 
 
         else:
-            # finish up attacking
-            if myBattleForcast.attackingUnitWillHit:
-                defendingUnit.hp -= myBattleForcast.attackingUnitDmg
-                print("attacking unit hit")
-            else:
-                print("attacking unit miss")
-
-            if defendingUnit.hp > 0 and myBattleForcast.defendingUnitCanCounter and myBattleForcast.defendingUnitWillHit:
-                currentUnit.hp -= myBattleForcast.defendingUnitDmg
-                print("defending unit hit")
-            elif not myBattleForcast.defendingUnitWillHit:
-                print("defending unit miss")
-            if defendingUnit.hp <= 0:
-                enemyUnits.remove(defendingUnit)
-                activeEnemyUnits.remove(defendingUnit)
-                map1.tiles[defendingUnit.X][defendingUnit.Y].currentUnit = None
-                print("defending unit died")
-            if currentUnit.hp <= 0:
-                playerUnits.remove(currentUnit)
-                map1.tiles[currentUnit.X][currentUnit.Y].currentUnit = None
-                print("attacking unit died")
+            currentUnitAttacking = True
+            defendingUnitAttacking = True
             attacking = False
             currentUnitTile = None
             currentUnitStartingTile = None
