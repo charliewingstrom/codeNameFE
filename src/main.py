@@ -270,7 +270,7 @@ class Unit():
         self.skill = 6
         self.luck = 4
         self.mov = 4
-        self.attackRange = [2, 5]
+        self.attackRange = [1, 1]
         self.X = X
         self.Y = Y
 
@@ -301,11 +301,9 @@ maxDistance = 256
 
 ## movement
 moving = False
-movingVelocity = 3
-moveTimer = movingVelocity
-currentUnitTile = None
-currentUnitStartingTile = None
-path = []
+moveVelocity = ()
+moveSpeed = 10
+targetTile = None
 
 ## combat
 currentUnitAttacking = True
@@ -362,6 +360,46 @@ enemyUnits.append(enemy1)
 activeEnemyUnits.append(enemy)
 activeEnemyUnits.append(enemy1)
 
+def findPlayerTarget(tiles):
+    for tile in tiles:
+        for adjTile in tile.adjList:
+            if adjTile.currentUnit != None and adjTile.currentUnit in playerUnits:
+                return adjTile.currentUnit, tile
+
+def findTilesInRange(unit):
+    map1.reset()
+    currentTile = map1.tiles[unit.X][unit.Y]
+    currentTile.distance = 0
+    queue = []
+    added = []
+    tilesInRange = []
+    queue.append(currentTile)
+    added.append(currentTile)
+    while len(queue) > 0:
+        queue.sort(key=lambda tile:tile.distance)
+        currTile = queue.pop(0)
+        if currTile.distance <= currentUnit.mov and (currTile.currentUnit == None or currTile.currentUnit == currentUnit):
+            tilesInRange.append(currTile)
+            added.append(currTile)
+            for tile in currTile.adjList:
+                if tile not in added:
+                    altDist = currTile.distance + 1
+                    if tile.distance > altDist:
+                        tile.distance = altDist
+                        tile.parent = currTile
+                    queue.append(tile)
+    return tilesInRange
+
+def getMoveVelocity(start, end, moveSpeed):
+    velocityX = (end.X - start.X) / moveSpeed
+    velocityY = (end.Y - start.Y) / moveSpeed
+    return (velocityX, velocityY)
+
+def resetAfterAction(unit):
+    if unit:
+        currentUnit.active = False
+    map1.reset()
+
 
 # main game loop
 while running:
@@ -369,60 +407,43 @@ while running:
 
     # if something is moving there shouldn't be any other input accepted
     if moving:
-        moveTimer -=1
-        if moveTimer < 0:
-            moveTimer = movingVelocity
-            # if there is still another tile in the path
-            if len(path) > 0:
-                nextTile = path.pop()
-                currentUnit.X = nextTile.X
-                currentUnit.Y = nextTile.Y
-                currentUnitTile = nextTile
-            # there's no more tiles to move to so we are done moving
-            else:
-                moving = False
-                
-                # we are done moving time to find a way to attack
-                if not playerTurn:
-                    pass
-                # pass control back to player to pick an option
-                else:
-                    selectingAction = True
-                    # reset menu options
-                    menuOptions = ['wait']
-                    menuSelectionIndex = 0
-                    # check what menu options are avaliable (wait added by default)
-                    ## check if there is a unit to attack in range
-                    unitsInRange = []
-                    for row in map1.tiles:
-                        for tile in row:
-                            tile.distance = maxDistance
-                    currTile = currentUnitTile
-                    currTile.distance = 0
-                    queue = []
-                    visited = []
-                    queue.append(currTile)
-                    visited.append(currTile)
-                    while len(queue) > 0:
-                        queue.sort(key=lambda tile:tile.distance)
-                        currTile = queue.pop(0)
-                        if currTile.distance <= currentUnit.attackRange[1]:
-                            if currTile.distance >= currentUnit.attackRange[0]:
-                                currTile.attackable = True
-                                if currTile.currentUnit != None and currTile.currentUnit in enemyUnits and currTile.currentUnit not in unitsInRange:
-                                    unitsInRange.append(currTile.currentUnit)
-                            for tile in currTile.adjList:
-                                if tile not in visited:
-                                    visited.append(currTile)
-                                    tile.distance = currTile.distance + 1
-                                    queue.append(tile)
-                    if len(unitsInRange) > 0:
-                        menuOptions.append('attack')
+        currentUnit.X += moveVelocity[0]
+        currentUnit.Y += moveVelocity[1]
+        if round(currentUnit.X) == targetTile.X and round(currentUnit.Y) == targetTile.Y:
+            currentUnit.X = targetTile.X
+            currentUnit.Y = targetTile.Y
+            currentUnitStartingTile.currentUnit = None
+            targetTile.currentUnit = currentUnit
+            currentUnitTile = targetTile
 
+            moving = False
+            if not playerTurn:
+                print("setup attack...")
+                myBattleForcast.calculate(currentUnit, defendingUnit)
+                myBattleForcast.roll()
+                attacking = True
+                
+            else:
+                selectingAction = True
     # not moving
     else: 
+        if not playerTurn and not attacking:
+            if len(activeEnemyUnits) > 0:
+                currentUnit = activeEnemyUnits.pop(0)
+                currentUnitStartingTile = map1.tiles[currentUnit.X][currentUnit.Y]
+                defendingUnit, targetTile = findPlayerTarget(findTilesInRange(currentUnit))
+                moveVelocity = getMoveVelocity(currentUnitStartingTile, targetTile, moveSpeed)
+                moving = True
+                
+            else:
+                playerTurn = True
+                for unit in playerUnits:
+                    unit.active = True
+                for unit in enemyUnits:
+                    activeEnemyUnits.append(unit)
+        
         ## if keys (they are up here because you should be able to hold the key)
-        if playerTurn and not selectingAction and not selectingAttack:
+        elif playerTurn and not selectingAction and not selectingAttack:
             # cursor controls
             if keys[pygame.K_DOWN]:
                 mainCursor.down()
@@ -445,64 +466,12 @@ while running:
         # end menu movement controls
 
         for event in pygame.event.get():
-            # if its player turn or not
-            ## end turn
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
-                playerTurn = False
-                selectingAction = False
             ## quit
             if event.type == pygame.QUIT:
                 running = False
             
-            if not playerTurn:
-                if len(activeEnemyUnits) > 0:
-                    # find closest player unit
-                    currentUnit = activeEnemyUnits.pop()
-                    currTile = map1.tiles[currentUnit.X][currentUnit.Y]
-                    currentUnitTile = currTile
-                    currTile.distance = 0
-                    queue = []
-                    added = []
-                    queue.append(currTile)
-                    while len(queue) > 0:
-                        queue.sort(key=lambda tile:tile.distance)
-                        currTile = queue.pop(0)
-                        added.append(currTile)
-                        for tile in currTile.adjList:
-                            if moving:
-                                break
-                            # if we found a player unit
-                            if tile.currentUnit != None and tile.currentUnit in playerUnits:
-                                while currTile.parent!=None:
-                                    path.append(currTile)
-                                    currTile = currTile.parent
-                                # make sure we can't move past our move
-                                if len(path) > currentUnit.mov:
-                                    path = path[len(path)-currentUnit.mov:]
-                                moving = True
-                                map1.reset()
-                            elif tile not in added and tile.currentUnit == None:
-                                altDist = currTile.distance + 1
-                                if tile.distance > altDist:
-                                    tile.distance = altDist
-                                    tile.parent = currTile
-                                queue.append(tile)
-                        if moving:
-                                currentUnitTile.currentUnit = None
-                                if len(path) > 0:
-                                    path[0].currentUnit = currentUnit
-                                break
-                else:
-                    # there are no more Enemy Units to move
-                    # start player turn
-                    playerTurn = True
-                    for unit in playerUnits:
-                        unit.active = True
-                    for unit in enemyUnits:
-                        activeEnemyUnits.append(unit)
-
             # player turn
-            else:
+            elif playerTurn:
                 # picking a unit to attack
                 if selectingAttack:
                     if event.type == pygame.KEYDOWN and event.key == pygame.K_z:
@@ -538,14 +507,12 @@ while running:
                     # action selected from menu
                     if event.type == pygame.KEYDOWN and event.key == pygame.K_z:
                         if menuOptions[menuSelectionIndex] == 'wait':
-                            currentUnit.active = False
+                            resetAfterAction(currentUnit)
                             currentUnit = None
                             currentUnitStartingTile = None
                             currentUnitTile = None
-                            path = []
-                            map1.reset()
                             selectingAction = False
-                            selectingTile = False
+                            
                             
                         if menuOptions[menuSelectionIndex] == 'attack':
                             selectingAction = False
@@ -561,11 +528,9 @@ while running:
                         currentUnit.X = currentUnitStartingTile.X
                         currentUnit.Y = currentUnitStartingTile.Y
                         currentUnitStartingTile.currentUnit = currentUnit
-                        selectingAction = False
+                        currentUnitTile = currentUnitStartingTile
                         selectingTile = True
-                        for row in map1.tiles:
-                            for tile in row:
-                                tile.attackable = False
+                        selectingAction = False
 
                 ### selecting what tile to move to 
                 elif selectingTile:
@@ -573,18 +538,13 @@ while running:
                     if event.type == pygame.KEYDOWN and event.key == pygame.K_z:
                         tileToMoveTo = map1.tiles[mainCursor.X][mainCursor.Y]
                         if tileToMoveTo.selectable:
-                            currentUnitStartingTile.currentUnit = None
-                            tileToMoveTo.currentUnit = currentUnit
-                            path = []
-                            while tileToMoveTo.parent!=None:
-                                path.append(tileToMoveTo)
-                                tileToMoveTo = tileToMoveTo.parent
-                            selectingTile = False
+                            targetTile = tileToMoveTo
                             moving = True
+                            selectingTile = False
+                            moveVelocity = getMoveVelocity(currentUnitTile, targetTile, moveSpeed)
                     # Stop selecting tile
                     elif event.type == pygame.KEYDOWN and event.key == pygame.K_x:
                         map1.reset()
-                        currentUnitStartingTile.currentUnit = currentUnit
                         currentUnit = None
                         currentUnitTile = None
                         currentUnitStartingTile = None
@@ -592,6 +552,9 @@ while running:
 
                 ### no unit selected, waiting for next unit to be selected
                 else:
+                    if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
+                        playerTurn = False
+                        selectingAction = False
                     # Select unit and show their range
                     if event.type == pygame.KEYDOWN and event.key == pygame.K_z:
                         
@@ -603,27 +566,10 @@ while running:
                         if currentUnit != None and currentUnit.active and currentUnit in playerUnits:
                             # need to save this for later
                             currentUnitTile = currentTile
-                            currentUnitTile.currentUnit = None
                             currentUnitStartingTile = currentTile
+                            for tile in findTilesInRange(currentUnit):
+                                tile.selectable = True
                             
-                            currentTile.distance = 0
-                            queue = []
-                            added = []
-                            queue.append(currentTile)
-                            added.append(currentTile)
-                            while len(queue) > 0:
-                                queue.sort(key=lambda tile:tile.distance)
-                                currTile = queue.pop(0)
-                                if currTile.distance <= currentUnit.mov and (currTile.currentUnit == None or currTile.currentUnit == currentUnit):
-                                    currTile.selectable = True
-                                    added.append(currTile)
-                                    for tile in currTile.adjList:
-                                        if tile not in added:
-                                            altDist = currTile.distance + 1
-                                            if tile.distance > altDist:
-                                                tile.distance = altDist
-                                                tile.parent = currTile
-                                            queue.append(tile)
                             selectingTile = True
                                 
 
@@ -646,9 +592,11 @@ while running:
                 if currentUnit.combatAnimation.draw(screen, 200, 200, False):
                     ## remove health
                     currentUnitAttacking = False
+                    print("current unit hit")
             ## unit will miss, play miss animation
             else:
-                pass
+                print("current unit miss")
+                currentUnitAttacking = False
 
         elif defendingUnitAttacking:
             if defendingUnit.hp > 0:
@@ -657,10 +605,11 @@ while running:
                     if defendingUnit.combatAnimation.draw(screen, 1000, 200, True):
                         # remove health
                         defendingUnitAttacking = False
+                        print("defending unit hit")
                 ## unit will miss, play miss animation
                 else:
+                    print("defending unit miss")
                     defendingUnitAttacking = False
-                    pass
             else:
                 defendingUnitAttacking = False
                 ## remove unit from game
