@@ -35,6 +35,9 @@ menuCursor = pygame.image.load("C:/Users/Charlie/Desktop/tryingThisAgain/assets/
 ### Battle Forecast
 battleForecastPic = pygame.image.load("C:/Users/Charlie/Desktop/tryingThisAgain/assets/battle-forecast.png")
 combatUI = pygame.image.load("C:/Users/Charlie/Desktop/tryingThisAgain/assets/Combat-UI.png")
+combatUIRed = pygame.image.load("C:/Users/Charlie/Desktop/tryingThisAgain/assets/Combat-UI-red.png")
+healthbarfullPiece = pygame.image.load("C:/Users/Charlie/Desktop/tryingThisAgain/assets/healthbar-piece.png")
+healthbarEmptyPiece = pygame.image.load("C:/Users/Charlie/Desktop/tryingThisAgain/assets/healthbar-piece-empty.png")
 ## backgrounds
 attacingBackground = pygame.image.load("C:/Users/Charlie/Desktop/tryingThisAgain/assets/attacking-background.png")
 #---------------------------
@@ -244,9 +247,45 @@ class CombatUI():
         self.X = X
         self.Y = Y
         self.pic = combatUI
+        self.enemyPic = combatUIRed
         
     def draw(self, screen, battleForcast):
-        pass
+        if currentUnit in enemyUnits:
+            screen.blit(self.enemyPic, (self.X, self.Y))
+            screen.blit(self.pic, (self.X + 1075, self.Y))
+        else:
+            screen.blit(self.pic, (self.X, self.Y))
+            screen.blit(self.enemyPic, (self.X + 1100, self.Y))
+
+        CUNameText = font.render(currentUnit.name, True, (0,0,0))
+        CUNameRect = CUNameText.get_rect()
+        CUNameRect.center = (self.X + (len(currentUnit.name) * 25), self.Y + 100)
+
+        CUAttackText = font.render(str(battleForcast.attackingUnitDmg), True, (0,0,0))
+        CUAttackRect = CUAttackText.get_rect()
+        CUAttackRect.center = (self.X + 185, self.Y + 330)
+
+        CUHitText = font.render(str(battleForcast.attackingUnitHit), True, (0,0,0))
+        CUHitRect = CUHitText.get_rect()
+        CUHitRect.center = (self.X + 450, self.Y + 330)
+
+        CUCritText = font.render(str(battleForcast.attackingUnitCrit), True, (0,0,0))
+        CUCritRect = CUCritText.get_rect()
+        CUCritRect.center = (self.X + 720, self.Y + 330)
+
+        for i in range(currentUnit.maxHp):
+            screen.blit(healthbarEmptyPiece, (self.X + 50 + (20*i), self.Y + 140))
+        for i in range(currentUnit.hp):
+            screen.blit(healthbarfullPiece, (self.X + 50 + (20*i), self.Y + 140))
+        
+        
+        screen.blit(CUNameText, CUNameRect)
+        screen.blit(CUAttackText, CUAttackRect)
+        screen.blit(CUHitText, CUHitRect)
+        screen.blit(CUCritText, CUCritRect)
+
+
+
 
     
 class Animation():
@@ -274,7 +313,8 @@ class Animation():
 class Unit():
 
     def __init__(self, X, Y):
-        self.maxHp = 100
+        self.name = "generic"
+        self.maxHp = 15
         self.hp = self.maxHp
         self.attack = 10
         self.defense = 5
@@ -348,13 +388,14 @@ font = pygame.font.Font('freesansbold.ttf', 52)
 ## custom classes
 map1 = Map(mapWidth, mapHeight)
 myBattleForcast = BattleForcast()
-
 mainCursor = Cursor()
+myCombatUI = CombatUI(0, gameHeight - 385)
+
 ## width first, height second (width goes from left to right, height goes from top to bottom)
 protag = Unit(3, 9)
 Jagen = Unit(3, 5)
-Jagen.attack = 90000
-Jagen.defense = 10
+Jagen.attack = 9
+Jagen.defense = 110
 Jagen.speed = 9
 
 enemy = Unit(2, 2)
@@ -604,7 +645,8 @@ while running:
             if myBattleForcast.attackingUnitWillHit:
                 if currentUnit.combatAnimation.draw(screen, 0, 0, False):
                     ## remove health
-                    defendingUnit.hp -= myBattleForcast.attackingUnitHit
+                    print("Damage = " + str(myBattleForcast.attackingUnitDmg))
+                    defendingUnit.hp -= myBattleForcast.attackingUnitDmg
                     currentUnitAttacking = False
                     print("current unit hit")
             ## unit will miss, play miss animation
@@ -612,7 +654,7 @@ while running:
                 if currentUnit.combatAnimation.draw(screen, 0, 0, False):
                     print("current unit miss")
                     currentUnitAttacking = False
-            screen.blit(combatUI, (0, gameHeight-381))
+            myCombatUI.draw(screen, myBattleForcast)
 
         elif defendingUnitAttacking:
             if defendingUnit.hp > 0:
@@ -630,9 +672,9 @@ while running:
                         defendingUnitAttacking = False
             else:
                 defendingUnitAttacking = False
+                print("defending unit died")
                 ## remove unit from game
-            screen.blit(combatUI, (0, gameHeight-381))
-
+            myCombatUI.draw(screen, myBattleForcast)
 
 
         else:
