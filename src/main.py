@@ -43,6 +43,55 @@ healthbarEmptyPiece = pygame.image.load("C:/Users/Charlie/Desktop/tryingThisAgai
 attacingBackground = pygame.image.load("C:/Users/Charlie/Desktop/tryingThisAgain/assets/attacking-background.png")
 #---------------------------
 
+# globals
+currentUnit = None
+defendingUnit = None
+## map
+tileSize = 96
+mapWidth = 24
+mapHeight = 19
+maxDistance = 256
+
+## camera
+yCamera = 0
+xCamera = 0
+
+## movement
+moving = False
+moveVelocity = ()
+moveSpeed = 10
+targetTile = None
+
+## combat
+currentUnitAttacking = True
+defendingUnitAttacking = True
+
+
+## player state
+playerTurn = True
+viewingUnitInfo = False
+selectingTile = False
+selectingAction = False
+selectingAttack = False
+attacking = False
+
+## menu items
+menuOptions = []
+menuOptions.append("wait")
+menuSelectionIndex = 0
+
+## unit arrays
+playerUnits = []
+enemyUnits = []
+activeEnemyUnits = []
+
+### attacking selection
+unitsInRange = []
+attackUnitIndex = 0
+font = pygame.font.Font('freesansbold.ttf', 52)
+
+
+# custom classes
 class Map():
 
     def __init__(self, width, height):
@@ -111,36 +160,57 @@ class Tile():
         self.attackable = False
 
     def draw(self, screen):
-        screen.blit(self.pic, (self.X*tileSize, self.Y*tileSize))
+        #screen.blit(self.pic, (self.X*tileSize, self.Y*tileSize))
         if self.currentUnit != None:
-            screen.blit(self.occupiedPic, (self.X*tileSize, self.Y*tileSize))
+            screen.blit(self.occupiedPic, (self.X*tileSize + xCamera, self.Y*tileSize + yCamera))
         elif self.attackable:
-            screen.blit(self.attackablePic, (self.X*tileSize, self.Y*tileSize))
+            screen.blit(self.attackablePic, (self.X*tileSize + xCamera, self.Y*tileSize + yCamera))
         elif self.selectable:
-            screen.blit(self.selectablePic, (self.X*tileSize, self.Y*tileSize))
+            screen.blit(self.selectablePic, (self.X*tileSize + xCamera, self.Y*tileSize + yCamera))
         
 class Cursor():
 
     def __init__(self):
         self.X = 1
         self.Y = 2
+        self.yCameraOffset = 0
+        self.xCameraOffset = 0
         self.pic = pygame.transform.scale(cursorPic, (tileSize, tileSize))
 
     def down(self):
         if self.Y < mapHeight-1:
             self.Y+=1
+            if (self.Y * tileSize) + yCamera + tileSize  > gameHeight:
+                self.yCameraOffset += 1
+                return -tileSize
+        return 0
+
     def up(self):
         if self.Y > 0:
             self.Y-=1
+            if (self.Y * tileSize) + yCamera < tileSize:
+                self.yCameraOffset -= 1
+                return tileSize
+        return 0
+
     def right(self):
         if self.X < mapWidth-1:
             self.X+=1
+            if (self.X * tileSize) + xCamera + tileSize > gameWidth:
+                self.xCameraOffset += 1
+                return -tileSize
+        return 0
+
     def left(self):
         if self.X > 0:
             self.X-=1
+            if (self.X * tileSize) + xCamera < tileSize:
+                self.xCameraOffset -= 1
+                return tileSize
+        return 0
 
     def draw(self, screen):
-        screen.blit(self.pic, (self.X*tileSize, self.Y*tileSize))
+        screen.blit(self.pic, ((self.X*tileSize) - (self.xCameraOffset*tileSize), (self.Y*tileSize) - (self.yCameraOffset*tileSize)))
 
 class BattleForcast():
 
@@ -325,62 +395,15 @@ class Unit():
 
 
     def draw(self, screen):
-        screen.blit(self.fieldPics[0], (self.X*tileSize, self.Y*tileSize))
+        screen.blit(self.fieldPics[0], (self.X*tileSize + xCamera, self.Y*tileSize + yCamera))
         self.aniTimer -= 1
         if self.aniTimer < 0:
             tmpPic = self.fieldPics.pop(0)
             self.fieldPics.append(tmpPic)
             self.aniTimer = 5
 
-# globals
-currentUnit = None
-defendingUnit = None
-## map
-tileSize = 96
-mapWidth = 24
-mapHeight = 12
-maxDistance = 256
 
-## camera
-yCamera = 0
-xCamera = 0
-
-## movement
-moving = False
-moveVelocity = ()
-moveSpeed = 10
-targetTile = None
-
-## combat
-currentUnitAttacking = True
-defendingUnitAttacking = True
-
-
-## player state
-playerTurn = True
-viewingUnitInfo = False
-selectingTile = False
-selectingAction = False
-selectingAttack = False
-attacking = False
-
-## menu items
-menuOptions = []
-menuOptions.append("wait")
-menuSelectionIndex = 0
-
-## unit arrays
-playerUnits = []
-enemyUnits = []
-activeEnemyUnits = []
-
-### attacking selection
-unitsInRange = []
-attackUnitIndex = 0
-font = pygame.font.Font('freesansbold.ttf', 52)
-
-
-## custom classes
+## custom class instances
 map1 = Map(mapWidth, mapHeight)
 myBattleForcast = BattleForcast()
 mainCursor = Cursor()
@@ -410,23 +433,6 @@ enemyUnits.append(enemy1)
 activeEnemyUnits.append(enemy)
 activeEnemyUnits.append(enemy1)
 
-def moveGame(axis, direction):
-    if axis == "Y":
-        for row in map1.tiles:
-            for tile in row:
-                tile.Y += direction
-        for unit in playerUnits:
-            unit.Y += direction
-        for unit in enemyUnits:
-            unit.Y += direction
-    elif axis == "X":
-        for row in map1.tiles:
-            for tile in row:
-                tile.X += direction
-        for unit in playerUnits:
-            unit.X += direction
-        for unit in enemyUnits:
-            unit.X += direction
         
 def findPlayerTarget(tiles):
     for tile in tiles:
@@ -565,13 +571,15 @@ while running:
         elif playerTurn and not selectingAction and not selectingAttack:
             # cursor controls
             if keys[pygame.K_DOWN]:
-                mainCursor.down()
+                yCamera += mainCursor.down()
+                print(yCamera)
             if keys[pygame.K_UP]:
-                mainCursor.up()
+                yCamera += mainCursor.up()
+                print(yCamera)
             if keys[pygame.K_RIGHT]:
-                mainCursor.right()
+                xCamera += mainCursor.right()
             if keys[pygame.K_LEFT]:
-                mainCursor.left()
+                xCamera += mainCursor.left()
             # end cursor controls
 
         # menu movement controls
@@ -692,18 +700,24 @@ while running:
                             currentUnitStartingTile = currentTile
                             tilesInRange = findTilesInMovRange(currentUnit)
                             for tile in tilesInRange:
-                                tile.selectable = True
-                                for atkTile in findTilesInAttackRange(tile, currentUnit.attackRange):
-                                    if atkTile not in tilesInRange:
-                                        atkTile.attackable = True
+                                if tile.currentUnit == None:
+                                    tile.selectable = True
+                                    for atkTile in findTilesInAttackRange(tile, currentUnit.attackRange):
+                                        if atkTile not in tilesInRange:
+                                            atkTile.attackable = True
                             selectingTile = True
-                        """ elif currentUnit != None and currentUnit in enemyUnits:
+                        elif currentUnit != None and currentUnit in enemyUnits:
                             tilesInRange = findTilesInMovRange(currentUnit)
                             for tile in tilesInRange:
-                                tile.selectable = True
-                                for atkTile in findTilesInAttackRange(tile, currentUnit.attackRange):
-                                    if atkTile not in tilesInRange:
-                                        atkTile.attackable = True """
+                                if tile.currentUnit == None:
+                                    tile.selectable = True
+                                    for atkTile in findTilesInAttackRange(tile, currentUnit.attackRange):
+                                        if atkTile not in tilesInRange:
+                                            atkTile.attackable = True
+                    
+                    if event.type == pygame.KEYDOWN and event.key == pygame.K_x:
+                        currentUnit = None
+                        map1.reset()
                     if event.type == pygame.KEYDOWN and event.key == pygame.K_a:
                         currentTile = map1.tiles[mainCursor.X][mainCursor.Y]
                         if currentTile.currentUnit != None:
@@ -711,7 +725,6 @@ while running:
                             myUnitInfo.reset(currentUnit)
                             viewingUnitInfo = True
                         
-    
     if attacking:
         screen.blit(attacingBackground, (0, 0))
         # if current player attacking, 
@@ -777,6 +790,7 @@ while running:
             
             map1.reset()
     else:
+        screen.fill((0,0,0))
         map1.draw(screen)
         mainCursor.draw(screen)
         for unit in playerUnits:
