@@ -145,6 +145,7 @@ class Tile():
         self.Y = Y
         self.currentUnit = None
         self.pic = pygame.transform.scale(grassTilePic, (tileSize, tileSize))
+        self.walkable = True
         self.selectable = False
         self.selectablePic = pygame.transform.scale(selectablePic, (tileSize, tileSize))
         self.attackable = False
@@ -386,7 +387,7 @@ class Unit():
         self.skill = 6
         self.luck = 4
         self.mov = 4
-        self.attackRange = [2, 3]
+        self.attackRange = [1, 1]
         self.X = X
         self.Y = Y
 
@@ -439,11 +440,31 @@ activeEnemyUnits.append(enemy1)
 
         
 def findPlayerTarget(tiles):
+    possibleTargets = []
     for tile in tiles:
         for adjTile in tile.adjList:
             if adjTile.currentUnit != None and adjTile.currentUnit in playerUnits:
                 return adjTile.currentUnit, tile
     return None, None
+
+def findPlayerTarget2(tiles, unit):
+    possibleTargets = []
+    for tile in tiles:
+        for attackableTile in findTilesInAttackRange(tile, unit.attackRange):
+            if attackableTile.currentUnit != None and attackableTile.currentUnit in playerUnits:
+                possibleTargets.append((attackableTile.currentUnit, tile))
+    #print(possibleTargets[0][0])
+    bestTarget = (None, None)
+    for target in possibleTargets:
+        if target[0].hp < unit.attack - target[0].defense:
+            return target
+        elif bestTarget == (None, None):
+            bestTarget = target
+        elif bestTarget[0].defense > target[0].defense:
+            bestTarget = target
+        
+    return bestTarget
+            
 
 def findTilesInMovRange(unit):
     map1.reset()
@@ -479,7 +500,11 @@ def findTilesInMovRange(unit):
                             tile.distance = altDist
                             tile.parent = currTile
                         queue.append(tile)
-    return tilesInRange
+    toReturn = []
+    for tile in tilesInRange:
+        if tile.currentUnit == None or tile.currentUnit == unit:
+            toReturn.append(tile)
+    return toReturn
 
 def getMoveVelocity(start, end, moveSpeed):
     velocityX = (end.X - start.X) / moveSpeed
@@ -557,12 +582,8 @@ while running:
                 currentUnit = activeEnemyUnits.pop(0)
                 currentUnitStartingTile = map1.tiles[currentUnit.X][currentUnit.Y]
                 enemyTilesInRange = findTilesInMovRange(currentUnit)
-                newTilesInRange = []
-                for tile in enemyTilesInRange:
-                    # make sure we can't move to a tile that is occupied
-                    if tile.currentUnit == None or tile.currentUnit == currentUnit:
-                        newTilesInRange.append(tile)
-                defendingUnit, targetTile = findPlayerTarget(newTilesInRange)
+                #defendingUnit, targetTile = findPlayerTarget(enemyTilesInRange)
+                defendingUnit, targetTile = findPlayerTarget2(enemyTilesInRange, currentUnit)
                 ## for now if a unit is not in range, don't move
                 if defendingUnit != None:
                     moveVelocity = getMoveVelocity(currentUnitStartingTile, targetTile, moveSpeed)
