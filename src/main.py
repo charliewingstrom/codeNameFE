@@ -39,8 +39,10 @@ combatUI = pygame.image.load("C:/Users/Charlie/Desktop/tryingThisAgain/assets/Co
 combatUIRed = pygame.image.load("C:/Users/Charlie/Desktop/tryingThisAgain/assets/Combat-UI-red.png")
 healthbarfullPiece = pygame.image.load("C:/Users/Charlie/Desktop/tryingThisAgain/assets/healthbar-piece.png")
 healthbarEmptyPiece = pygame.image.load("C:/Users/Charlie/Desktop/tryingThisAgain/assets/healthbar-piece-empty.png")
+
 ## backgrounds
 attacingBackground = pygame.image.load("C:/Users/Charlie/Desktop/tryingThisAgain/assets/attacking-background.png")
+map1background = pygame.image.load("C:/Users/Charlie/Desktop/tryingThisAgain/assets/map1-background.png")
 #---------------------------
 
 # globals
@@ -94,10 +96,10 @@ font = pygame.font.Font('freesansbold.ttf', 52)
 # custom classes
 class Map():
 
-    def __init__(self, width, height):
+    def __init__(self, width, height, background):
         self.width=width
         self.height=height
-
+        self.background = background
         # creates a list of rows of tiles
         tiles = []
         currHeight = 0
@@ -129,7 +131,9 @@ class Map():
         for row in self.tiles:
             for tile in row:
                 tile.reset()
+
     def draw(self, screen):
+        screen.blit(self.background, (xCamera, yCamera))
         for row in self.tiles:
             for tile in row:
                 tile.draw(screen)
@@ -389,7 +393,7 @@ class Unit():
         self.fieldPics = [pygame.transform.scale(protagPicA, (tileSize, tileSize)), pygame.transform.scale(protagPicB, (tileSize, tileSize))] 
         self.aniTimer = 5
 
-        self.combatAnimation = Animation([combatUnit1, combatUnit1,combatUnit1,combatUnit2, combatUnit2,combatUnit2,combatUnit3, combatUnit3,combatUnit3,combatUnit4, combatUnit4,combatUnit4,combatUnit5, combatUnit5,combatUnit5,combatUnit5,combatUnit6, combatUnit6,combatUnit6,combatUnit5, combatUnit4, combatUnit3, combatUnit2, combatUnit1])
+        self.combatAnimation = Animation([combatUnit1,combatUnit2, combatUnit3,combatUnit4, combatUnit5, combatUnit6,combatUnit5, combatUnit4, combatUnit3, combatUnit2, combatUnit1])
 
         self.active = True
 
@@ -404,7 +408,7 @@ class Unit():
 
 
 ## custom class instances
-map1 = Map(mapWidth, mapHeight)
+map1 = Map(mapWidth, mapHeight, map1background)
 myBattleForcast = BattleForcast()
 mainCursor = Cursor()
 myCombatUI = CombatUI(0, gameHeight - 385)
@@ -439,6 +443,7 @@ def findPlayerTarget(tiles):
         for adjTile in tile.adjList:
             if adjTile.currentUnit != None and adjTile.currentUnit in playerUnits:
                 return adjTile.currentUnit, tile
+    return None, None
 
 def findTilesInMovRange(unit):
     map1.reset()
@@ -552,13 +557,16 @@ while running:
                 currentUnit = activeEnemyUnits.pop(0)
                 currentUnitStartingTile = map1.tiles[currentUnit.X][currentUnit.Y]
                 enemyTilesInRange = findTilesInMovRange(currentUnit)
+                newTilesInRange = []
                 for tile in enemyTilesInRange:
                     # make sure we can't move to a tile that is occupied
-                    if tile.currentUnit != None:
-                        enemyTilesInRange.remove(tile)
-                defendingUnit, targetTile = findPlayerTarget(enemyTilesInRange)
-                moveVelocity = getMoveVelocity(currentUnitStartingTile, targetTile, moveSpeed)
-                moving = True
+                    if tile.currentUnit == None or tile.currentUnit == currentUnit:
+                        newTilesInRange.append(tile)
+                defendingUnit, targetTile = findPlayerTarget(newTilesInRange)
+                ## for now if a unit is not in range, don't move
+                if defendingUnit != None:
+                    moveVelocity = getMoveVelocity(currentUnitStartingTile, targetTile, moveSpeed)
+                    moving = True
                 
             else:
                 playerTurn = True
@@ -572,10 +580,8 @@ while running:
             # cursor controls
             if keys[pygame.K_DOWN]:
                 yCamera += mainCursor.down()
-                print(yCamera)
             if keys[pygame.K_UP]:
                 yCamera += mainCursor.up()
-                print(yCamera)
             if keys[pygame.K_RIGHT]:
                 xCamera += mainCursor.right()
             if keys[pygame.K_LEFT]:
@@ -700,7 +706,7 @@ while running:
                             currentUnitStartingTile = currentTile
                             tilesInRange = findTilesInMovRange(currentUnit)
                             for tile in tilesInRange:
-                                if tile.currentUnit == None:
+                                if tile.currentUnit == None or tile.currentUnit == currentUnit:
                                     tile.selectable = True
                                     for atkTile in findTilesInAttackRange(tile, currentUnit.attackRange):
                                         if atkTile not in tilesInRange:
