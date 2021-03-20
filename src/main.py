@@ -309,12 +309,13 @@ class CombatUI():
         self.enemyPic = combatUIRed
         
     def draw(self, screen, battleForcast):
+        DUOffset = 1075
         if currentUnit in enemyUnits:
             screen.blit(self.enemyPic, (self.X, self.Y))
-            screen.blit(self.pic, (self.X + 1075, self.Y))
+            screen.blit(self.pic, (self.X + DUOffset, self.Y))
         else:
             screen.blit(self.pic, (self.X, self.Y))
-            screen.blit(self.enemyPic, (self.X + 1100, self.Y))
+            screen.blit(self.enemyPic, (self.X + DUOffset, self.Y))
 
         CUNameText = font.render(currentUnit.name, True, (0,0,0))
         CUNameRect = CUNameText.get_rect()
@@ -337,11 +338,40 @@ class CombatUI():
         for i in range(currentUnit.hp):
             screen.blit(healthbarfullPiece, (self.X + 50 + (20*i), self.Y + 140))
         
-        
+        ## defending unit stuff
+        DUNameText = font.render(defendingUnit.name, True, (0,0,0))
+        DUNameRect = DUNameText.get_rect()
+        DUNameRect.center = (self.X + DUOffset + (len(defendingUnit.name) * 25), self.Y + 100)
+
+        DUAttackText = font.render(str(battleForcast.defendingUnitDmg), True, (0,0,0))
+        DUAttackRect = DUAttackText.get_rect()
+        DUAttackRect.center = (self.X + DUOffset + 185, self.Y + 330)
+
+        DUHitText = font.render(str(battleForcast.defendingUnitHit), True, (0,0,0))
+        DUHitRect = DUHitText.get_rect()
+        DUHitRect.center = (self.X + DUOffset + 450, self.Y + 330)
+
+        DUCritText = font.render(str(battleForcast.defendingUnitCrit), True, (0,0,0))
+        DUCritRect = CUCritText.get_rect()
+        DUCritRect.center = (self.X + 720 + DUOffset, self.Y + 330)
+
+        for i in range(defendingUnit.maxHp):
+            screen.blit(healthbarEmptyPiece, (self.X + 50 + (20*i) + DUOffset, self.Y + 140))
+        for i in range(defendingUnit.hp):
+            screen.blit(healthbarfullPiece, (self.X + 50 + (20*i) + DUOffset, self.Y + 140))
+
+        # draw
+        ## current unit
         screen.blit(CUNameText, CUNameRect)
         screen.blit(CUAttackText, CUAttackRect)
         screen.blit(CUHitText, CUHitRect)
         screen.blit(CUCritText, CUCritRect)
+
+        ## defending unit
+        screen.blit(DUNameText, DUNameRect)
+        screen.blit(DUAttackText, DUAttackRect)
+        screen.blit(DUHitText, DUHitRect)
+        screen.blit(DUCritText, DUCritRect)
 
 class UnitInfo():
 
@@ -406,6 +436,16 @@ class Unit():
             tmpPic = self.fieldPics.pop(0)
             self.fieldPics.append(tmpPic)
             self.aniTimer = 5
+        
+        ## draw health bar 
+        pygame.draw.rect(screen, (0,0,0), pygame.Rect(self.X*tileSize + xCamera, (self.Y*tileSize)+tileSize-5 + yCamera, tileSize, 5))
+        healthPercent = self.hp/self.maxHp
+        color = (0, 255, 0)
+        if healthPercent < 0.2:
+            color = (255, 0, 0)
+        elif healthPercent < 0.5:
+            color = (238, 255, 0)
+        pygame.draw.rect(screen, color, pygame.Rect(self.X*tileSize + xCamera, (self.Y*tileSize)+tileSize-5 + yCamera, healthPercent * tileSize, 5))
 
 
 ## custom class instances
