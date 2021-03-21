@@ -33,12 +33,13 @@ attackButton = pygame.image.load("C:/Users/Charlie/Desktop/tryingThisAgain/asset
 menuCursor = pygame.image.load("C:/Users/Charlie/Desktop/tryingThisAgain/assets/menu-cursor.png")
 unitInfoPic = pygame.image.load("C:/Users/Charlie/Desktop/tryingThisAgain/assets/unit-info.png")
 
-### Battle Forecast
+### Combat and UI
 battleForecastPic = pygame.image.load("C:/Users/Charlie/Desktop/tryingThisAgain/assets/battle-forecast.png")
 combatUI = pygame.image.load("C:/Users/Charlie/Desktop/tryingThisAgain/assets/Combat-UI.png")
 combatUIRed = pygame.image.load("C:/Users/Charlie/Desktop/tryingThisAgain/assets/Combat-UI-red.png")
 healthbarfullPiece = pygame.image.load("C:/Users/Charlie/Desktop/tryingThisAgain/assets/healthbar-piece.png")
 healthbarEmptyPiece = pygame.image.load("C:/Users/Charlie/Desktop/tryingThisAgain/assets/healthbar-piece-empty.png")
+mapUnitUI = pygame.image.load("C:/Users/Charlie/Desktop/tryingThisAgain/assets/map-unit-UI.png")
 
 ## backgrounds
 attacingBackground = pygame.image.load("C:/Users/Charlie/Desktop/tryingThisAgain/assets/attacking-background.png")
@@ -373,6 +374,15 @@ class CombatUI():
         screen.blit(DUHitText, DUHitRect)
         screen.blit(DUCritText, DUCritRect)
 
+class MapUnitUI():
+
+    def __init__(self):
+        self.X = gameWidth - 460
+        self.Y = gameHeight - 280
+        self.pic = mapUnitUI
+    def draw(self, screen):
+        screen.blit(self.pic, (self.X, self.Y))
+
 class UnitInfo():
 
     def __init__(self):
@@ -454,7 +464,7 @@ myBattleForcast = BattleForcast()
 mainCursor = Cursor()
 myCombatUI = CombatUI(0, gameHeight - 385)
 myUnitInfo = UnitInfo()
-
+myMapUnitUI = MapUnitUI()
 
 ## width first, height second (width goes from left to right, height goes from top to bottom)
 protag = Unit(3, 9)
@@ -479,15 +489,8 @@ activeEnemyUnits.append(enemy)
 activeEnemyUnits.append(enemy1)
 
         
-def findPlayerTarget(tiles):
-    possibleTargets = []
-    for tile in tiles:
-        for adjTile in tile.adjList:
-            if adjTile.currentUnit != None and adjTile.currentUnit in playerUnits:
-                return adjTile.currentUnit, tile
-    return None, None
 
-def findPlayerTarget2(tiles, unit):
+def findPlayerTarget(tiles, unit):
     possibleTargets = []
     for tile in tiles:
         for attackableTile in findTilesInAttackRange(tile, unit.attackRange):
@@ -503,8 +506,7 @@ def findPlayerTarget2(tiles, unit):
         elif bestTarget[0].defense > target[0].defense:
             bestTarget = target
         
-    return bestTarget
-            
+    return bestTarget        
 
 def findTilesInMovRange(unit):
     map1.reset()
@@ -582,6 +584,15 @@ def findTilesInAttackRange(startTile, atkRange):
                     dist[tile] = dist[currTile] + 1
     return inRange
 
+def checkMapUI():
+    if mainCursor.X * tileSize > gameWidth / 2:
+        myMapUnitUI.X = 10
+        myBattleForcast.X = 10
+    else:
+        myMapUnitUI.X = gameWidth - 460
+        myBattleForcast.X = gameWidth - 500
+
+        
 # main game loop
 while running:
     keys = pygame.key.get_pressed()
@@ -622,8 +633,7 @@ while running:
                 currentUnit = activeEnemyUnits.pop(0)
                 currentUnitStartingTile = map1.tiles[currentUnit.X][currentUnit.Y]
                 enemyTilesInRange = findTilesInMovRange(currentUnit)
-                #defendingUnit, targetTile = findPlayerTarget(enemyTilesInRange)
-                defendingUnit, targetTile = findPlayerTarget2(enemyTilesInRange, currentUnit)
+                defendingUnit, targetTile = findPlayerTarget(enemyTilesInRange, currentUnit)
                 ## for now if a unit is not in range, don't move
                 if defendingUnit != None:
                     moveVelocity = getMoveVelocity(currentUnitStartingTile, targetTile, moveSpeed)
@@ -645,8 +655,10 @@ while running:
                 yCamera += mainCursor.up()
             if keys[pygame.K_RIGHT]:
                 xCamera += mainCursor.right()
+                checkMapUI()
             if keys[pygame.K_LEFT]:
                 xCamera += mainCursor.left()
+                checkMapUI()
             # end cursor controls
 
         # menu movement controls
@@ -865,6 +877,7 @@ while running:
         for enemy in enemyUnits:
             enemy.draw(screen)
         
+        myMapUnitUI.draw(screen)
         if selectingAttack:
             myBattleForcast.draw(screen)
 
