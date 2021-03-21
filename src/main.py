@@ -10,40 +10,40 @@ running = True
 
 #------ load assets --------
 ## Tiles
-grassTilePic = pygame.image.load("C:/Users/Charlie/Desktop/tryingThisAgain/assets/grassTile.png")
-selectablePic = pygame.image.load("C:/Users/Charlie/Desktop/tryingThisAgain/assets/selectableHighlight.png")
-attackablePic = pygame.image.load("C:/Users/Charlie/Desktop/tryingThisAgain/assets/attackableHighlight.png")
-occupiedPic = pygame.image.load("C:/Users/Charlie/Desktop/tryingThisAgain/assets/occupiedHighlight.png")
-cursorPic = pygame.image.load("C:/Users/Charlie/Desktop/tryingThisAgain/assets/cursor.png")
+grassTilePic = pygame.image.load("C:/Users/Charlie/Desktop/CodenameFE/assets/grassTile.png")
+selectablePic = pygame.image.load("C:/Users/Charlie/Desktop/CodenameFE/assets/selectableHighlight.png")
+attackablePic = pygame.image.load("C:/Users/Charlie/Desktop/CodenameFE/assets/attackableHighlight.png")
+occupiedPic = pygame.image.load("C:/Users/Charlie/Desktop/CodenameFE/assets/occupiedHighlight.png")
+cursorPic = pygame.image.load("C:/Users/Charlie/Desktop/CodenameFE/assets/cursor.png")
 
 ## Characters
-protagPicA = pygame.image.load("C:/Users/Charlie/Desktop/tryingThisAgain/assets/protag_A.png")
-protagPicB = pygame.image.load("C:/Users/Charlie/Desktop/tryingThisAgain/assets/protag_B.png")
+protagPicA = pygame.image.load("C:/Users/Charlie/Desktop/CodenameFE/assets/protag_A.png")
+protagPicB = pygame.image.load("C:/Users/Charlie/Desktop/CodenameFE/assets/protag_B.png")
 
-combatUnit1 = pygame.image.load("C:/Users/Charlie/Desktop/tryingThisAgain/assets/Combat-1.png")
-combatUnit2 = pygame.image.load("C:/Users/Charlie/Desktop/tryingThisAgain/assets/Combat-2.png")
-combatUnit3 = pygame.image.load("C:/Users/Charlie/Desktop/tryingThisAgain/assets/Combat-3.png")
-combatUnit4 = pygame.image.load("C:/Users/Charlie/Desktop/tryingThisAgain/assets/Combat-4.png")
-combatUnit5 = pygame.image.load("C:/Users/Charlie/Desktop/tryingThisAgain/assets/Combat-5.png")
-combatUnit6 = pygame.image.load("C:/Users/Charlie/Desktop/tryingThisAgain/assets/Combat-6.png")
+combatUnit1 = pygame.image.load("C:/Users/Charlie/Desktop/CodenameFE/assets/Combat-1.png")
+combatUnit2 = pygame.image.load("C:/Users/Charlie/Desktop/CodenameFE/assets/Combat-2.png")
+combatUnit3 = pygame.image.load("C:/Users/Charlie/Desktop/CodenameFE/assets/Combat-3.png")
+combatUnit4 = pygame.image.load("C:/Users/Charlie/Desktop/CodenameFE/assets/Combat-4.png")
+combatUnit5 = pygame.image.load("C:/Users/Charlie/Desktop/CodenameFE/assets/Combat-5.png")
+combatUnit6 = pygame.image.load("C:/Users/Charlie/Desktop/CodenameFE/assets/Combat-6.png")
 
 ## Menu
-waitButton = pygame.image.load("C:/Users/Charlie/Desktop/tryingThisAgain/assets/wait-button.png")
-attackButton = pygame.image.load("C:/Users/Charlie/Desktop/tryingThisAgain/assets/attack-button.png")
-menuCursor = pygame.image.load("C:/Users/Charlie/Desktop/tryingThisAgain/assets/menu-cursor.png")
-unitInfoPic = pygame.image.load("C:/Users/Charlie/Desktop/tryingThisAgain/assets/unit-info.png")
+waitButton = pygame.image.load("C:/Users/Charlie/Desktop/CodenameFE/assets/wait-button.png")
+attackButton = pygame.image.load("C:/Users/Charlie/Desktop/CodenameFE/assets/attack-button.png")
+menuCursor = pygame.image.load("C:/Users/Charlie/Desktop/CodenameFE/assets/menu-cursor.png")
+unitInfoPic = pygame.image.load("C:/Users/Charlie/Desktop/CodenameFE/assets/unit-info.png")
 
 ### Combat and UI
-battleForecastPic = pygame.image.load("C:/Users/Charlie/Desktop/tryingThisAgain/assets/battle-forecast.png")
-combatUI = pygame.image.load("C:/Users/Charlie/Desktop/tryingThisAgain/assets/Combat-UI.png")
-combatUIRed = pygame.image.load("C:/Users/Charlie/Desktop/tryingThisAgain/assets/Combat-UI-red.png")
-healthbarfullPiece = pygame.image.load("C:/Users/Charlie/Desktop/tryingThisAgain/assets/healthbar-piece.png")
-healthbarEmptyPiece = pygame.image.load("C:/Users/Charlie/Desktop/tryingThisAgain/assets/healthbar-piece-empty.png")
-mapUnitUI = pygame.image.load("C:/Users/Charlie/Desktop/tryingThisAgain/assets/map-unit-UI.png")
+battleForecastPic = pygame.image.load("C:/Users/Charlie/Desktop/CodenameFE/assets/battle-forecast.png")
+combatUI = pygame.image.load("C:/Users/Charlie/Desktop/CodenameFE/assets/Combat-UI.png")
+combatUIRed = pygame.image.load("C:/Users/Charlie/Desktop/CodenameFE/assets/Combat-UI-red.png")
+healthbarfullPiece = pygame.image.load("C:/Users/Charlie/Desktop/CodenameFE/assets/healthbar-piece.png")
+healthbarEmptyPiece = pygame.image.load("C:/Users/Charlie/Desktop/CodenameFE/assets/healthbar-piece-empty.png")
+mapUnitUI = pygame.image.load("C:/Users/Charlie/Desktop/CodenameFE/assets/map-unit-UI.png")
 
 ## backgrounds
-attacingBackground = pygame.image.load("C:/Users/Charlie/Desktop/tryingThisAgain/assets/attacking-background.png")
-map1background = pygame.image.load("C:/Users/Charlie/Desktop/tryingThisAgain/assets/map1-background.png")
+attacingBackground = pygame.image.load("C:/Users/Charlie/Desktop/CodenameFE/assets/attacking-background.png")
+map1background = pygame.image.load("C:/Users/Charlie/Desktop/CodenameFE/assets/level1Background.png")
 #---------------------------
 
 # globals
@@ -387,12 +387,69 @@ class UnitInfo():
 
     def __init__(self):
         self.pic = unitInfoPic
-
+        self.currUnit = None
     def reset(self, unit):
-        pass
+        self.currUnit = unit
 
     def draw(self, screen):
         screen.blit(self.pic, (0, 0))
+
+        nameT = font.render(self.currUnit.name, True, (0,0,0))
+        nameR = nameT.get_rect()
+        nameR.center = (250, 650)
+
+        lvlT = font.render(str(self.currUnit.level), True, (0,0,0))
+        lvlR = lvlT.get_rect()
+        lvlR.center = (270, 870)
+
+        expT = font.render(str(self.currUnit.exp), True, (0,0,0))
+        expR = expT.get_rect()
+        expR.center = (630, 870)
+
+        hpT = font.render(str(self.currUnit.hp), True, (0,0,0))
+        hpR = hpT.get_rect()
+        hpR.center = (330, 990)
+
+        mhpT = font.render(str(self.currUnit.maxHp), True, (0,0,0))
+        mhpR = mhpT.get_rect()
+        mhpR.center = (450, 990)
+
+        strT = font.render(str(self.currUnit.attack), True, (0,0,0))
+        strR = strT.get_rect()
+        strR.center = (870, 110)
+
+        sklT = font.render(str(self.currUnit.skill), True, (0,0,0))
+        sklR = strT.get_rect()
+        sklR.center = (870, 230)
+
+        spdT = font.render(str(self.currUnit.speed), True, (0,0,0))
+        spdR = spdT.get_rect()
+        spdR.center = (870, 340)
+
+        lckT = font.render(str(self.currUnit.luck), True, (0,0,0))
+        lckR = lckT.get_rect()
+        lckR.center = (870, 460)
+
+        defT = font.render(str(self.currUnit.defense), True, (0,0,0))
+        defR = defT.get_rect()
+        defR.center = (870, 580)
+
+        movT = font.render(str(self.currUnit.mov), True, (0,0,0))
+        movR = movT.get_rect()
+        movR.center = (870, 700)
+
+        screen.blit(nameT, nameR)
+        screen.blit(lvlT, lvlR)
+        screen.blit(expT, expR)
+
+        screen.blit(hpT, hpR)
+        screen.blit(mhpT, mhpR)
+        screen.blit(strT, strR)
+        screen.blit(sklT, sklR)
+        screen.blit(spdT, spdR)
+        screen.blit(lckT, lckR)
+        screen.blit(defT, defR)
+        screen.blit(movT, movR)
 
 class Animation():
     
@@ -419,6 +476,8 @@ class Unit():
 
     def __init__(self, X, Y):
         self.name = "generic"
+        self.level = 1
+        self.exp = 0
         self.maxHp = 15
         self.hp = self.maxHp
         self.attack = 10
@@ -469,6 +528,7 @@ myMapUnitUI = MapUnitUI()
 ## width first, height second (width goes from left to right, height goes from top to bottom)
 protag = Unit(3, 9)
 Jagen = Unit(3, 5)
+Jagen.name = 'Jagen'
 Jagen.attack = 9
 Jagen.defense = 110
 Jagen.speed = 9
@@ -592,7 +652,7 @@ def checkMapUI():
         myMapUnitUI.X = gameWidth - 460
         myBattleForcast.X = gameWidth - 500
 
-        
+
 # main game loop
 while running:
     keys = pygame.key.get_pressed()
