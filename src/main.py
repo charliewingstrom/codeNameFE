@@ -239,9 +239,15 @@ class BattleForcast():
         self.defendingUnitCanCounter = True
 
     def calculate(self, attackingUnit, defendingUnit):
+        ## need to check if defendingUnit is in range to counter attack
+        self.defendingUnitCanCounter = False
+        for tile in findTilesInAttackRange(map1.tiles[defendingUnit.X][defendingUnit.Y], defendingUnit.attackRange):
+            if tile.currentUnit == attackingUnit:
+                self.defendingUnitCanCounter = True
+        
+
         self.attackingUnitDmg = max(0, attackingUnit.attack - defendingUnit.defense)
         self.attackingUnitHit = int((75 + (attackingUnit.skill * 2) + attackingUnit.luck / 2) - ((defendingUnit.speed * 2) + defendingUnit.luck))
-
         
         self.defendingUnitDmg = max(0, defendingUnit.attack - attackingUnit.defense)
         self.defendingUnitHit = int((75 + (defendingUnit.skill * 2) + defendingUnit.luck / 2) - ((attackingUnit.speed * 2) + attackingUnit.luck))
@@ -529,13 +535,14 @@ myMapUnitUI = MapUnitUI()
 protag = Unit(3, 9)
 Jagen = Unit(3, 5)
 Jagen.name = 'Jagen'
-Jagen.attack = 9
+Jagen.attack = 21
 Jagen.defense = 110
 Jagen.speed = 9
 
 enemy = Unit(2, 2)
 enemy1 = Unit(2, 3)
 enemy1.defense = 7
+enemy1.attackRange = [2,3]
 # Setting up for game
 map1.addUnitToMap(enemy)
 map1.addUnitToMap(enemy1)
@@ -662,6 +669,7 @@ while running:
         currentUnit.X += moveVelocity[0]
         currentUnit.Y += moveVelocity[1]
         if round(currentUnit.X) == targetTile.X and round(currentUnit.Y) == targetTile.Y:
+            ## finish moving
             currentUnit.X = targetTile.X
             currentUnit.Y = targetTile.Y
             currentUnitStartingTile.currentUnit = None
@@ -896,21 +904,36 @@ while running:
         elif defendingUnitAttacking:
             if defendingUnit.hp > 0:
                 screen.blit(combatUnit1, (0, 0))
-                if myBattleForcast.defendingUnitWillHit:
-                    if defendingUnit.combatAnimation.draw(screen, 0, 0, True):
-                        # remove health
-                        currentUnit.hp -= myBattleForcast.defendingUnitDmg
-                        defendingUnitAttacking = False
-                        print("defending unit hit")
-                ## unit will miss, play miss animation
+                if myBattleForcast.defendingUnitCanCounter:
+                    if myBattleForcast.defendingUnitWillHit:
+                        if defendingUnit.combatAnimation.draw(screen, 0, 0, True):
+                            # remove health
+                            currentUnit.hp -= myBattleForcast.defendingUnitDmg
+                            defendingUnitAttacking = False
+                            print("defending unit hit")
+                            if currentUnit.hp <= 0:
+                                if currentUnit in playerUnits:
+                                    playerUnits.remove(currentUnit)
+                                elif currentUnit in enemyUnits:
+                                    enemyUnits.remove(currentUnit)
+                                map1.tiles[currentUnit.X][currentUnit.Y].currentUnit = None
+                    ## unit will miss, play miss animation
+                    else:
+                        if defendingUnit.combatAnimation.draw(screen, 0, 0, True):
+                            print("defending unit miss")
+                            defendingUnitAttacking = False
                 else:
-                    if defendingUnit.combatAnimation.draw(screen, 0, 0, True):
-                        print("defending unit miss")
-                        defendingUnitAttacking = False
+                    defendingUnitAttacking = False
             else:
                 defendingUnitAttacking = False
                 print("defending unit died")
                 ## remove unit from game
+                if defendingUnit in playerUnits:
+                    playerUnits.remove(defendingUnit)
+                elif defendingUnit in enemyUnits:
+                    enemyUnits.remove(defendingUnit)
+                    activeEnemyUnits.remove(defendingUnit)
+                map1.tiles[defendingUnit.X][defendingUnit.Y].currentUnit = None
             myCombatUI.draw(screen, myBattleForcast)
 
 
