@@ -9,41 +9,44 @@ pygame.display.set_caption("Code FE")
 running = True
 
 #------ load assets --------
+from pathlib import Path
+
+
 ## Tiles
-grassTilePic = pygame.image.load("C:/Users/Charlie/Desktop/CodenameFE/assets/grassTile.png")
-selectablePic = pygame.image.load("C:/Users/Charlie/Desktop/CodenameFE/assets/selectableHighlight.png")
-attackablePic = pygame.image.load("C:/Users/Charlie/Desktop/CodenameFE/assets/attackableHighlight.png")
-occupiedPic = pygame.image.load("C:/Users/Charlie/Desktop/CodenameFE/assets/occupiedHighlight.png")
-cursorPic = pygame.image.load("C:/Users/Charlie/Desktop/CodenameFE/assets/cursor.png")
+grassTilePic = pygame.image.load(Path(__file__).parent / "../assets/grassTile.png")
+selectablePic = pygame.image.load(Path(__file__).parent / "../assets/selectableHighlight.png")
+attackablePic = pygame.image.load(Path(__file__).parent / "../assets/attackableHighlight.png")
+occupiedPic = pygame.image.load(Path(__file__).parent / "../assets/occupiedHighlight.png")
+cursorPic = pygame.image.load(Path(__file__).parent / "../assets/cursor.png")
 
 ## Characters
-protagPicA = pygame.image.load("C:/Users/Charlie/Desktop/CodenameFE/assets/protag_A.png")
-protagPicB = pygame.image.load("C:/Users/Charlie/Desktop/CodenameFE/assets/protag_B.png")
+protagPicA = pygame.image.load(Path(__file__).parent / "../assets/protag_A.png")
+protagPicB = pygame.image.load(Path(__file__).parent / "../assets/protag_B.png")
 
-combatUnit1 = pygame.image.load("C:/Users/Charlie/Desktop/CodenameFE/assets/Combat-1.png")
-combatUnit2 = pygame.image.load("C:/Users/Charlie/Desktop/CodenameFE/assets/Combat-2.png")
-combatUnit3 = pygame.image.load("C:/Users/Charlie/Desktop/CodenameFE/assets/Combat-3.png")
-combatUnit4 = pygame.image.load("C:/Users/Charlie/Desktop/CodenameFE/assets/Combat-4.png")
-combatUnit5 = pygame.image.load("C:/Users/Charlie/Desktop/CodenameFE/assets/Combat-5.png")
-combatUnit6 = pygame.image.load("C:/Users/Charlie/Desktop/CodenameFE/assets/Combat-6.png")
+combatUnit1 = pygame.image.load(Path(__file__).parent / "../assets/Combat-1.png")
+combatUnit2 = pygame.image.load(Path(__file__).parent / "../assets/Combat-2.png")
+combatUnit3 = pygame.image.load(Path(__file__).parent / "../assets/Combat-3.png")
+combatUnit4 = pygame.image.load(Path(__file__).parent / "../assets/Combat-4.png")
+combatUnit5 = pygame.image.load(Path(__file__).parent / "../assets/Combat-5.png")
+combatUnit6 = pygame.image.load(Path(__file__).parent / "../assets/Combat-6.png")
 
 ## Menu
-waitButton = pygame.image.load("C:/Users/Charlie/Desktop/CodenameFE/assets/wait-button.png")
-attackButton = pygame.image.load("C:/Users/Charlie/Desktop/CodenameFE/assets/attack-button.png")
-menuCursor = pygame.image.load("C:/Users/Charlie/Desktop/CodenameFE/assets/menu-cursor.png")
-unitInfoPic = pygame.image.load("C:/Users/Charlie/Desktop/CodenameFE/assets/unit-info.png")
+waitButton = pygame.image.load(Path(__file__).parent / "../assets/wait-button.png")
+attackButton = pygame.image.load(Path(__file__).parent / "../assets/attack-button.png")
+menuCursor = pygame.image.load(Path(__file__).parent / "../assets/menu-cursor.png")
+unitInfoPic = pygame.image.load(Path(__file__).parent / "../assets/unit-info.png")
 
 ### Combat and UI
-battleForecastPic = pygame.image.load("C:/Users/Charlie/Desktop/CodenameFE/assets/battle-forecast.png")
-combatUI = pygame.image.load("C:/Users/Charlie/Desktop/CodenameFE/assets/Combat-UI.png")
-combatUIRed = pygame.image.load("C:/Users/Charlie/Desktop/CodenameFE/assets/Combat-UI-red.png")
-healthbarfullPiece = pygame.image.load("C:/Users/Charlie/Desktop/CodenameFE/assets/healthbar-piece.png")
-healthbarEmptyPiece = pygame.image.load("C:/Users/Charlie/Desktop/CodenameFE/assets/healthbar-piece-empty.png")
-mapUnitUI = pygame.image.load("C:/Users/Charlie/Desktop/CodenameFE/assets/map-unit-UI.png")
+battleForecastPic = pygame.image.load(Path(__file__).parent / "../assets/battle-forecast.png")
+combatUI = pygame.image.load(Path(__file__).parent / "../assets/Combat-UI.png")
+combatUIRed = pygame.image.load(Path(__file__).parent / "../assets/Combat-UI-red.png")
+healthbarfullPiece = pygame.image.load(Path(__file__).parent / "../assets/healthbar-piece.png")
+healthbarEmptyPiece = pygame.image.load(Path(__file__).parent / "../assets/healthbar-piece-empty.png")
+mapUnitUI = pygame.image.load(Path(__file__).parent / "../assets/map-unit-UI.png")
 
 ## backgrounds
-attacingBackground = pygame.image.load("C:/Users/Charlie/Desktop/CodenameFE/assets/attacking-background.png")
-map1background = pygame.image.load("C:/Users/Charlie/Desktop/CodenameFE/assets/level1Background.png")
+attacingBackground = pygame.image.load(Path(__file__).parent / "../assets/attacking-background.png")
+map1background = pygame.image.load(Path(__file__).parent / "../assets/level1Background.png")
 #---------------------------
 
 # globals
