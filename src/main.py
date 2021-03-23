@@ -1,5 +1,6 @@
 import pygame
 import random
+from pathlib import Path
 
 pygame.init()
 gameWidth = 1920
@@ -9,8 +10,6 @@ pygame.display.set_caption("Code FE")
 running = True
 
 #------ load assets --------
-from pathlib import Path
-
 
 ## Tiles
 grassTilePic = pygame.image.load(Path(__file__).parent / "../assets/grassTile.png")
@@ -558,7 +557,8 @@ enemyUnits.append(enemy1)
 activeEnemyUnits.append(enemy)
 activeEnemyUnits.append(enemy1)
 
-        
+for i in range(3):
+    map1.tiles[i][4].walkable = False
 
 def findPlayerTarget(tiles, unit):
     possibleTargets = []
@@ -591,7 +591,7 @@ def findTilesInMovRange(unit):
         queue.sort(key=lambda tile:tile.distance)
         currTile = queue.pop(0)
         if unit in playerUnits:
-            if currTile.distance <= currentUnit.mov and (currTile.currentUnit == None or currTile.currentUnit in playerUnits):
+            if currTile.distance <= currentUnit.mov and currTile.walkable and (currTile.currentUnit == None or currTile.currentUnit in playerUnits):
                 tilesInRange.append(currTile)
                 added.append(currTile)
                 for tile in currTile.adjList:
@@ -602,7 +602,7 @@ def findTilesInMovRange(unit):
                             tile.parent = currTile
                         queue.append(tile)
         else:
-            if currTile.distance <= currentUnit.mov and (currTile.currentUnit == None or currTile.currentUnit in enemyUnits):
+            if currTile.distance <= currentUnit.mov and currTile.walkable and (currTile.currentUnit == None or currTile.currentUnit in enemyUnits):
                 tilesInRange.append(currTile)
                 added.append(currTile)
                 for tile in currTile.adjList:
