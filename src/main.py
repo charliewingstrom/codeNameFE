@@ -243,16 +243,16 @@ class BattleForcast():
     def calculate(self, attackingUnit, defendingUnit):
         ## need to check if defendingUnit is in range to counter attack
         self.defendingUnitCanCounter = False
-        for tile in findTilesInAttackRange(map1.tiles[defendingUnit.X][defendingUnit.Y], defendingUnit.attackRange):
+        for tile in findTilesInAttackRange(map1.tiles[defendingUnit.X][defendingUnit.Y], defendingUnit.getAttackRange()):
             if tile.currentUnit == attackingUnit:
                 self.defendingUnitCanCounter = True
         
 
-        self.attackingUnitDmg = max(0, attackingUnit.attack - defendingUnit.defense)
-        self.attackingUnitHit = int((75 + (attackingUnit.skill * 2) + attackingUnit.luck / 2) - ((defendingUnit.speed * 2) + defendingUnit.luck))
-        
-        self.defendingUnitDmg = max(0, defendingUnit.attack - attackingUnit.defense)
-        self.defendingUnitHit = int((75 + (defendingUnit.skill * 2) + defendingUnit.luck / 2) - ((attackingUnit.speed * 2) + attackingUnit.luck))
+        self.attackingUnitDmg = max(0, (attackingUnit.attack + attackingUnit.getEquippedWeapon().might) - defendingUnit.defense)
+        self.attackingUnitHit = int((attackingUnit.getEquippedWeapon().hit + (attackingUnit.skill * 2) + attackingUnit.luck / 2) - ((defendingUnit.speed * 2) + defendingUnit.luck))
+        if self.defendingUnitCanCounter:
+            self.defendingUnitDmg = max(0, (defendingUnit.attack + defendingUnit.getEquippedWeapon().might) - attackingUnit.defense)
+            self.defendingUnitHit = int((defendingUnit.getEquippedWeapon().hit + (defendingUnit.skill * 2) + defendingUnit.luck / 2) - ((attackingUnit.speed * 2) + attackingUnit.luck))
 
     def roll(self):
         if random.randint(0, 100) <= self.attackingUnitHit:
@@ -459,6 +459,14 @@ class UnitInfo():
         screen.blit(defT, defR)
         screen.blit(movT, movR)
 
+        Yoffset = 100
+        for item in self.currUnit.inventory:
+            itemT = font.render(item.name, True, (0,0,0))
+            itemR = itemT.get_rect()
+            itemR.center = (1600, Yoffset)
+            screen.blit(itemT, itemR)
+            Yoffset += 100
+
 class Animation():
     
     def __init__(self, frames):
@@ -493,18 +501,26 @@ class Unit():
         self.speed = 6
         self.skill = 6
         self.luck = 4
-        self.mov = 4
-        self.attackRange = [1, 1]
+        self.mov = 5
+        self.inventory = []
         self.X = X
         self.Y = Y
 
         self.fieldPics = [pygame.transform.scale(protagPicA, (tileSize, tileSize)), pygame.transform.scale(protagPicB, (tileSize, tileSize))] 
         self.aniTimer = 5
-
         self.combatAnimation = Animation([combatUnit1,combatUnit2, combatUnit3,combatUnit4, combatUnit5, combatUnit6,combatUnit5, combatUnit4, combatUnit3, combatUnit2, combatUnit1])
 
         self.active = True
 
+    def getEquippedWeapon(self):
+        if len(self.inventory) > 0:
+            return self.inventory[0] 
+        return None
+
+    def getAttackRange(self):
+        if len(self.inventory) > 0:
+            return self.inventory[0].range
+        return [0,0]
 
     def draw(self, screen):
         screen.blit(self.fieldPics[0], (self.X*tileSize + xCamera, self.Y*tileSize + yCamera))
@@ -543,16 +559,20 @@ myMapUnitUI = MapUnitUI()
 
 ## width first, height second (width goes from left to right, height goes from top to bottom)
 protag = Unit(3, 3)
+protag.inventory.append(Weapon())
 Jagen = Unit(3, 5)
+Jagen.inventory.append(Weapon())
+Jagen.inventory.append(Weapon())
 Jagen.name = 'Jagen'
-Jagen.attack = 21
-Jagen.defense = 110
+Jagen.attack = 10
+Jagen.defense = 10
 Jagen.speed = 9
 
 enemy = Unit(11, 5)
+enemy.inventory.append(Weapon())
 enemy1 = Unit(14, 5)
+enemy1.inventory.append(Weapon())
 enemy1.defense = 7
-enemy1.attackRange = [2,3]
 # Setting up for game
 map1.addUnitToMap(enemy)
 map1.addUnitToMap(enemy1)
@@ -582,13 +602,13 @@ for i in range(5):
 def findPlayerTarget(tiles, unit):
     possibleTargets = []
     for tile in tiles:
-        for attackableTile in findTilesInAttackRange(tile, unit.attackRange):
+        for attackableTile in findTilesInAttackRange(tile, unit.getAttackRange()):
             if attackableTile.currentUnit != None and attackableTile.currentUnit in playerUnits:
                 possibleTargets.append((attackableTile.currentUnit, tile))
     #print(possibleTargets[0][0])
     bestTarget = (None, None)
     for target in possibleTargets:
-        if target[0].hp < unit.attack - target[0].defense:
+        if target[0].hp < (unit.attack + unit.getEquippedWeapon().might) - target[0].defense:
             return target
         elif bestTarget == (None, None):
             bestTarget = target
@@ -711,7 +731,7 @@ while running:
                 menuSelectionIndex = 0
                 menuOptions.insert(0, "wait")
                 unitsInRange = []
-                for tile in findTilesInAttackRange(currentUnitTile, currentUnit.attackRange):
+                for tile in findTilesInAttackRange(currentUnitTile, currentUnit.getAttackRange()):
                     if tile.currentUnit != None and tile.currentUnit in enemyUnits:
                         unitsInRange.append(tile.currentUnit)
                 if len(unitsInRange) > 0:
@@ -871,7 +891,7 @@ while running:
                             for tile in tilesInRange:
                                 if tile.currentUnit == None or tile.currentUnit == currentUnit:
                                     tile.selectable = True
-                                    for atkTile in findTilesInAttackRange(tile, currentUnit.attackRange):
+                                    for atkTile in findTilesInAttackRange(tile, currentUnit.getAttackRange()):
                                         if atkTile not in tilesInRange:
                                             atkTile.attackable = True
                             selectingTile = True
@@ -880,7 +900,7 @@ while running:
                             for tile in tilesInRange:
                                 if tile.currentUnit == None:
                                     tile.selectable = True
-                                    for atkTile in findTilesInAttackRange(tile, currentUnit.attackRange):
+                                    for atkTile in findTilesInAttackRange(tile, currentUnit.getAttackRange()):
                                         if atkTile not in tilesInRange:
                                             atkTile.attackable = True
                     
