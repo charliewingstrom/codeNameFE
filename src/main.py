@@ -53,7 +53,7 @@ currentUnit = None
 defendingUnit = None
 ## map
 tileSize = 96
-mapWidth = 24
+mapWidth = 32
 mapHeight = 19
 maxDistance = 256
 
@@ -524,6 +524,14 @@ class Unit():
             color = (238, 255, 0)
         pygame.draw.rect(screen, color, pygame.Rect(self.X*tileSize + xCamera, (self.Y*tileSize)+tileSize-5 + yCamera, healthPercent * tileSize, 5))
 
+class Weapon():
+    def __init__(self):
+        self.name = "generic"
+        self.range = [1, 1]
+        self.uses = 45
+        self.might = 5
+        self.hit = 80
+        self.crit = 0
 
 ## custom class instances
 map1 = Map(mapWidth, mapHeight, map1background)
@@ -534,15 +542,15 @@ myUnitInfo = UnitInfo()
 myMapUnitUI = MapUnitUI()
 
 ## width first, height second (width goes from left to right, height goes from top to bottom)
-protag = Unit(3, 9)
+protag = Unit(3, 3)
 Jagen = Unit(3, 5)
 Jagen.name = 'Jagen'
 Jagen.attack = 21
 Jagen.defense = 110
 Jagen.speed = 9
 
-enemy = Unit(2, 2)
-enemy1 = Unit(2, 3)
+enemy = Unit(11, 5)
+enemy1 = Unit(14, 5)
 enemy1.defense = 7
 enemy1.attackRange = [2,3]
 # Setting up for game
@@ -559,6 +567,17 @@ activeEnemyUnits.append(enemy1)
 
 for i in range(3):
     map1.tiles[i][4].walkable = False
+for i in range(5):
+    map1.tiles[4][i].walkable = False
+for i in range(3):
+    map1.tiles[i+5][4].walkable = False
+for i in range(5):
+    map1.tiles[9][i].walkable = False
+for i in range(3):
+    map1.tiles[i+10][4].walkable = False
+for i in range(5):
+    map1.tiles[14][i].walkable = False
+
 
 def findPlayerTarget(tiles, unit):
     possibleTargets = []
