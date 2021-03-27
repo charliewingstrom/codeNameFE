@@ -42,6 +42,7 @@ combatUIRed = pygame.image.load(Path(__file__).parent / "../assets/Combat-UI-red
 healthbarfullPiece = pygame.image.load(Path(__file__).parent / "../assets/healthbar-piece.png")
 healthbarEmptyPiece = pygame.image.load(Path(__file__).parent / "../assets/healthbar-piece-empty.png")
 mapUnitUI = pygame.image.load(Path(__file__).parent / "../assets/map-unit-UI.png")
+inventoryUI = pygame.image.load(Path(__file__).parent / "../assets/inventory.png") 
 
 ## backgrounds
 attacingBackground = pygame.image.load(Path(__file__).parent / "../assets/attacking-background.png")
@@ -77,6 +78,7 @@ playerTurn = True
 viewingUnitInfo = False
 selectingTile = False
 selectingAction = False
+selectingWeapon = False
 selectingAttack = False
 attacking = False
 
@@ -460,12 +462,75 @@ class UnitInfo():
         screen.blit(movT, movR)
 
         Yoffset = 100
-        for item in self.currUnit.inventory:
+        for item in self.currUnit.getInventory():
             itemT = font.render(item.name, True, (0,0,0))
             itemR = itemT.get_rect()
             itemR.center = (1600, Yoffset)
             screen.blit(itemT, itemR)
             Yoffset += 100
+
+class Inventory():
+    
+    def __init__(self):
+        self.X = 300
+        self.Y = 300
+        self.weapons = []
+        self.items = []
+        self.selectionIndex = 0
+        
+    def getInventory(self):
+        return self.weapons + self.items
+
+    def addItem(self, item):
+        if type(item) == Weapon:
+            self.weapons.append(item)
+        else:
+            self.items.append(items)
+
+    def getEquippedWeapon(self):
+        if len(self.weapons) > 0:
+            return self.weapons[0]
+        return None
+
+    def equipSelectedWeapon(self):
+        weaponToEquip = self.weapons[self.selectionIndex]
+        self.weapons.remove(weaponToEquip)
+        self.weapons.insert(0, weaponToEquip)
+        self.selectionIndex = 0
+    
+    def draw(self, screen):
+        Yoffset = 50
+        screen.blit(inventoryUI, (self.X, self.Y))
+        screen.blit(menuCursor, (self.X+15, self.Y+15+(100*self.selectionIndex)))
+        for item in self.getInventory():
+            itemT = font.render(item.name, True, (0,0,0))
+            itemR = itemT.get_rect()
+            itemR.center = (self.X+250, self.Y+Yoffset)
+            screen.blit(itemT, itemR)
+            Yoffset += 75
+    
+    def down(self):
+        if self.selectionIndex < len(self.getInventory()) - 1:
+            self.selectionIndex += 1
+        else:
+            self.selectionIndex = 0
+        
+    def up(self):
+        if self.selectionIndex > 0:
+            self.selectionIndex -= 1
+        else:
+            self.selectionIndex = len(self.getInventory()) - 1
+
+    def drawWeapons(self, screen):
+        Yoffset = 0
+        screen.blit(menuCursor, (self.X - 100, self.Y+50+(100*self.selectionIndex)))
+        for item in self.weapons:
+            itemT = font.render(item.name, True, (0,0,0))
+            itemR = itemT.get_rect()
+            itemR.center = (self.X+100, self.Y+Yoffset)
+            screen.blit(itemT, itemR)
+            Yoffset += 100
+
 
 class Animation():
     
@@ -502,7 +567,7 @@ class Unit():
         self.skill = 6
         self.luck = 4
         self.mov = 5
-        self.inventory = []
+        self.inventory = Inventory()
         self.X = X
         self.Y = Y
 
@@ -513,13 +578,16 @@ class Unit():
         self.active = True
 
     def getEquippedWeapon(self):
-        if len(self.inventory) > 0:
-            return self.inventory[0] 
+        if len(self.getInventory()) > 0:
+            return self.getInventory()[0] 
         return None
+    
+    def getInventory(self):
+        return self.inventory.getInventory()
 
     def getAttackRange(self):
-        if len(self.inventory) > 0:
-            return self.inventory[0].range
+        if len(self.getInventory()) > 0:
+            return self.getEquippedWeapon().range
         return [0,0]
 
     def draw(self, screen):
@@ -541,8 +609,8 @@ class Unit():
         pygame.draw.rect(screen, color, pygame.Rect(self.X*tileSize + xCamera, (self.Y*tileSize)+tileSize-5 + yCamera, healthPercent * tileSize, 5))
 
 class Weapon():
-    def __init__(self):
-        self.name = "generic"
+    def __init__(self, name = "generic"):
+        self.name = name
         self.range = [1, 1]
         self.uses = 45
         self.might = 5
@@ -559,19 +627,19 @@ myMapUnitUI = MapUnitUI()
 
 ## width first, height second (width goes from left to right, height goes from top to bottom)
 protag = Unit(3, 3)
-protag.inventory.append(Weapon())
+protag.inventory.addItem(Weapon())
 Jagen = Unit(3, 5)
-Jagen.inventory.append(Weapon())
-Jagen.inventory.append(Weapon())
+Jagen.inventory.addItem(Weapon("Sword"))
+Jagen.inventory.addItem(Weapon("Lance"))
 Jagen.name = 'Jagen'
 Jagen.attack = 10
 Jagen.defense = 10
 Jagen.speed = 9
 
-enemy = Unit(11, 5)
-enemy.inventory.append(Weapon())
+enemy = Unit(9, 5)
+enemy.inventory.addItem(Weapon())
 enemy1 = Unit(14, 5)
-enemy1.inventory.append(Weapon())
+enemy1.inventory.addItem(Weapon())
 enemy1.defense = 7
 # Setting up for game
 map1.addUnitToMap(enemy)
@@ -757,7 +825,7 @@ while running:
                     activeEnemyUnits.append(unit)
         
         ## if keys (they are up here because you should be able to hold the key)
-        elif playerTurn and not selectingAction and not selectingAttack:
+        elif playerTurn and not selectingAction and not selectingAttack and not selectingWeapon:
             # cursor controls
             if keys[pygame.K_DOWN]:
                 yCamera += mainCursor.down()
@@ -818,6 +886,22 @@ while running:
                         selectingAttack = False
                         selectingAction = True
 
+                elif selectingWeapon:
+                    if event.type == pygame.KEYDOWN and event.key == pygame.K_z:
+                        currentUnit.inventory.equipSelectedWeapon()
+                        selectingWeapon = False
+                        selectingAttack = True
+                        attackUnitIndex = 0
+                        defendingUnit = unitsInRange[attackUnitIndex]
+                        mainCursor.X = defendingUnit.X
+                        mainCursor.Y = defendingUnit.Y
+                        myBattleForcast.calculate(currentUnit, defendingUnit)
+
+                    if event.type == pygame.KEYDOWN and event.key == pygame.K_UP:
+                        currentUnit.inventory.up()
+                    if event.type == pygame.KEYDOWN and event.key == pygame.K_DOWN:
+                        currentUnit.inventory.down()
+
                 ### selecting action in menu
                 elif selectingAction:
                     # action selected from menu
@@ -832,12 +916,13 @@ while running:
                             
                         if menuOptions[menuSelectionIndex] == 'attack':
                             selectingAction = False
-                            selectingAttack = True
-                            attackUnitIndex = 0
-                            defendingUnit = unitsInRange[attackUnitIndex]
-                            mainCursor.X = defendingUnit.X
-                            mainCursor.Y = defendingUnit.Y
-                            myBattleForcast.calculate(currentUnit, defendingUnit)
+                            selectingWeapon = True
+                            #selectingAttack = True
+                            #attackUnitIndex = 0
+                            #defendingUnit = unitsInRange[attackUnitIndex]
+                            #mainCursor.X = defendingUnit.X
+                            #mainCursor.Y = defendingUnit.Y
+                            #myBattleForcast.calculate(currentUnit, defendingUnit)
                     # go back to selecting tile
                     if event.type == pygame.KEYDOWN and event.key == pygame.K_x:
                         currentUnitTile.currentUnit = None
@@ -1005,9 +1090,12 @@ while running:
         myMapUnitUI.draw(screen)
         if selectingAttack:
             myBattleForcast.draw(screen)
+            
+        elif selectingWeapon:
+            currentUnit.inventory.draw(screen)
 
         elif selectingAction:
-            screen.blit(menuCursor, (gameWidth-350, 200+(165*menuSelectionIndex)))
+            screen.blit(menuCursor, (gameWidth-450, 240+(165*menuSelectionIndex)))
             Y = 200
             if "attack" in menuOptions:
                 screen.blit(attackButton, (gameWidth - 300, Y))
