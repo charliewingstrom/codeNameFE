@@ -498,6 +498,18 @@ class Inventory():
         self.weapons.insert(0, weaponToEquip)
         self.selectionIndex = 0
     
+    # gets largest range of all weapons in the inventory
+    def getBestRange(self):
+        largestRange = [0,0]
+        if len(self.weapons) > 0:
+            largestRange[0] = self.weapons[0].range[0]
+            for weapon in self.weapons:
+                if weapon.range[1] > largestRange[1]:
+                    largestRange[1] = weapon.range[1]
+                if weapon.range[0] < largestRange[0]:
+                    largestRange[0] = weapon.range[0]
+        return largestRange
+
     def draw(self, screen):
         Yoffset = 50
         screen.blit(inventoryUI, (self.X, self.Y))
@@ -530,7 +542,6 @@ class Inventory():
             itemR.center = (self.X+100, self.Y+Yoffset)
             screen.blit(itemT, itemR)
             Yoffset += 100
-
 
 class Animation():
     
@@ -627,10 +638,14 @@ myMapUnitUI = MapUnitUI()
 
 ## width first, height second (width goes from left to right, height goes from top to bottom)
 protag = Unit(3, 3)
-protag.inventory.addItem(Weapon())
+bow = Weapon("bow")
+bow.range = [2,2]
+protag.inventory.addItem(bow)
 Jagen = Unit(3, 5)
 Jagen.inventory.addItem(Weapon("Sword"))
-Jagen.inventory.addItem(Weapon("Lance"))
+lance = Weapon("Javelin")
+lance.range = [1,2]
+Jagen.inventory.addItem(lance)
 Jagen.name = 'Jagen'
 Jagen.attack = 10
 Jagen.defense = 10
@@ -638,7 +653,7 @@ Jagen.speed = 9
 
 enemy = Unit(9, 5)
 enemy.inventory.addItem(Weapon())
-enemy1 = Unit(14, 5)
+enemy1 = Unit(9, 6)
 enemy1.inventory.addItem(Weapon())
 enemy1.defense = 7
 # Setting up for game
@@ -665,6 +680,8 @@ for i in range(3):
     map1.tiles[i+10][4].walkable = False
 for i in range(5):
     map1.tiles[14][i].walkable = False
+for i in range(14):
+    map1.tiles[i][7].walkable = False
 
 
 def findPlayerTarget(tiles, unit):
@@ -799,6 +816,7 @@ while running:
                 menuSelectionIndex = 0
                 menuOptions.insert(0, "wait")
                 unitsInRange = []
+                ## TODO check to see if they can attack with any weapon (ie all ranges)
                 for tile in findTilesInAttackRange(currentUnitTile, currentUnit.getAttackRange()):
                     if tile.currentUnit != None and tile.currentUnit in enemyUnits:
                         unitsInRange.append(tile.currentUnit)
@@ -889,6 +907,13 @@ while running:
                 elif selectingWeapon:
                     if event.type == pygame.KEYDOWN and event.key == pygame.K_z:
                         currentUnit.inventory.equipSelectedWeapon()
+                        unitsInRange = []
+                        print(currentUnit.getAttackRange())
+                        print(currentUnit.getEquippedWeapon().name)
+                        print(currentUnit.getEquippedWeapon().range)
+                        for tile in findTilesInAttackRange(currentUnitTile, currentUnit.getAttackRange()):
+                            if tile.currentUnit != None and tile.currentUnit in enemyUnits:
+                                unitsInRange.append(tile.currentUnit)
                         selectingWeapon = False
                         selectingAttack = True
                         attackUnitIndex = 0
@@ -976,7 +1001,7 @@ while running:
                             for tile in tilesInRange:
                                 if tile.currentUnit == None or tile.currentUnit == currentUnit:
                                     tile.selectable = True
-                                    for atkTile in findTilesInAttackRange(tile, currentUnit.getAttackRange()):
+                                    for atkTile in findTilesInAttackRange(tile, currentUnit.inventory.getBestRange()):
                                         if atkTile not in tilesInRange:
                                             atkTile.attackable = True
                             selectingTile = True
@@ -985,7 +1010,7 @@ while running:
                             for tile in tilesInRange:
                                 if tile.currentUnit == None:
                                     tile.selectable = True
-                                    for atkTile in findTilesInAttackRange(tile, currentUnit.getAttackRange()):
+                                    for atkTile in findTilesInAttackRange(tile, currentUnit.inventory.getBestRange()):
                                         if atkTile not in tilesInRange:
                                             atkTile.attackable = True
                     
