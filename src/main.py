@@ -476,6 +476,7 @@ class Inventory():
         self.Y = 300
         self.weapons = []
         self.items = []
+        self.usableWeapons = []
         self.selectionIndex = 0
         
     def getInventory(self):
@@ -493,9 +494,9 @@ class Inventory():
         return None
 
     def equipSelectedWeapon(self):
-        weaponToEquip = self.weapons[self.selectionIndex]
-        self.weapons.remove(weaponToEquip)
-        self.weapons.insert(0, weaponToEquip)
+        weaponToEquip = self.usableWeapons[self.selectionIndex]
+        self.usableWeapons.remove(weaponToEquip)
+        self.usableWeapons.insert(0, weaponToEquip)
         self.selectionIndex = 0
     
     # gets largest range of all weapons in the inventory
@@ -522,7 +523,7 @@ class Inventory():
             Yoffset += 75
     
     def down(self):
-        if self.selectionIndex < len(self.getInventory()) - 1:
+        if self.selectionIndex < len(self.usableWeapons) - 1:
             self.selectionIndex += 1
         else:
             self.selectionIndex = 0
@@ -531,17 +532,18 @@ class Inventory():
         if self.selectionIndex > 0:
             self.selectionIndex -= 1
         else:
-            self.selectionIndex = len(self.getInventory()) - 1
+            self.selectionIndex = len(self.usableWeapons) - 1
 
-    def drawWeapons(self, screen):
-        Yoffset = 0
-        screen.blit(menuCursor, (self.X - 100, self.Y+50+(100*self.selectionIndex)))
-        for item in self.weapons:
+    def drawUsableWeapons(self, screen):
+        Yoffset = 50
+        screen.blit(inventoryUI, (self.X, self.Y))
+        screen.blit(menuCursor, (self.X+15, self.Y+15+(100*self.selectionIndex)))
+        for item in self.usableWeapons:
             itemT = font.render(item.name, True, (0,0,0))
             itemR = itemT.get_rect()
-            itemR.center = (self.X+100, self.Y+Yoffset)
+            itemR.center = (self.X+250, self.Y+Yoffset)
             screen.blit(itemT, itemR)
-            Yoffset += 100
+            Yoffset += 75
 
 class Animation():
     
@@ -639,7 +641,7 @@ myMapUnitUI = MapUnitUI()
 ## width first, height second (width goes from left to right, height goes from top to bottom)
 protag = Unit(3, 3)
 bow = Weapon("bow")
-bow.range = [2,2]
+bow.range = [3,3]
 protag.inventory.addItem(bow)
 Jagen = Unit(3, 5)
 Jagen.inventory.addItem(Weapon("Sword"))
@@ -815,9 +817,12 @@ while running:
                 menuOptions = []
                 menuSelectionIndex = 0
                 menuOptions.insert(0, "wait")
+                if len(currentUnit.getInventory()) > 0:
+                    menuOptions.insert(0, "items")
                 unitsInRange = []
                 ## TODO check to see if they can attack with any weapon (ie all ranges)
-                for tile in findTilesInAttackRange(currentUnitTile, currentUnit.getAttackRange()):
+                for tile in findTilesInAttackRange(currentUnitTile, currentUnit.inventory.getBestRange()):
+                    tile.attackable = True
                     if tile.currentUnit != None and tile.currentUnit in enemyUnits:
                         unitsInRange.append(tile.currentUnit)
                 if len(unitsInRange) > 0:
@@ -908,12 +913,14 @@ while running:
                     if event.type == pygame.KEYDOWN and event.key == pygame.K_z:
                         currentUnit.inventory.equipSelectedWeapon()
                         unitsInRange = []
-                        print(currentUnit.getAttackRange())
                         print(currentUnit.getEquippedWeapon().name)
                         print(currentUnit.getEquippedWeapon().range)
-                        for tile in findTilesInAttackRange(currentUnitTile, currentUnit.getAttackRange()):
+                        map1.reset()
+                        for tile in findTilesInAttackRange(currentUnitTile, currentUnit.inventory.usableWeapons[0].range):
                             if tile.currentUnit != None and tile.currentUnit in enemyUnits:
                                 unitsInRange.append(tile.currentUnit)
+                            tile.attackable = True
+
                         selectingWeapon = False
                         selectingAttack = True
                         attackUnitIndex = 0
@@ -942,14 +949,17 @@ while running:
                         if menuOptions[menuSelectionIndex] == 'attack':
                             selectingAction = False
                             selectingWeapon = True
-                            #selectingAttack = True
-                            #attackUnitIndex = 0
-                            #defendingUnit = unitsInRange[attackUnitIndex]
-                            #mainCursor.X = defendingUnit.X
-                            #mainCursor.Y = defendingUnit.Y
-                            #myBattleForcast.calculate(currentUnit, defendingUnit)
+                            
+                            ## TODO get the weapons that can be used to attack
+                            currentUnit.inventory.usableWeapons = []
+                            for weapon in currentUnit.inventory.weapons:
+                                for tile in findTilesInAttackRange(currentUnitTile, weapon.range):
+                                    if tile.currentUnit != None and tile.currentUnit in enemyUnits:
+                                        currentUnit.inventory.usableWeapons.append(weapon)
+                                        break
                     # go back to selecting tile
                     if event.type == pygame.KEYDOWN and event.key == pygame.K_x:
+                        map1.reset()
                         currentUnitTile.currentUnit = None
                         currentUnit.X = currentUnitStartingTile.X
                         currentUnit.Y = currentUnitStartingTile.Y
@@ -957,6 +967,13 @@ while running:
                         currentUnitTile = currentUnitStartingTile
                         selectingTile = True
                         selectingAction = False
+                        tilesInRange = findTilesInMovRange(currentUnit)
+                        for tile in tilesInRange:
+                            if tile.currentUnit == None or tile.currentUnit == currentUnit:
+                                tile.selectable = True
+                                for atkTile in findTilesInAttackRange(tile, currentUnit.inventory.getBestRange()):
+                                    if atkTile not in tilesInRange:
+                                        atkTile.attackable = True
 
                 ### selecting what tile to move to 
                 elif selectingTile:
@@ -968,6 +985,8 @@ while running:
                             moving = True
                             selectingTile = False
                             moveVelocity = getMoveVelocity(currentUnitTile, targetTile, moveSpeed)
+                            map1.reset()
+
                     # Stop selecting tile
                     elif event.type == pygame.KEYDOWN and event.key == pygame.K_x:
                         map1.reset()
@@ -1117,7 +1136,7 @@ while running:
             myBattleForcast.draw(screen)
             
         elif selectingWeapon:
-            currentUnit.inventory.draw(screen)
+            currentUnit.inventory.drawUsableWeapons(screen)
 
         elif selectingAction:
             screen.blit(menuCursor, (gameWidth-450, 240+(165*menuSelectionIndex)))
