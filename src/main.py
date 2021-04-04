@@ -255,16 +255,22 @@ class BattleForcast():
         if self.defendingUnitCanCounter:
             self.defendingUnitDmg = max(0, (defendingUnit.attack + defendingUnit.getEquippedWeapon().might) - attackingUnit.defense)
             self.defendingUnitHit = int((defendingUnit.getEquippedWeapon().hit + (defendingUnit.skill * 2) + defendingUnit.luck / 2) - ((attackingUnit.speed * 2) + attackingUnit.luck))
+        else:
+            self.defendingUnitDmg = "-"
+            self.defendingUnitHit = "-"
+            self.defendingUnitCrit = "-"
 
+            
     def roll(self):
         if random.randint(0, 100) <= self.attackingUnitHit:
             self.attackingUnitWillHit = True
         else:
             self.attackingUnitWillHit = False
-        if random.randint(0, 100) <= self.defendingUnitHit:
-            self.defendingUnitWillHit = True
-        else:
-            self.defendingUnitWillHit = False
+        if self.defendingUnitCanCounter:
+            if random.randint(0, 100) <= self.defendingUnitHit:
+                self.defendingUnitWillHit = True
+            else:
+                self.defendingUnitWillHit = False
 
     def draw(self, screen):
         screen.blit(self.pic, (self.X, self.Y))
@@ -390,8 +396,34 @@ class MapUnitUI():
         self.X = gameWidth - 460
         self.Y = gameHeight - 280
         self.pic = mapUnitUI
+        self.currUnit = None
+    
+    def reset(self, unit):
+        self.currUnit = unit
+
     def draw(self, screen):
-        screen.blit(self.pic, (self.X, self.Y))
+        if self.currUnit != None:
+            screen.blit(self.pic, (self.X, self.Y))
+
+            nameT = font.render(self.currUnit.name, True, (0,0,0))
+            nameR = nameT.get_rect()
+            nameR.center = (self.X + 21*len(self.currUnit.name), self.Y + 50)
+
+            hpT = font.render(str(self.currUnit.hp) + " /", True, (0,0,0))
+            hpR = hpT.get_rect()
+            hpR.center = (self.X + 70, self.Y + 150)
+
+            mHpT = font.render(str(self.currUnit.maxHp), True, (0,0,0))
+            mHpR = mHpT.get_rect()
+            mHpR.center = (self.X + 150, self.Y + 150)
+
+
+
+            screen.blit(nameT, nameR)
+            screen.blit(hpT, hpR)
+            screen.blit(mHpT, mHpR)
+
+
 
 class UnitInfo():
 
@@ -787,6 +819,12 @@ def checkMapUI():
     else:
         myMapUnitUI.X = gameWidth - 460
         myBattleForcast.X = gameWidth - 500
+    
+    ## check if cursor is over a player
+    cursorTileUnit = map1.tiles[mainCursor.X][mainCursor.Y].currentUnit
+    myMapUnitUI.reset(cursorTileUnit)
+
+
 
 
 # main game loop
@@ -852,8 +890,10 @@ while running:
             # cursor controls
             if keys[pygame.K_DOWN]:
                 yCamera += mainCursor.down()
+                checkMapUI()
             if keys[pygame.K_UP]:
                 yCamera += mainCursor.up()
+                checkMapUI()
             if keys[pygame.K_RIGHT]:
                 xCamera += mainCursor.right()
                 checkMapUI()
