@@ -31,6 +31,7 @@ combatUnit6 = pygame.image.load(Path(__file__).parent / "../assets/Combat-6.png"
 
 ## Menu
 waitButton = pygame.image.load(Path(__file__).parent / "../assets/wait-button.png")
+itemsButton = pygame.image.load(Path(__file__).parent / "../assets/items-button.png")
 attackButton = pygame.image.load(Path(__file__).parent / "../assets/attack-button.png")
 menuCursor = pygame.image.load(Path(__file__).parent / "../assets/menu-cursor.png")
 unitInfoPic = pygame.image.load(Path(__file__).parent / "../assets/unit-info.png")
@@ -78,6 +79,7 @@ playerTurn = True
 viewingUnitInfo = False
 selectingTile = False
 selectingAction = False
+selectingItems = False
 selectingWeapon = False
 selectingAttack = False
 attacking = False
@@ -422,8 +424,6 @@ class MapUnitUI():
             screen.blit(nameT, nameR)
             screen.blit(hpT, hpR)
             screen.blit(mHpT, mHpR)
-
-
 
 class UnitInfo():
 
@@ -886,7 +886,7 @@ while running:
                     activeEnemyUnits.append(unit)
         
         ## if keys (they are up here because you should be able to hold the key)
-        elif playerTurn and not selectingAction and not selectingAttack and not selectingWeapon:
+        elif playerTurn and not (selectingAction or selectingAttack or selectingWeapon or selectingItems):
             # cursor controls
             if keys[pygame.K_DOWN]:
                 yCamera += mainCursor.down()
@@ -949,12 +949,16 @@ while running:
                         selectingAttack = False
                         selectingAction = True
 
+                elif selectingItems:
+                    if event.type == pygame.KEYDOWN and event.key == pygame.K_x:
+                        selectingItems = False
+                        selectingAction = True
                 elif selectingWeapon:
                     if event.type == pygame.KEYDOWN and event.key == pygame.K_z:
                         currentUnit.inventory.equipSelectedWeapon()
                         unitsInRange = []
-                        print(currentUnit.getEquippedWeapon().name)
-                        print(currentUnit.getEquippedWeapon().range)
+                        #print(currentUnit.getEquippedWeapon().name)
+                        #print(currentUnit.getEquippedWeapon().range)
                         map1.reset()
                         for tile in findTilesInAttackRange(currentUnitTile, currentUnit.inventory.usableWeapons[0].range):
                             if tile.currentUnit != None and tile.currentUnit in enemyUnits:
@@ -997,6 +1001,11 @@ while running:
                                     if tile.currentUnit != None and tile.currentUnit in enemyUnits:
                                         currentUnit.inventory.usableWeapons.append(weapon)
                                         break
+
+                        if menuOptions[menuSelectionIndex] == 'items':
+                            selectingItems = True
+                            selectingAction = False
+
                     # go back to selecting tile
                     if event.type == pygame.KEYDOWN and event.key == pygame.K_x:
                         map1.reset()
@@ -1174,7 +1183,9 @@ while running:
         myMapUnitUI.draw(screen)
         if selectingAttack:
             myBattleForcast.draw(screen)
-            
+
+        elif selectingItems:
+            currentUnit.inventory.draw(screen)            
         elif selectingWeapon:
             currentUnit.inventory.drawUsableWeapons(screen)
 
@@ -1183,6 +1194,9 @@ while running:
             Y = 200
             if "attack" in menuOptions:
                 screen.blit(attackButton, (gameWidth - 300, Y))
+                Y+= 165
+            if "items" in menuOptions:
+                screen.blit(itemsButton, (gameWidth - 300, Y))
                 Y+= 165
             if "wait" in menuOptions:
                 screen.blit(waitButton, (gameWidth - 300, Y))
