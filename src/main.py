@@ -508,7 +508,7 @@ class Inventory():
         self.Y = 300
         self.weapons = []
         self.items = []
-        self.usableWeapons = []
+        self.avaliableItems = []
         self.selectionIndex = 0
         
     def getInventory(self):
@@ -526,9 +526,11 @@ class Inventory():
         return None
 
     def equipSelectedWeapon(self):
-        weaponToEquip = self.usableWeapons[self.selectionIndex]
-        self.usableWeapons.remove(weaponToEquip)
-        self.usableWeapons.insert(0, weaponToEquip)
+        weaponToEquip = self.avaliableItems[self.selectionIndex]
+        self.weapons.remove(weaponToEquip)
+        self.weapons.insert(0, weaponToEquip)
+        self.avaliableItems.remove(weaponToEquip)
+        self.avaliableItems.insert(0, weaponToEquip)
         self.selectionIndex = 0
     
     # gets largest range of all weapons in the inventory
@@ -547,35 +549,39 @@ class Inventory():
         Yoffset = 50
         screen.blit(inventoryUI, (self.X, self.Y))
         screen.blit(menuCursor, (self.X+15, self.Y+15+(100*self.selectionIndex)))
-        for item in self.getInventory():
+        for item in self.avaliableItems:
             itemT = font.render(item.name, True, (0,0,0))
             itemR = itemT.get_rect()
             itemR.center = (self.X+250, self.Y+Yoffset)
             screen.blit(itemT, itemR)
             Yoffset += 75
-    
+
+        screen.blit(inventoryUI, (self.X+630, self.Y))
+        highlightedItem = self.avaliableItems[self.selectionIndex]
+        mtT = font.render("Might: " + str(highlightedItem.might), True, (0,0,0))
+        mtR = mtT.get_rect()
+        mtR.center = (self.X + 750, self.Y+50)
+        hitT = font.render("Hit: " + str(highlightedItem.hit), True, (0,0,0))
+        hitR = hitT.get_rect()
+        hitR.center = (self.X + 950, self.Y + 50)
+
+        
+        screen.blit(mtT, mtR)
+        screen.blit(hitT, hitR)
+
+
     def down(self):
-        if self.selectionIndex < len(self.usableWeapons) - 1:
+        if self.selectionIndex < len(self.avaliableItems) - 1:
             self.selectionIndex += 1
         else:
             self.selectionIndex = 0
-        
     def up(self):
         if self.selectionIndex > 0:
             self.selectionIndex -= 1
         else:
-            self.selectionIndex = len(self.usableWeapons) - 1
+            self.selectionIndex = len(self.avaliableItems) - 1
+        
 
-    def drawUsableWeapons(self, screen):
-        Yoffset = 50
-        screen.blit(inventoryUI, (self.X, self.Y))
-        screen.blit(menuCursor, (self.X+15, self.Y+15+(100*self.selectionIndex)))
-        for item in self.usableWeapons:
-            itemT = font.render(item.name, True, (0,0,0))
-            itemR = itemT.get_rect()
-            itemR.center = (self.X+250, self.Y+Yoffset)
-            screen.blit(itemT, itemR)
-            Yoffset += 75
 
 class Animation():
     
@@ -653,9 +659,15 @@ class Unit():
             color = (238, 255, 0)
         pygame.draw.rect(screen, color, pygame.Rect(self.X*tileSize + xCamera, (self.Y*tileSize)+tileSize-5 + yCamera, healthPercent * tileSize, 5))
 
-class Weapon():
-    def __init__(self, name = "generic"):
+class Item():
+
+    def __init__(self, name, description):
         self.name = name
+        self.description = description
+
+class Weapon(Item):
+    def __init__(self, name = "generic"):
+        super().__init__(name, "generic weapon")
         self.range = [1, 1]
         self.uses = 45
         self.might = 5
@@ -679,6 +691,7 @@ Jagen = Unit(3, 5)
 Jagen.inventory.addItem(Weapon("Sword"))
 lance = Weapon("Javelin")
 lance.range = [1,2]
+lance.might = 3
 Jagen.inventory.addItem(lance)
 Jagen.name = 'Jagen'
 Jagen.attack = 10
@@ -953,14 +966,19 @@ while running:
                     if event.type == pygame.KEYDOWN and event.key == pygame.K_x:
                         selectingItems = False
                         selectingAction = True
+                    if event.type == pygame.KEYDOWN and event.key == pygame.K_UP:
+                        currentUnit.inventory.up()
+                    if event.type == pygame.KEYDOWN and event.key == pygame.K_DOWN:
+                        currentUnit.inventory.down()
+                    if event.type == pygame.KEYDOWN and event.key == pygame.K_z:
+                        currentUnit.inventory.equipSelectedWeapon()
+
                 elif selectingWeapon:
                     if event.type == pygame.KEYDOWN and event.key == pygame.K_z:
                         currentUnit.inventory.equipSelectedWeapon()
                         unitsInRange = []
-                        #print(currentUnit.getEquippedWeapon().name)
-                        #print(currentUnit.getEquippedWeapon().range)
                         map1.reset()
-                        for tile in findTilesInAttackRange(currentUnitTile, currentUnit.inventory.usableWeapons[0].range):
+                        for tile in findTilesInAttackRange(currentUnitTile, currentUnit.inventory.avaliableItems[0].range):
                             if tile.currentUnit != None and tile.currentUnit in enemyUnits:
                                 unitsInRange.append(tile.currentUnit)
                             tile.attackable = True
@@ -993,19 +1011,19 @@ while running:
                         if menuOptions[menuSelectionIndex] == 'attack':
                             selectingAction = False
                             selectingWeapon = True
-                            
+                            currentUnit.inventory.selectionIndex = 0
                             ## TODO get the weapons that can be used to attack
-                            currentUnit.inventory.usableWeapons = []
+                            currentUnit.inventory.avaliableItems = []
                             for weapon in currentUnit.inventory.weapons:
                                 for tile in findTilesInAttackRange(currentUnitTile, weapon.range):
                                     if tile.currentUnit != None and tile.currentUnit in enemyUnits:
-                                        currentUnit.inventory.usableWeapons.append(weapon)
+                                        currentUnit.inventory.avaliableItems.append(weapon)
                                         break
 
                         if menuOptions[menuSelectionIndex] == 'items':
                             selectingItems = True
                             selectingAction = False
-
+                            currentUnit.inventory.avaliableItems = currentUnit.getInventory()
                     # go back to selecting tile
                     if event.type == pygame.KEYDOWN and event.key == pygame.K_x:
                         map1.reset()
@@ -1187,7 +1205,7 @@ while running:
         elif selectingItems:
             currentUnit.inventory.draw(screen)            
         elif selectingWeapon:
-            currentUnit.inventory.drawUsableWeapons(screen)
+            currentUnit.inventory.draw(screen)
 
         elif selectingAction:
             screen.blit(menuCursor, (gameWidth-450, 240+(165*menuSelectionIndex)))
