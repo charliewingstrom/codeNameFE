@@ -518,7 +518,20 @@ class Inventory():
         if type(item) == Weapon:
             self.weapons.append(item)
         else:
-            self.items.append(items)
+            self.items.append(item)
+
+    def activateItem(self, unit):
+        activatedItem = self.avaliableItems[self.selectionIndex]
+        
+        if isinstance(activatedItem, Weapon):
+            self.equipSelectedWeapon()
+            self.selectionIndex = 0
+            return False
+        else:
+            if activatedItem.use(unit):
+                self.items.remove(activatedItem)
+            self.selectionIndex = 0
+            return True
 
     def getEquippedWeapon(self):
         if len(self.weapons) > 0:
@@ -531,7 +544,7 @@ class Inventory():
         self.weapons.insert(0, weaponToEquip)
         self.avaliableItems.remove(weaponToEquip)
         self.avaliableItems.insert(0, weaponToEquip)
-        self.selectionIndex = 0
+        
     
     # gets largest range of all weapons in the inventory
     def getBestRange(self):
@@ -548,7 +561,7 @@ class Inventory():
     def draw(self, screen):
         Yoffset = 50
         screen.blit(inventoryUI, (self.X, self.Y))
-        screen.blit(menuCursor, (self.X+15, self.Y+15+(100*self.selectionIndex)))
+        screen.blit(menuCursor, (self.X+15, self.Y+15+(75*self.selectionIndex)))
         for item in self.avaliableItems:
             itemT = font.render(item.name, True, (0,0,0))
             itemR = itemT.get_rect()
@@ -558,16 +571,8 @@ class Inventory():
 
         screen.blit(inventoryUI, (self.X+630, self.Y))
         highlightedItem = self.avaliableItems[self.selectionIndex]
-        mtT = font.render("Might: " + str(highlightedItem.might), True, (0,0,0))
-        mtR = mtT.get_rect()
-        mtR.center = (self.X + 750, self.Y+50)
-        hitT = font.render("Hit: " + str(highlightedItem.hit), True, (0,0,0))
-        hitR = hitT.get_rect()
-        hitR.center = (self.X + 950, self.Y + 50)
 
-        
-        screen.blit(mtT, mtR)
-        screen.blit(hitT, hitR)
+        highlightedItem.drawDesc(screen, self.X + 630, self.Y)
 
 
     def down(self):
@@ -664,15 +669,50 @@ class Item():
     def __init__(self, name, description):
         self.name = name
         self.description = description
+        self.uses = 1
 
+    def drawDesc(self, screen, x, y):
+        screen.blit(inventoryUI, (x, y))
+        middle = inventoryUI.get_width() / 2
+        descT = font.render(self.description, True, (0,0,0))
+        descR = descT.get_rect()
+        descR.center = (x+ middle, y + middle)
+
+        screen.blit(descT, descR)
+
+class HealingItem(Item):
+    def __init__(self, name = "generic heal", description = "generic heal desc"):
+        super().__init__(name, description)
+        self.power = 10
+        self.uses = 3
+
+    # return True if we are out of uses
+    def use(self, unit):
+        if unit.hp + self.power < unit.maxHp:
+            unit.hp += self.power
+        else: 
+            unit.hp = unit.maxHp
+        self.uses -= 1
+        return self.uses <= 0
+            
 class Weapon(Item):
-    def __init__(self, name = "generic"):
-        super().__init__(name, "generic weapon")
+    def __init__(self, name = "genericW", description = "generic weapon desc"):
+        super().__init__(name, description)
         self.range = [1, 1]
         self.uses = 45
         self.might = 5
         self.hit = 80
         self.crit = 0
+
+    def drawDesc(self, screen, x, y):
+        screen.blit(inventoryUI, (x, y))
+        middle = inventoryUI.get_width() / 2
+        descT = font.render(self.description, True, (0,0,0))
+        descR = descT.get_rect()
+        descR.center = (x+ middle, y + middle)
+
+
+        screen.blit(descT, descR)
 
 ## custom class instances
 map1 = Map(mapWidth, mapHeight, map1background)
@@ -693,6 +733,7 @@ lance = Weapon("Javelin")
 lance.range = [1,2]
 lance.might = 3
 Jagen.inventory.addItem(lance)
+Jagen.inventory.addItem(HealingItem())
 Jagen.name = 'Jagen'
 Jagen.attack = 10
 Jagen.defense = 10
@@ -971,7 +1012,17 @@ while running:
                     if event.type == pygame.KEYDOWN and event.key == pygame.K_DOWN:
                         currentUnit.inventory.down()
                     if event.type == pygame.KEYDOWN and event.key == pygame.K_z:
-                        currentUnit.inventory.equipSelectedWeapon()
+                        if currentUnit.inventory.activateItem(currentUnit):
+                            currentUnitTile = None
+                            currentUnitStartingTile = None
+                            currentUnit.active = False
+                            currentUnit = None
+                            defendingUnit = None
+                            selectingTile = False
+                            selectingAction = False
+                            selectingAttack = False
+                            selectingItems = False
+                            map1.reset()
 
                 elif selectingWeapon:
                     if event.type == pygame.KEYDOWN and event.key == pygame.K_z:
