@@ -72,7 +72,7 @@ targetTile = None
 ## combat
 currentUnitAttacking = True
 defendingUnitAttacking = True
-
+experience = 0
 
 ## player state
 playerTurn = True
@@ -97,6 +97,7 @@ activeEnemyUnits = []
 ### attacking selection
 unitsInRange = []
 attackUnitIndex = 0
+
 font = pygame.font.Font('freesansbold.ttf', 52)
 
 
@@ -586,8 +587,6 @@ class Inventory():
         else:
             self.selectionIndex = len(self.avaliableItems) - 1
         
-
-
 class Animation():
     
     def __init__(self, frames):
@@ -676,12 +675,17 @@ class Item():
         middle = inventoryUI.get_width() / 2
         descT = font.render(self.description, True, (0,0,0))
         descR = descT.get_rect()
-        descR.center = (x+ middle, y + middle)
+        descR.center = (x+ middle, y + 50)
+
+        usesT = font.render("Uses: "+str(self.uses), True, (0,0,0))
+        usesR = usesT.get_rect()
+        usesR.center = (x+150, y+300)
 
         screen.blit(descT, descR)
+        screen.blit(usesT, usesR)
 
 class HealingItem(Item):
-    def __init__(self, name = "generic heal", description = "generic heal desc"):
+    def __init__(self, name = "generic heal", description = "Heals 10 HP"):
         super().__init__(name, description)
         self.power = 10
         self.uses = 3
@@ -696,7 +700,7 @@ class HealingItem(Item):
         return self.uses <= 0
             
 class Weapon(Item):
-    def __init__(self, name = "genericW", description = "generic weapon desc"):
+    def __init__(self, name = "genericW", description = "Basic Weapon"):
         super().__init__(name, description)
         self.range = [1, 1]
         self.uses = 45
@@ -705,14 +709,23 @@ class Weapon(Item):
         self.crit = 0
 
     def drawDesc(self, screen, x, y):
-        screen.blit(inventoryUI, (x, y))
-        middle = inventoryUI.get_width() / 2
-        descT = font.render(self.description, True, (0,0,0))
-        descR = descT.get_rect()
-        descR.center = (x+ middle, y + middle)
+        super().drawDesc(screen, x, y)
+        mightT = font.render("Mt: "+str(self.might), True, (0,0,0))
+        mightR = mightT.get_rect()
+        mightR.center = (x + 90, y + 150)
 
+        hitT = font.render("Hit: "+str(self.hit), True, (0,0,0))
+        hitR = hitT.get_rect()
+        hitR.center = (x + 290, y + 150)
 
-        screen.blit(descT, descR)
+        critT = font.render("Crit: "+str(self.crit), True, (0,0,0))
+        critR = critT.get_rect()
+        critR.center = (x + 490, y + 150)
+
+        screen.blit(mightT, mightR)
+        screen.blit(hitT, hitR)
+        screen.blit(critT, critR)
+
 
 ## custom class instances
 map1 = Map(mapWidth, mapHeight, map1background)
@@ -1183,6 +1196,8 @@ while running:
                     defendingUnit.hp -= myBattleForcast.attackingUnitDmg
                     currentUnitAttacking = False
                     print("current unit hit")
+                    #if currentUnit in playerUnits:
+                        #experience += myBattleForcast.attackingUnitDmg
             ## unit will miss, play miss animation
             else:
                 if currentUnit.combatAnimation.draw(screen, 0, 0, False):
@@ -1199,12 +1214,15 @@ while running:
                             # remove health
                             currentUnit.hp -= myBattleForcast.defendingUnitDmg
                             defendingUnitAttacking = False
+                            #if defendingUnit in playerUnits:
+                                #experience += myBattleForcast.defendingUnitDmg
                             print("defending unit hit")
                             if currentUnit.hp <= 0:
                                 if currentUnit in playerUnits:
                                     playerUnits.remove(currentUnit)
                                 elif currentUnit in enemyUnits:
                                     enemyUnits.remove(currentUnit)
+                                    #experience += 30
                                 map1.tiles[currentUnit.X][currentUnit.Y].currentUnit = None
                     ## unit will miss, play miss animation
                     else:
@@ -1222,11 +1240,13 @@ while running:
                 elif defendingUnit in enemyUnits:
                     enemyUnits.remove(defendingUnit)
                     activeEnemyUnits.remove(defendingUnit)
+                    #experience += 30
                 map1.tiles[defendingUnit.X][defendingUnit.Y].currentUnit = None
             myCombatUI.draw(screen, myBattleForcast)
 
 
         else:
+            #print("EXP: " + str(experience))
             currentUnitAttacking = True
             defendingUnitAttacking = True
             attacking = False
