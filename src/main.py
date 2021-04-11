@@ -83,6 +83,8 @@ selectingItems = False
 selectingWeapon = False
 selectingAttack = False
 attacking = False
+finishedAttacking = True
+addingExp = False
 
 ## menu items
 menuOptions = []
@@ -663,6 +665,24 @@ class Unit():
             color = (238, 255, 0)
         pygame.draw.rect(screen, color, pygame.Rect(self.X*tileSize + xCamera, (self.Y*tileSize)+tileSize-5 + yCamera, healthPercent * tileSize, 5))
 
+class Exp():
+
+    def __init__(self):
+        self.currUnit = None
+        self.expToAdd = 0
+
+    def setup(self, unit, exp):
+        self.currUnit = unit
+        self.expToAdd = exp
+
+    def draw(self, screen):
+        if self.currUnit != None:
+            self.currUnit.exp += 2
+            self.expToAdd -= 2
+            pygame.draw.rect(screen, (0, 0, 0), pygame.Rect((gameWidth / 2) - (gameWidth/4), 900, gameWidth / 2, 20))
+            pygame.draw.rect(screen, (252, 219, 3), pygame.Rect((gameWidth / 2) - (gameWidth/4), 900, (gameWidth / 2) * (self.currUnit.exp / 100), 20))
+        return self.expToAdd <= 0
+
 class Item():
 
     def __init__(self, name, description):
@@ -734,6 +754,7 @@ mainCursor = Cursor()
 myCombatUI = CombatUI(0, gameHeight - 385)
 myUnitInfo = UnitInfo()
 myMapUnitUI = MapUnitUI()
+myExp = Exp()
 
 ## width first, height second (width goes from left to right, height goes from top to bottom)
 protag = Unit(3, 3)
@@ -1196,13 +1217,14 @@ while running:
                     defendingUnit.hp -= myBattleForcast.attackingUnitDmg
                     currentUnitAttacking = False
                     print("current unit hit")
-                    #if currentUnit in playerUnits:
-                        #experience += myBattleForcast.attackingUnitDmg
+                    if currentUnit in playerUnits:
+                        experience += myBattleForcast.attackingUnitDmg
             ## unit will miss, play miss animation
             else:
                 if currentUnit.combatAnimation.draw(screen, 0, 0, False):
                     print("current unit miss")
                     currentUnitAttacking = False
+                    experience += 1
             myCombatUI.draw(screen, myBattleForcast)
 
         elif defendingUnitAttacking:
@@ -1214,22 +1236,24 @@ while running:
                             # remove health
                             currentUnit.hp -= myBattleForcast.defendingUnitDmg
                             defendingUnitAttacking = False
-                            #if defendingUnit in playerUnits:
-                                #experience += myBattleForcast.defendingUnitDmg
+                            if defendingUnit in playerUnits:
+                                experience += myBattleForcast.defendingUnitDmg
                             print("defending unit hit")
                             if currentUnit.hp <= 0:
                                 if currentUnit in playerUnits:
                                     playerUnits.remove(currentUnit)
                                 elif currentUnit in enemyUnits:
                                     enemyUnits.remove(currentUnit)
-                                    #experience += 30
+                                    experience += 30
                                 map1.tiles[currentUnit.X][currentUnit.Y].currentUnit = None
                     ## unit will miss, play miss animation
                     else:
                         if defendingUnit.combatAnimation.draw(screen, 0, 0, True):
                             print("defending unit miss")
                             defendingUnitAttacking = False
+                            experience += 1
                 else:
+                    screen.blit(pygame.transform.flip(combatUnit1, True, False), (0, 0))
                     defendingUnitAttacking = False
             else:
                 defendingUnitAttacking = False
@@ -1240,16 +1264,34 @@ while running:
                 elif defendingUnit in enemyUnits:
                     enemyUnits.remove(defendingUnit)
                     activeEnemyUnits.remove(defendingUnit)
-                    #experience += 30
+                    experience += 30
                 map1.tiles[defendingUnit.X][defendingUnit.Y].currentUnit = None
             myCombatUI.draw(screen, myBattleForcast)
 
-
+        elif finishedAttacking:
+            screen.blit(combatUnit1, (0, 0))
+            screen.blit(pygame.transform.flip(combatUnit1, True, False), (0, 0))
+            myCombatUI.draw(screen, myBattleForcast)
+            if experience > 0:
+                experience = 99
+                addingExp = True
+                if currentUnit in playerUnits:
+                    myExp.setup(currentUnit, experience)
+                elif defendingUnit in playerUnits:
+                    myExp.setup(defendingUnit, experience)
+            finishedAttacking = False
+        elif addingExp:
+            screen.blit(combatUnit1, (0, 0))
+            screen.blit(pygame.transform.flip(combatUnit1, True, False), (0, 0))
+            myCombatUI.draw(screen, myBattleForcast)
+            if myExp.draw(screen):
+                addingExp = False
         else:
-            #print("EXP: " + str(experience))
+            experience = 0
             currentUnitAttacking = True
             defendingUnitAttacking = True
             attacking = False
+            finishedAttacking = True
             currentUnitTile = None
             currentUnitStartingTile = None
             currentUnit.active = False
