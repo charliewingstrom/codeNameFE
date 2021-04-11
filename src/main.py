@@ -44,7 +44,7 @@ healthbarfullPiece = pygame.image.load(Path(__file__).parent / "../assets/health
 healthbarEmptyPiece = pygame.image.load(Path(__file__).parent / "../assets/healthbar-piece-empty.png")
 mapUnitUI = pygame.image.load(Path(__file__).parent / "../assets/map-unit-UI.png")
 inventoryUI = pygame.image.load(Path(__file__).parent / "../assets/inventory.png") 
-
+levelUpUI = pygame.image.load(Path(__file__).parent / "../assets/levelUp.png") 
 ## backgrounds
 attacingBackground = pygame.image.load(Path(__file__).parent / "../assets/attacking-background.png")
 map1background = pygame.image.load(Path(__file__).parent / "../assets/level1Background.png")
@@ -85,6 +85,7 @@ selectingAttack = False
 attacking = False
 finishedAttacking = True
 addingExp = False
+levelingUp = False
 
 ## menu items
 menuOptions = []
@@ -616,6 +617,8 @@ class Unit():
         self.name = "generic"
         self.level = 1
         self.exp = 0
+        
+        # stats
         self.maxHp = 15
         self.hp = self.maxHp
         self.attack = 10
@@ -624,6 +627,14 @@ class Unit():
         self.skill = 6
         self.luck = 4
         self.mov = 5
+
+        # growths
+        self.hpG = 50
+        self.attackG = 50
+        self.defenseG = 50
+        self.speedG = 50
+        self.skillG = 50
+        self.luckG = 50
         self.inventory = Inventory()
         self.X = X
         self.Y = Y
@@ -633,6 +644,26 @@ class Unit():
         self.combatAnimation = Animation([combatUnit1,combatUnit2, combatUnit3,combatUnit4, combatUnit5, combatUnit6,combatUnit5, combatUnit4, combatUnit3, combatUnit2, combatUnit1])
 
         self.active = True
+
+    def getStats(self):
+        return [self.maxHp, self.attack, self.defense, self.speed, self.skill, self.luck]
+
+    def addToStat(self, index, amount):
+        if index == 0:
+            self.maxHp += amount
+        if index == 1:
+            self.attack += amount
+        if index == 2:
+            self.defense += amount
+        if index == 3:
+            self.speed += amount
+        if index == 4:
+            self.skill += amount
+        if index == 5:
+            self.luck += amount
+
+    def getGrowths(self):
+        return [self.hpG, self.attackG, self.defenseG, self.speedG, self.skillG, self.luckG]
 
     def getEquippedWeapon(self):
         if len(self.getInventory()) > 0:
@@ -682,6 +713,64 @@ class Exp():
             pygame.draw.rect(screen, (0, 0, 0), pygame.Rect((gameWidth / 2) - (gameWidth/4), 900, gameWidth / 2, 20))
             pygame.draw.rect(screen, (252, 219, 3), pygame.Rect((gameWidth / 2) - (gameWidth/4), 900, (gameWidth / 2) * (self.currUnit.exp / 100), 20))
         return self.expToAdd <= 0
+
+class LevelUp():
+    def __init__(self):
+        self.currUnit = None
+        self.delay = 5
+        self.growthIndex = 0
+        self.X = (gameWidth/2)-(levelUpUI.get_width()/2)
+        self.Y = (gameHeight/2)-(levelUpUI.get_height()/2)
+    def draw(self, screen):
+        if self.currUnit != None:
+            screen.blit(levelUpUI, (self.X, self.Y))
+
+            hpT = font.render(str(self.currUnit.maxHp), True, (0,0,0))
+            hpR = hpT.get_rect()
+            hpR.center = (self.X+400, self.Y+390)
+
+            strT = font.render(str(self.currUnit.attack), True, (0,0,0))
+            strR = hpT.get_rect()
+            strR.center = (self.X+400, self.Y+540)
+
+            defT = font.render(str(self.currUnit.defense), True, (0,0,0))
+            defR = hpT.get_rect()
+            defR.center = (self.X+400, self.Y+690)
+
+            spdT = font.render(str(self.currUnit.speed), True, (0,0,0))
+            spdR = hpT.get_rect()
+            spdR.center = (self.X+400, self.Y+840)
+
+            sklT = font.render(str(self.currUnit.skill), True, (0,0,0))
+            sklR = hpT.get_rect()
+            sklR.center = (self.X+920, self.Y+390)
+
+            lckT = font.render(str(self.currUnit.luck), True, (0,0,0))
+            lckR = hpT.get_rect()
+            lckR.center = (self.X+920, self.Y+540)
+
+            screen.blit(hpT, hpR)
+            screen.blit(strT, strR)
+            screen.blit(defT, defR)
+            screen.blit(spdT, spdR)
+            screen.blit(sklT, sklR)
+            screen.blit(lckT, lckR)
+
+            self.delay -= 1
+            if self.delay <= 0:
+                if self.growthIndex >= len(self.currUnit.getStats()):
+                    self.growthIndex = 0
+                    return True
+                self.delay = 5
+                if self.currUnit.getGrowths()[self.growthIndex] > random.randint(1,100):
+                    self.currUnit.addToStat(self.growthIndex, 1)
+                self.growthIndex+=1
+
+                
+        return False
+                    
+
+
 
 class Item():
 
@@ -755,6 +844,7 @@ myCombatUI = CombatUI(0, gameHeight - 385)
 myUnitInfo = UnitInfo()
 myMapUnitUI = MapUnitUI()
 myExp = Exp()
+myLevelUp = LevelUp()
 
 ## width first, height second (width goes from left to right, height goes from top to bottom)
 protag = Unit(3, 3)
@@ -762,6 +852,7 @@ bow = Weapon("bow")
 bow.range = [3,3]
 protag.inventory.addItem(bow)
 Jagen = Unit(3, 5)
+Jagen.exp = 90
 Jagen.inventory.addItem(Weapon("Sword"))
 lance = Weapon("Javelin")
 lance.range = [1,2]
@@ -772,6 +863,8 @@ Jagen.name = 'Jagen'
 Jagen.attack = 10
 Jagen.defense = 10
 Jagen.speed = 9
+
+myLevelUp.currUnit = Jagen
 
 enemy = Unit(9, 5)
 enemy.inventory.addItem(Weapon())
@@ -1280,12 +1373,25 @@ while running:
                 elif defendingUnit in playerUnits:
                     myExp.setup(defendingUnit, experience)
             finishedAttacking = False
+
+        elif levelingUp:
+            screen.blit(combatUnit1, (0, 0))
+            screen.blit(pygame.transform.flip(combatUnit1, True, False), (0, 0))
+            myCombatUI.draw(screen, myBattleForcast)
+            if myLevelUp.draw(screen):
+                levelingUp = False
         elif addingExp:
             screen.blit(combatUnit1, (0, 0))
             screen.blit(pygame.transform.flip(combatUnit1, True, False), (0, 0))
             myCombatUI.draw(screen, myBattleForcast)
-            if myExp.draw(screen):
+            if myExp.currUnit.exp == 100:
+                levelingUp = True
+                myExp.currUnit.exp = 0
+                myExp.currUnit.level += 1
+            elif myExp.draw(screen):
                 addingExp = False
+
+
         else:
             experience = 0
             currentUnitAttacking = True
