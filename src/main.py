@@ -336,65 +336,65 @@ class CombatUI():
         if currentUnit in enemyUnits:
             screen.blit(self.enemyPic, (self.X, self.Y))
             screen.blit(self.pic, (self.X + DUOffset, self.Y))
-        else:
+        elif currentUnit in playerUnits:
             screen.blit(self.pic, (self.X, self.Y))
             screen.blit(self.enemyPic, (self.X + DUOffset, self.Y))
+        if currentUnit in enemyUnits or currentUnit in playerUnits:
+            CUNameText = font.render(currentUnit.name, True, (0,0,0))
+            CUNameRect = CUNameText.get_rect()
+            CUNameRect.center = (self.X + (len(currentUnit.name) * 25), self.Y + 100)
 
-        CUNameText = font.render(currentUnit.name, True, (0,0,0))
-        CUNameRect = CUNameText.get_rect()
-        CUNameRect.center = (self.X + (len(currentUnit.name) * 25), self.Y + 100)
+            CUAttackText = font.render(str(battleForcast.attackingUnitDmg), True, (0,0,0))
+            CUAttackRect = CUAttackText.get_rect()
+            CUAttackRect.center = (self.X + 185, self.Y + 330)
 
-        CUAttackText = font.render(str(battleForcast.attackingUnitDmg), True, (0,0,0))
-        CUAttackRect = CUAttackText.get_rect()
-        CUAttackRect.center = (self.X + 185, self.Y + 330)
+            CUHitText = font.render(str(battleForcast.attackingUnitHit), True, (0,0,0))
+            CUHitRect = CUHitText.get_rect()
+            CUHitRect.center = (self.X + 450, self.Y + 330)
 
-        CUHitText = font.render(str(battleForcast.attackingUnitHit), True, (0,0,0))
-        CUHitRect = CUHitText.get_rect()
-        CUHitRect.center = (self.X + 450, self.Y + 330)
+            CUCritText = font.render(str(battleForcast.attackingUnitCrit), True, (0,0,0))
+            CUCritRect = CUCritText.get_rect()
+            CUCritRect.center = (self.X + 720, self.Y + 330)
 
-        CUCritText = font.render(str(battleForcast.attackingUnitCrit), True, (0,0,0))
-        CUCritRect = CUCritText.get_rect()
-        CUCritRect.center = (self.X + 720, self.Y + 330)
+            for i in range(currentUnit.maxHp):
+                screen.blit(healthbarEmptyPiece, (self.X + 50 + (20*i), self.Y + 140))
+            for i in range(currentUnit.hp):
+                screen.blit(healthbarfullPiece, (self.X + 50 + (20*i), self.Y + 140))
+            
+            ## defending unit stuff
+            DUNameText = font.render(defendingUnit.name, True, (0,0,0))
+            DUNameRect = DUNameText.get_rect()
+            DUNameRect.center = (self.X + DUOffset + (len(defendingUnit.name) * 25), self.Y + 100)
 
-        for i in range(currentUnit.maxHp):
-            screen.blit(healthbarEmptyPiece, (self.X + 50 + (20*i), self.Y + 140))
-        for i in range(currentUnit.hp):
-            screen.blit(healthbarfullPiece, (self.X + 50 + (20*i), self.Y + 140))
-        
-        ## defending unit stuff
-        DUNameText = font.render(defendingUnit.name, True, (0,0,0))
-        DUNameRect = DUNameText.get_rect()
-        DUNameRect.center = (self.X + DUOffset + (len(defendingUnit.name) * 25), self.Y + 100)
+            DUAttackText = font.render(str(battleForcast.defendingUnitDmg), True, (0,0,0))
+            DUAttackRect = DUAttackText.get_rect()
+            DUAttackRect.center = (self.X + DUOffset + 185, self.Y + 330)
 
-        DUAttackText = font.render(str(battleForcast.defendingUnitDmg), True, (0,0,0))
-        DUAttackRect = DUAttackText.get_rect()
-        DUAttackRect.center = (self.X + DUOffset + 185, self.Y + 330)
+            DUHitText = font.render(str(battleForcast.defendingUnitHit), True, (0,0,0))
+            DUHitRect = DUHitText.get_rect()
+            DUHitRect.center = (self.X + DUOffset + 450, self.Y + 330)
 
-        DUHitText = font.render(str(battleForcast.defendingUnitHit), True, (0,0,0))
-        DUHitRect = DUHitText.get_rect()
-        DUHitRect.center = (self.X + DUOffset + 450, self.Y + 330)
+            DUCritText = font.render(str(battleForcast.defendingUnitCrit), True, (0,0,0))
+            DUCritRect = CUCritText.get_rect()
+            DUCritRect.center = (self.X + 720 + DUOffset, self.Y + 330)
 
-        DUCritText = font.render(str(battleForcast.defendingUnitCrit), True, (0,0,0))
-        DUCritRect = CUCritText.get_rect()
-        DUCritRect.center = (self.X + 720 + DUOffset, self.Y + 330)
+            for i in range(defendingUnit.maxHp):
+                screen.blit(healthbarEmptyPiece, (self.X + 50 + (20*i) + DUOffset, self.Y + 140))
+            for i in range(defendingUnit.hp):
+                screen.blit(healthbarfullPiece, (self.X + 50 + (20*i) + DUOffset, self.Y + 140))
 
-        for i in range(defendingUnit.maxHp):
-            screen.blit(healthbarEmptyPiece, (self.X + 50 + (20*i) + DUOffset, self.Y + 140))
-        for i in range(defendingUnit.hp):
-            screen.blit(healthbarfullPiece, (self.X + 50 + (20*i) + DUOffset, self.Y + 140))
+            # draw
+            ## current unit
+            screen.blit(CUNameText, CUNameRect)
+            screen.blit(CUAttackText, CUAttackRect)
+            screen.blit(CUHitText, CUHitRect)
+            screen.blit(CUCritText, CUCritRect)
 
-        # draw
-        ## current unit
-        screen.blit(CUNameText, CUNameRect)
-        screen.blit(CUAttackText, CUAttackRect)
-        screen.blit(CUHitText, CUHitRect)
-        screen.blit(CUCritText, CUCritRect)
-
-        ## defending unit
-        screen.blit(DUNameText, DUNameRect)
-        screen.blit(DUAttackText, DUAttackRect)
-        screen.blit(DUHitText, DUHitRect)
-        screen.blit(DUCritText, DUCritRect)
+            ## defending unit
+            screen.blit(DUNameText, DUNameRect)
+            screen.blit(DUAttackText, DUAttackRect)
+            screen.blit(DUHitText, DUHitRect)
+            screen.blit(DUCritText, DUCritRect)
 
 class MapUnitUI():
 
@@ -705,49 +705,68 @@ class Exp():
     def setup(self, unit, exp):
         self.currUnit = unit
         self.expToAdd = exp
+        self.delay = 10
 
     def draw(self, screen):
         if self.currUnit != None:
-            self.currUnit.exp += 2
-            self.expToAdd -= 2
-            pygame.draw.rect(screen, (0, 0, 0), pygame.Rect((gameWidth / 2) - (gameWidth/4), 900, gameWidth / 2, 20))
-            pygame.draw.rect(screen, (252, 219, 3), pygame.Rect((gameWidth / 2) - (gameWidth/4), 900, (gameWidth / 2) * (self.currUnit.exp / 100), 20))
-        return self.expToAdd <= 0
+            pygame.draw.rect(screen, (0, 0, 0), pygame.Rect((gameWidth / 2) - (gameWidth/4), 900, gameWidth / 3, 20))
+            pygame.draw.rect(screen, (252, 219, 3), pygame.Rect((gameWidth / 2) - (gameWidth/4), 900, (gameWidth / 3) * (self.currUnit.exp / 100), 20))
+            if self.expToAdd > 0:
+                self.currUnit.exp += 3
+                self.expToAdd -= 3
+            elif self.delay > 0:
+                self.delay -= 1
+            else:
+                self.delay = 10
+                return True
+        return False
 
 class LevelUp():
     def __init__(self):
         self.currUnit = None
         self.delay = 5
         self.growthIndex = 0
+        self.hasLeveledStat = [False, False, False, False, False, False]
         self.X = (gameWidth/2)-(levelUpUI.get_width()/2)
         self.Y = (gameHeight/2)-(levelUpUI.get_height()/2)
+    
+    """ def roll(self, unit):
+        for  """
+
+
+    def getHasLeveled(self, index):
+        if self.hasLeveledStat[index]:
+            return "+=1"
+        else:
+            return ""
+
     def draw(self, screen):
         if self.currUnit != None:
             screen.blit(levelUpUI, (self.X, self.Y))
 
-            hpT = font.render(str(self.currUnit.maxHp), True, (0,0,0))
+            hpT = font.render(str(self.currUnit.maxHp)+self.getHasLeveled(0), True, (0,0,0))
             hpR = hpT.get_rect()
-            hpR.center = (self.X+400, self.Y+390)
+            hpR.topleft = (self.X+380, self.Y+370)
 
-            strT = font.render(str(self.currUnit.attack), True, (0,0,0))
+            strT = font.render(str(self.currUnit.attack)+self.getHasLeveled(1), True, (0,0,0))
             strR = hpT.get_rect()
-            strR.center = (self.X+400, self.Y+540)
+            strR.topleft = (self.X+380, self.Y+520)
 
-            defT = font.render(str(self.currUnit.defense), True, (0,0,0))
+            defT = font.render(str(self.currUnit.defense)+self.getHasLeveled(2), True, (0,0,0))
             defR = hpT.get_rect()
-            defR.center = (self.X+400, self.Y+690)
+            defR.topleft = (self.X+380, self.Y+670)
 
-            spdT = font.render(str(self.currUnit.speed), True, (0,0,0))
+            spdT = font.render(str(self.currUnit.speed)+self.getHasLeveled(3), True, (0,0,0))
             spdR = hpT.get_rect()
-            spdR.center = (self.X+400, self.Y+840)
+            spdR.topleft = (self.X+380, self.Y+820)
 
-            sklT = font.render(str(self.currUnit.skill), True, (0,0,0))
+            sklT = font.render(str(self.currUnit.skill)+self.getHasLeveled(4), True, (0,0,0))
             sklR = hpT.get_rect()
-            sklR.center = (self.X+920, self.Y+390)
+            sklR.topleft = (self.X+900, self.Y+370)
 
-            lckT = font.render(str(self.currUnit.luck), True, (0,0,0))
+            lckT = font.render(str(self.currUnit.luck)+self.getHasLeveled(5), True, (0,0,0))
             lckR = hpT.get_rect()
-            lckR.center = (self.X+920, self.Y+540)
+            lckR.topleft = (self.X+900, self.Y+520)
 
             screen.blit(hpT, hpR)
             screen.blit(strT, strR)
@@ -759,14 +778,15 @@ class LevelUp():
             self.delay -= 1
             if self.delay <= 0:
                 if self.growthIndex >= len(self.currUnit.getStats()):
+                    self.currUnit = None
                     self.growthIndex = 0
+                    self.hasLeveledStat = [False, False, False, False, False, False]
                     return True
                 self.delay = 5
                 if self.currUnit.getGrowths()[self.growthIndex] > random.randint(1,100):
                     self.currUnit.addToStat(self.growthIndex, 1)
+                    self.hasLeveledStat[self.growthIndex] = True
                 self.growthIndex+=1
-
-                
         return False
                     
 
@@ -1362,8 +1382,10 @@ while running:
             myCombatUI.draw(screen, myBattleForcast)
 
         elif finishedAttacking:
-            screen.blit(combatUnit1, (0, 0))
-            screen.blit(pygame.transform.flip(combatUnit1, True, False), (0, 0))
+            if currentUnit.hp > 0:
+                screen.blit(combatUnit1, (0, 0))
+            if defendingUnit.hp > 0:
+                screen.blit(pygame.transform.flip(combatUnit1, True, False), (0, 0))
             myCombatUI.draw(screen, myBattleForcast)
             if experience > 0:
                 experience = 99
@@ -1375,17 +1397,24 @@ while running:
             finishedAttacking = False
 
         elif levelingUp:
-            screen.blit(combatUnit1, (0, 0))
-            screen.blit(pygame.transform.flip(combatUnit1, True, False), (0, 0))
+            if currentUnit.hp > 0:
+                screen.blit(combatUnit1, (0, 0))
+            if defendingUnit.hp > 0:
+                screen.blit(pygame.transform.flip(combatUnit1, True, False), (0, 0))
             myCombatUI.draw(screen, myBattleForcast)
             if myLevelUp.draw(screen):
                 levelingUp = False
+                myLevelUp.currUnit = None
         elif addingExp:
-            screen.blit(combatUnit1, (0, 0))
-            screen.blit(pygame.transform.flip(combatUnit1, True, False), (0, 0))
+            if currentUnit.hp > 0:
+                screen.blit(combatUnit1, (0, 0))
+            if defendingUnit.hp > 0:
+                screen.blit(pygame.transform.flip(combatUnit1, True, False), (0, 0))
             myCombatUI.draw(screen, myBattleForcast)
-            if myExp.currUnit.exp == 100:
+            if myExp.currUnit.exp >= 100:
                 levelingUp = True
+                myLevelUp.currUnit = myExp.currUnit
+                #myLevelUp.roll(myExp.currUnit)
                 myExp.currUnit.exp = 0
                 myExp.currUnit.level += 1
             elif myExp.draw(screen):
