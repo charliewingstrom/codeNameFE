@@ -711,9 +711,12 @@ class Exp():
         if self.currUnit != None:
             pygame.draw.rect(screen, (0, 0, 0), pygame.Rect((gameWidth / 2) - (gameWidth/4), 900, gameWidth / 3, 20))
             pygame.draw.rect(screen, (252, 219, 3), pygame.Rect((gameWidth / 2) - (gameWidth/4), 900, (gameWidth / 3) * (self.currUnit.exp / 100), 20))
-            if self.expToAdd > 0:
-                self.currUnit.exp += 3
-                self.expToAdd -= 3
+            if self.expToAdd > 6 and self.currUnit.exp + 6 < 100:
+                self.currUnit.exp += 6
+                self.expToAdd -= 6
+            elif self.expToAdd > 0:
+                self.currUnit.exp += 1
+                self.expToAdd -= 1
             elif self.delay > 0:
                 self.delay -= 1
             else:
@@ -725,13 +728,19 @@ class LevelUp():
     def __init__(self):
         self.currUnit = None
         self.delay = 5
-        self.growthIndex = 0
+        self.levelIndex = 0
         self.hasLeveledStat = [False, False, False, False, False, False]
+        self.statsLeveled = []
         self.X = (gameWidth/2)-(levelUpUI.get_width()/2)
         self.Y = (gameHeight/2)-(levelUpUI.get_height()/2)
     
-    """ def roll(self, unit):
-        for  """
+    def roll(self, unit):
+        self.currUnit = unit
+        self.hasLeveledStat = [False, False, False, False, False, False]
+        self.statsLeveled = []
+        for i in range(len(self.currUnit.getGrowths())):
+            if self.currUnit.getGrowths()[i] > random.randint(0, 99):
+                self.statsLeveled.append(i)
 
 
     def getHasLeveled(self, index):
@@ -777,16 +786,15 @@ class LevelUp():
 
             self.delay -= 1
             if self.delay <= 0:
-                if self.growthIndex >= len(self.currUnit.getStats()):
+                if self.levelIndex >= len(self.statsLeveled):
                     self.currUnit = None
-                    self.growthIndex = 0
-                    self.hasLeveledStat = [False, False, False, False, False, False]
+                    self.levelIndex = 0
                     return True
                 self.delay = 5
-                if self.currUnit.getGrowths()[self.growthIndex] > random.randint(1,100):
-                    self.currUnit.addToStat(self.growthIndex, 1)
-                    self.hasLeveledStat[self.growthIndex] = True
-                self.growthIndex+=1
+                
+                self.currUnit.addToStat(self.statsLeveled[self.levelIndex], 1)
+                self.hasLeveledStat[self.statsLeveled[self.levelIndex]] = True
+                self.levelIndex+=1
         return False
                     
 
@@ -1414,7 +1422,7 @@ while running:
             if myExp.currUnit.exp >= 100:
                 levelingUp = True
                 myLevelUp.currUnit = myExp.currUnit
-                #myLevelUp.roll(myExp.currUnit)
+                myLevelUp.roll(myExp.currUnit)
                 myExp.currUnit.exp = 0
                 myExp.currUnit.level += 1
             elif myExp.draw(screen):
