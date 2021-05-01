@@ -1,6 +1,8 @@
 import pygame
 import random
 from pathlib import Path
+from map import Map
+
 
 pygame.init()
 gameWidth = 1920
@@ -12,10 +14,7 @@ running = True
 #------ load assets --------
 
 ## Tiles
-grassTilePic = pygame.image.load(Path(__file__).parent / "../assets/grassTile.png")
-selectablePic = pygame.image.load(Path(__file__).parent / "../assets/selectableHighlight.png")
-attackablePic = pygame.image.load(Path(__file__).parent / "../assets/attackableHighlight.png")
-occupiedPic = pygame.image.load(Path(__file__).parent / "../assets/occupiedHighlight.png")
+
 cursorPic = pygame.image.load(Path(__file__).parent / "../assets/cursor.png")
 
 ## Characters
@@ -105,88 +104,9 @@ font = pygame.font.Font('freesansbold.ttf', 52)
 
 
 # custom classes
-class Map():
-
-    def __init__(self, width, height, background):
-        self.width=width
-        self.height=height
-        self.background = background
-        # creates a list of rows of tiles
-        tiles = []
-        currHeight = 0
-        currWidth = 0
-        for i in range(width):
-            row = []
-            for j in range(height):
-                row.append(Tile(currWidth, currHeight))
-                currHeight+=1
-            currHeight = 0
-            currWidth+=1
-            tiles.append(row)
-        self.tiles = tiles
-        for row in self.tiles:
-            for tile in row:
-                if tile.Y < self.height-1:
-                    tile.adjList.append(self.tiles[tile.X][tile.Y+1])
-                if tile.Y > 0:
-                    tile.adjList.append(self.tiles[tile.X][tile.Y-1])
-                if tile.X < self.width-1:
-                    tile.adjList.append(self.tiles[tile.X+1][tile.Y])
-                if tile.X > 0:
-                    tile.adjList.append(self.tiles[tile.X-1][tile.Y])
-
-    def addUnitToMap(self, unit):
-        self.tiles[unit.X][unit.Y].currentUnit = unit
-
-    def reset(self):
-        for row in self.tiles:
-            for tile in row:
-                tile.reset()
-
-    def draw(self, screen):
-        screen.blit(self.background, (xCamera, yCamera))
-        for row in self.tiles:
-            for tile in row:
-                tile.draw(screen)
-            
-class Tile():
-
-    def __init__(self, X, Y):
-        self.X = X
-        self.Y = Y
-        self.currentUnit = None
-        self.pic = pygame.transform.scale(grassTilePic, (tileSize, tileSize))
-        self.walkable = True
-        self.selectable = False
-        self.selectablePic = pygame.transform.scale(selectablePic, (tileSize, tileSize))
-        self.attackable = False
-        self.attackablePic = pygame.transform.scale(attackablePic, (tileSize, tileSize))
-        self.occupiedPic = pygame.transform.scale(occupiedPic, (tileSize, tileSize))
-        self.adjList = []
-        self.distance = maxDistance
-        self.parent = None
-
-    def __str__(self):
-        return "X: {0}\tY: {1}".format(self.X, self.Y)
-
-    def reset(self):
-        self.parent = None
-        self.distance = maxDistance
-        self.selectable = False
-        self.attackable = False
-
-    def draw(self, screen):
-        #screen.blit(self.pic, (self.X*tileSize, self.Y*tileSize))
-        if self.currentUnit != None:
-            screen.blit(self.occupiedPic, (self.X*tileSize + xCamera, self.Y*tileSize + yCamera))
-        elif self.attackable:
-            screen.blit(self.attackablePic, (self.X*tileSize + xCamera, self.Y*tileSize + yCamera))
-        elif self.selectable:
-            screen.blit(self.selectablePic, (self.X*tileSize + xCamera, self.Y*tileSize + yCamera))
-        
 class Cursor():
 
-    def __init__(self):
+    def __init__(self, tileSize):
         self.X = 1
         self.Y = 2
         self.yCameraOffset = 0
@@ -745,7 +665,7 @@ class LevelUp():
 
     def getHasLeveled(self, index):
         if self.hasLeveledStat[index]:
-            return "+=1"
+            return " += 1"
         else:
             return ""
 
@@ -784,17 +704,21 @@ class LevelUp():
             screen.blit(sklT, sklR)
             screen.blit(lckT, lckR)
 
+            ## count down delay, either add 1 to level stat, or wait after all the stats are shown or reset and return True 
             self.delay -= 1
             if self.delay <= 0:
-                if self.levelIndex >= len(self.statsLeveled):
-                    self.currUnit = None
+                if self.levelIndex > len(self.statsLeveled):
                     self.levelIndex = 0
+                    self.currUnit = None
                     return True
-                self.delay = 5
-                
-                self.currUnit.addToStat(self.statsLeveled[self.levelIndex], 1)
-                self.hasLeveledStat[self.statsLeveled[self.levelIndex]] = True
-                self.levelIndex+=1
+                elif self.levelIndex == len(self.statsLeveled):
+                    self.levelIndex+=1
+                    self.delay = 10
+                else:
+                    self.delay = 5
+                    self.currUnit.addToStat(self.statsLeveled[self.levelIndex], 1)
+                    self.hasLeveledStat[self.statsLeveled[self.levelIndex]] = True
+                    self.levelIndex+=1
         return False
                     
 
@@ -865,9 +789,9 @@ class Weapon(Item):
 
 
 ## custom class instances
-map1 = Map(mapWidth, mapHeight, map1background)
+map1 = Map(mapWidth, mapHeight, map1background, tileSize)
 myBattleForcast = BattleForcast()
-mainCursor = Cursor()
+mainCursor = Cursor(tileSize)
 myCombatUI = CombatUI(0, gameHeight - 385)
 myUnitInfo = UnitInfo()
 myMapUnitUI = MapUnitUI()
@@ -1447,7 +1371,7 @@ while running:
             map1.reset()
     else:
         screen.fill((0,0,0))
-        map1.draw(screen)
+        map1.draw(screen, xCamera, yCamera)
         mainCursor.draw(screen)
         for unit in playerUnits:
             unit.draw(screen)
