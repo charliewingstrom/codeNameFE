@@ -1,7 +1,10 @@
 import pygame
 import random
 from pathlib import Path
-from map import Map
+
+## custom classes
+from tileMap import Map
+from cursor import Cursor
 
 
 pygame.init()
@@ -12,11 +15,6 @@ pygame.display.set_caption("Code FE")
 running = True
 
 #------ load assets --------
-
-## Tiles
-
-cursorPic = pygame.image.load(Path(__file__).parent / "../assets/cursor.png")
-
 ## Characters
 protagPicA = pygame.image.load(Path(__file__).parent / "../assets/protag_A.png")
 protagPicB = pygame.image.load(Path(__file__).parent / "../assets/protag_B.png")
@@ -104,50 +102,6 @@ font = pygame.font.Font('freesansbold.ttf', 52)
 
 
 # custom classes
-class Cursor():
-
-    def __init__(self, tileSize):
-        self.X = 1
-        self.Y = 2
-        self.yCameraOffset = 0
-        self.xCameraOffset = 0
-        self.pic = pygame.transform.scale(cursorPic, (tileSize, tileSize))
-
-    def down(self):
-        if self.Y < mapHeight-1:
-            self.Y+=1
-            if (self.Y * tileSize) + yCamera + tileSize  > gameHeight:
-                self.yCameraOffset += 1
-                return -tileSize
-        return 0
-
-    def up(self):
-        if self.Y > 0:
-            self.Y-=1
-            if (self.Y * tileSize) + yCamera < tileSize:
-                self.yCameraOffset -= 1
-                return tileSize
-        return 0
-
-    def right(self):
-        if self.X < mapWidth-1:
-            self.X+=1
-            if (self.X * tileSize) + xCamera + tileSize > gameWidth:
-                self.xCameraOffset += 1
-                return -tileSize
-        return 0
-
-    def left(self):
-        if self.X > 0:
-            self.X-=1
-            if (self.X * tileSize) + xCamera < tileSize:
-                self.xCameraOffset -= 1
-                return tileSize
-        return 0
-
-    def draw(self, screen):
-        screen.blit(self.pic, ((self.X*tileSize) - (self.xCameraOffset*tileSize), (self.Y*tileSize) - (self.yCameraOffset*tileSize)))
-
 class BattleForcast():
 
     def __init__(self):
@@ -721,9 +675,6 @@ class LevelUp():
                     self.levelIndex+=1
         return False
                     
-
-
-
 class Item():
 
     def __init__(self, name, description):
@@ -791,7 +742,7 @@ class Weapon(Item):
 ## custom class instances
 map1 = Map(mapWidth, mapHeight, map1background, tileSize)
 myBattleForcast = BattleForcast()
-mainCursor = Cursor(tileSize)
+mainCursor = Cursor(tileSize, mapWidth, mapHeight, gameWidth, gameHeight)
 myCombatUI = CombatUI(0, gameHeight - 385)
 myUnitInfo = UnitInfo()
 myMapUnitUI = MapUnitUI()
@@ -1022,16 +973,16 @@ while running:
         elif playerTurn and not (selectingAction or selectingAttack or selectingWeapon or selectingItems):
             # cursor controls
             if keys[pygame.K_DOWN]:
-                yCamera += mainCursor.down()
+                yCamera += mainCursor.down(yCamera)
                 checkMapUI()
             if keys[pygame.K_UP]:
-                yCamera += mainCursor.up()
+                yCamera += mainCursor.up(yCamera)
                 checkMapUI()
             if keys[pygame.K_RIGHT]:
-                xCamera += mainCursor.right()
+                xCamera += mainCursor.right(xCamera)
                 checkMapUI()
             if keys[pygame.K_LEFT]:
-                xCamera += mainCursor.left()
+                xCamera += mainCursor.left(xCamera)
                 checkMapUI()
             # end cursor controls
 
