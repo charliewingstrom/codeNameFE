@@ -2,6 +2,7 @@ import pygame
 from pathlib import Path
 import random
 
+mainMenuPic = pygame.image.load(Path(__file__).parent / "../assets/main-menu.png")
 battleForecastPic = pygame.image.load(Path(__file__).parent / "../assets/battle-forecast.png")
 
 combatUI = pygame.image.load(Path(__file__).parent / "../assets/Combat-UI.png")
@@ -10,6 +11,13 @@ healthbarfullPiece = pygame.image.load(Path(__file__).parent / "../assets/health
 healthbarEmptyPiece = pygame.image.load(Path(__file__).parent / "../assets/healthbar-piece-empty.png")
 
 mapUnitUI = pygame.image.load(Path(__file__).parent / "../assets/map-unit-UI.png")
+
+unitInfoPic = pygame.image.load(Path(__file__).parent / "../assets/unit-info.png")
+
+class MainMenu():
+
+    def draw(self, screen):
+        screen.blit(mainMenuPic, (0,0))
 
 class BattleForcast():
 
@@ -106,7 +114,6 @@ class BattleForcast():
         screen.blit(eHitText, eHitRect)
         screen.blit(eCritText, eCritRect)
 
-
 class CombatUI():
 
     def __init__(self, X, Y):
@@ -180,7 +187,6 @@ class CombatUI():
             screen.blit(DUHitText, DUHitRect)
             screen.blit(DUCritText, DUCritRect)
 
-
 class MapUnitUI():
 
     def __init__(self, gameWidth, gameHeight):
@@ -213,3 +219,80 @@ class MapUnitUI():
             screen.blit(nameT, nameR)
             screen.blit(hpT, hpR)
             screen.blit(mHpT, mHpR)
+
+
+class UnitInfo():
+
+    def __init__(self):
+        self.pic = unitInfoPic
+        self.currUnit = None
+    def reset(self, unit):
+        self.currUnit = unit
+
+    def draw(self, screen, font):
+        screen.blit(self.pic, (0, 0))
+
+        nameT = font.render(self.currUnit.name, True, (0,0,0))
+        nameR = nameT.get_rect()
+        nameR.center = (250, 650)
+
+        lvlT = font.render(str(self.currUnit.level), True, (0,0,0))
+        lvlR = lvlT.get_rect()
+        lvlR.center = (270, 870)
+
+        expT = font.render(str(self.currUnit.exp), True, (0,0,0))
+        expR = expT.get_rect()
+        expR.center = (630, 870)
+
+        hpT = font.render(str(self.currUnit.hp), True, (0,0,0))
+        hpR = hpT.get_rect()
+        hpR.center = (330, 990)
+
+        mhpT = font.render(str(self.currUnit.maxHp), True, (0,0,0))
+        mhpR = mhpT.get_rect()
+        mhpR.center = (450, 990)
+
+        strT = font.render(str(self.currUnit.attack), True, (0,0,0))
+        strR = strT.get_rect()
+        strR.center = (870, 110)
+
+        sklT = font.render(str(self.currUnit.skill), True, (0,0,0))
+        sklR = strT.get_rect()
+        sklR.center = (870, 230)
+
+        spdT = font.render(str(self.currUnit.speed), True, (0,0,0))
+        spdR = spdT.get_rect()
+        spdR.center = (870, 340)
+
+        lckT = font.render(str(self.currUnit.luck), True, (0,0,0))
+        lckR = lckT.get_rect()
+        lckR.center = (870, 460)
+
+        defT = font.render(str(self.currUnit.defense), True, (0,0,0))
+        defR = defT.get_rect()
+        defR.center = (870, 580)
+
+        movT = font.render(str(self.currUnit.mov), True, (0,0,0))
+        movR = movT.get_rect()
+        movR.center = (870, 700)
+
+        screen.blit(nameT, nameR)
+        screen.blit(lvlT, lvlR)
+        screen.blit(expT, expR)
+
+        screen.blit(hpT, hpR)
+        screen.blit(mhpT, mhpR)
+        screen.blit(strT, strR)
+        screen.blit(sklT, sklR)
+        screen.blit(spdT, spdR)
+        screen.blit(lckT, lckR)
+        screen.blit(defT, defR)
+        screen.blit(movT, movR)
+
+        Yoffset = 100
+        for item in self.currUnit.getInventory():
+            itemT = font.render(item.name, True, (0,0,0))
+            itemR = itemT.get_rect()
+            itemR.center = (1600, Yoffset)
+            screen.blit(itemT, itemR)
+            Yoffset += 100

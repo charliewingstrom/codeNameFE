@@ -5,7 +5,7 @@ from pathlib import Path
 ## custom classes
 from tileMap import Map
 from cursor import Cursor
-from ui import BattleForcast, CombatUI, MapUnitUI
+from ui import MainMenu, BattleForcast, CombatUI, MapUnitUI, UnitInfo
 
 pygame.init()
 gameWidth = 1920
@@ -31,7 +31,6 @@ waitButton = pygame.image.load(Path(__file__).parent / "../assets/wait-button.pn
 itemsButton = pygame.image.load(Path(__file__).parent / "../assets/items-button.png")
 attackButton = pygame.image.load(Path(__file__).parent / "../assets/attack-button.png")
 menuCursor = pygame.image.load(Path(__file__).parent / "../assets/menu-cursor.png")
-unitInfoPic = pygame.image.load(Path(__file__).parent / "../assets/unit-info.png")
 
 ### Combat and UI
 inventoryUI = pygame.image.load(Path(__file__).parent / "../assets/inventory.png") 
@@ -66,6 +65,7 @@ defendingUnitAttacking = True
 experience = 0
 
 ## player state
+inMainMenu = True
 playerTurn = True
 viewingUnitInfo = False
 selectingTile = False
@@ -102,81 +102,7 @@ font = pygame.font.Font('freesansbold.ttf', 52)
 
 
 
-class UnitInfo():
 
-    def __init__(self):
-        self.pic = unitInfoPic
-        self.currUnit = None
-    def reset(self, unit):
-        self.currUnit = unit
-
-    def draw(self, screen):
-        screen.blit(self.pic, (0, 0))
-
-        nameT = font.render(self.currUnit.name, True, (0,0,0))
-        nameR = nameT.get_rect()
-        nameR.center = (250, 650)
-
-        lvlT = font.render(str(self.currUnit.level), True, (0,0,0))
-        lvlR = lvlT.get_rect()
-        lvlR.center = (270, 870)
-
-        expT = font.render(str(self.currUnit.exp), True, (0,0,0))
-        expR = expT.get_rect()
-        expR.center = (630, 870)
-
-        hpT = font.render(str(self.currUnit.hp), True, (0,0,0))
-        hpR = hpT.get_rect()
-        hpR.center = (330, 990)
-
-        mhpT = font.render(str(self.currUnit.maxHp), True, (0,0,0))
-        mhpR = mhpT.get_rect()
-        mhpR.center = (450, 990)
-
-        strT = font.render(str(self.currUnit.attack), True, (0,0,0))
-        strR = strT.get_rect()
-        strR.center = (870, 110)
-
-        sklT = font.render(str(self.currUnit.skill), True, (0,0,0))
-        sklR = strT.get_rect()
-        sklR.center = (870, 230)
-
-        spdT = font.render(str(self.currUnit.speed), True, (0,0,0))
-        spdR = spdT.get_rect()
-        spdR.center = (870, 340)
-
-        lckT = font.render(str(self.currUnit.luck), True, (0,0,0))
-        lckR = lckT.get_rect()
-        lckR.center = (870, 460)
-
-        defT = font.render(str(self.currUnit.defense), True, (0,0,0))
-        defR = defT.get_rect()
-        defR.center = (870, 580)
-
-        movT = font.render(str(self.currUnit.mov), True, (0,0,0))
-        movR = movT.get_rect()
-        movR.center = (870, 700)
-
-        screen.blit(nameT, nameR)
-        screen.blit(lvlT, lvlR)
-        screen.blit(expT, expR)
-
-        screen.blit(hpT, hpR)
-        screen.blit(mhpT, mhpR)
-        screen.blit(strT, strR)
-        screen.blit(sklT, sklR)
-        screen.blit(spdT, spdR)
-        screen.blit(lckT, lckR)
-        screen.blit(defT, defR)
-        screen.blit(movT, movR)
-
-        Yoffset = 100
-        for item in self.currUnit.getInventory():
-            itemT = font.render(item.name, True, (0,0,0))
-            itemR = itemT.get_rect()
-            itemR.center = (1600, Yoffset)
-            screen.blit(itemT, itemR)
-            Yoffset += 100
 
 class Inventory():
     
@@ -540,6 +466,7 @@ class Weapon(Item):
 
 
 ## custom class instances
+myMainMenu = MainMenu()
 map1 = Map(mapWidth, mapHeight, map1background, tileSize)
 myBattleForcast = BattleForcast(gameWidth)
 mainCursor = Cursor(tileSize, mapWidth, mapHeight, gameWidth, gameHeight)
@@ -721,8 +648,11 @@ def checkMapUI():
 
 # main game loop
 while running:
+
+    #### moving ####
     keys = pygame.key.get_pressed()
 
+    
     # if something is moving there shouldn't be any other input accepted
     if moving:
         currentUnit.X += moveVelocity[0]
@@ -759,6 +689,7 @@ while running:
                     menuOptions.insert(0, "attack")
     # not moving
     else: 
+        ## automated enemy phase actions
         if not playerTurn and not attacking:
             if len(activeEnemyUnits) > 0:
                 currentUnit = activeEnemyUnits.pop(0)
@@ -777,6 +708,8 @@ while running:
                 for unit in enemyUnits:
                     activeEnemyUnits.append(unit)
         
+
+        ## menu and cursor controls 
         ## if keys (they are up here because you should be able to hold the key)
         elif playerTurn and not (selectingAction or selectingAttack or selectingWeapon or selectingItems):
             # cursor controls
@@ -808,7 +741,9 @@ while running:
             ## quit
             if event.type == pygame.QUIT:
                 running = False
-            
+            if inMainMenu: 
+                if event.type == pygame.KEYDOWN:
+                    inMainMenu = False
             # player turn
             elif playerTurn:
                 # picking a unit to attack
@@ -1000,7 +935,13 @@ while running:
                             myUnitInfo.reset(currentUnit)
                             viewingUnitInfo = True
                         
-    if attacking:
+    
+    #### drawing ####
+    if inMainMenu:
+        myMainMenu.draw(screen)
+    
+    ## attacking ####
+    elif attacking:
         screen.blit(attacingBackground, (0, 0))
         # if current player attacking, 
         ## if player will hit, play hit animation and remove the required health from the opponent
@@ -1129,6 +1070,9 @@ while running:
             selectingAttack = False
             
             map1.reset()
+    
+    
+    
     else:
         screen.fill((0,0,0))
         map1.draw(screen, xCamera, yCamera)
@@ -1160,7 +1104,7 @@ while running:
                 screen.blit(waitButton, (gameWidth - 300, Y))
         
         elif viewingUnitInfo:
-            myUnitInfo.draw(screen)
+            myUnitInfo.draw(screen, font)
                 
     pygame.display.update()
     pygame.time.delay(60)
