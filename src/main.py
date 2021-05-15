@@ -8,6 +8,7 @@ from cursor import Cursor
 from ui import MainMenu, BattleForcast, CombatUI, MapUnitUI, UnitInfo
 from inventory import Inventory, Weapon, HealingItem
 from animation import Animation
+from unit import Unit
 
 
 pygame.init()
@@ -19,15 +20,7 @@ running = True
 
 #------ load assets --------
 ## Characters
-protagPicA = pygame.image.load(Path(__file__).parent / "../assets/protag_A.png")
-protagPicB = pygame.image.load(Path(__file__).parent / "../assets/protag_B.png")
 
-combatUnit1 = pygame.image.load(Path(__file__).parent / "../assets/Combat-1.png")
-combatUnit2 = pygame.image.load(Path(__file__).parent / "../assets/Combat-2.png")
-combatUnit3 = pygame.image.load(Path(__file__).parent / "../assets/Combat-3.png")
-combatUnit4 = pygame.image.load(Path(__file__).parent / "../assets/Combat-4.png")
-combatUnit5 = pygame.image.load(Path(__file__).parent / "../assets/Combat-5.png")
-combatUnit6 = pygame.image.load(Path(__file__).parent / "../assets/Combat-6.png")
 
 ## Menu
 waitButton = pygame.image.load(Path(__file__).parent / "../assets/wait-button.png")
@@ -99,101 +92,7 @@ font = pygame.font.Font('freesansbold.ttf', 52)
 
 # custom classes
 
-        
 
-
-
-
-
-
-
-        
-
-
-class Unit():
-
-    def __init__(self, X, Y):
-        self.name = "generic"
-        self.level = 1
-        self.exp = 0
-        
-        # stats
-        self.maxHp = 15
-        self.hp = self.maxHp
-        self.attack = 10
-        self.defense = 5
-        self.speed = 6
-        self.skill = 6
-        self.luck = 4
-        self.mov = 5
-
-        # growths
-        self.hpG = 50
-        self.attackG = 50
-        self.defenseG = 50
-        self.speedG = 50
-        self.skillG = 50
-        self.luckG = 50
-        self.inventory = Inventory()
-        self.X = X
-        self.Y = Y
-
-        self.fieldPics = [pygame.transform.scale(protagPicA, (tileSize, tileSize)), pygame.transform.scale(protagPicB, (tileSize, tileSize))] 
-        self.aniTimer = 5
-        self.combatAnimation = Animation([combatUnit1,combatUnit2, combatUnit3,combatUnit4, combatUnit5, combatUnit6,combatUnit5, combatUnit4, combatUnit3, combatUnit2, combatUnit1])
-
-        self.active = True
-
-    def getStats(self):
-        return [self.maxHp, self.attack, self.defense, self.speed, self.skill, self.luck]
-
-    def addToStat(self, index, amount):
-        if index == 0:
-            self.maxHp += amount
-        if index == 1:
-            self.attack += amount
-        if index == 2:
-            self.defense += amount
-        if index == 3:
-            self.speed += amount
-        if index == 4:
-            self.skill += amount
-        if index == 5:
-            self.luck += amount
-
-    def getGrowths(self):
-        return [self.hpG, self.attackG, self.defenseG, self.speedG, self.skillG, self.luckG]
-
-    def getEquippedWeapon(self):
-        if len(self.getInventory()) > 0:
-            return self.getInventory()[0] 
-        return None
-    
-    def getInventory(self):
-        return self.inventory.getInventory()
-
-    def getAttackRange(self):
-        if len(self.getInventory()) > 0:
-            return self.getEquippedWeapon().range
-        return [0,0]
-
-    def draw(self, screen):
-        screen.blit(self.fieldPics[0], (self.X*tileSize + xCamera, self.Y*tileSize + yCamera))
-        self.aniTimer -= 1
-        if self.aniTimer < 0:
-            tmpPic = self.fieldPics.pop(0)
-            self.fieldPics.append(tmpPic)
-            self.aniTimer = 5
-        
-        ## draw health bar 
-        pygame.draw.rect(screen, (0,0,0), pygame.Rect(self.X*tileSize + xCamera, (self.Y*tileSize)+tileSize-5 + yCamera, tileSize, 5))
-        healthPercent = self.hp/self.maxHp
-        color = (0, 255, 0)
-        if healthPercent < 0.2:
-            color = (255, 0, 0)
-        elif healthPercent < 0.5:
-            color = (238, 255, 0)
-        pygame.draw.rect(screen, color, pygame.Rect(self.X*tileSize + xCamera, (self.Y*tileSize)+tileSize-5 + yCamera, healthPercent * tileSize, 5))
 
 class Exp():
 
@@ -315,11 +214,11 @@ myExp = Exp()
 myLevelUp = LevelUp()
 
 ## width first, height second (width goes from left to right, height goes from top to bottom)
-protag = Unit(3, 3)
+protag = Unit(3, 3, tileSize)
 bow = Weapon("bow")
 bow.range = [3,3]
 protag.inventory.addItem(bow)
-Jagen = Unit(3, 5)
+Jagen = Unit(3, 5, tileSize)
 Jagen.exp = 90
 Jagen.inventory.addItem(Weapon("Sword"))
 lance = Weapon("Javelin")
@@ -334,9 +233,9 @@ Jagen.speed = 9
 
 myLevelUp.currUnit = Jagen
 
-enemy = Unit(9, 5)
+enemy = Unit(9, 5, tileSize)
 enemy.inventory.addItem(Weapon())
-enemy1 = Unit(9, 6)
+enemy1 = Unit(9, 6, tileSize)
 enemy1.inventory.addItem(Weapon())
 enemy1.defense = 7
 # Setting up for game
@@ -792,7 +691,7 @@ while running:
         ##### play miss animation 
 
         if currentUnitAttacking:
-            screen.blit(pygame.transform.flip(combatUnit1, True, False), (0, 0))
+            screen.blit(pygame.transform.flip(defendingUnit.getCombatAniFirstFrame(), True, False), (0, 0))
             
             if myBattleForcast.attackingUnitWillHit:
                 if currentUnit.combatAnimation.draw(screen, 0, 0, False):
@@ -813,7 +712,7 @@ while running:
 
         elif defendingUnitAttacking:
             if defendingUnit.hp > 0:
-                screen.blit(combatUnit1, (0, 0))
+                screen.blit(currentUnit.getCombatAniFirstFrame(), (0, 0))
                 if myBattleForcast.defendingUnitCanCounter:
                     if myBattleForcast.defendingUnitWillHit:
                         if defendingUnit.combatAnimation.draw(screen, 0, 0, True):
@@ -837,7 +736,7 @@ while running:
                             defendingUnitAttacking = False
                             experience += 1
                 else:
-                    screen.blit(pygame.transform.flip(combatUnit1, True, False), (0, 0))
+                    screen.blit(pygame.transform.flip(defendingUnit.getCombatAniFirstFrame(), True, False), (0, 0))
                     defendingUnitAttacking = False
             else:
                 defendingUnitAttacking = False
@@ -854,9 +753,9 @@ while running:
 
         elif finishedAttacking:
             if currentUnit.hp > 0:
-                screen.blit(combatUnit1, (0, 0))
+                screen.blit(currentUnit.getCombatAniFirstFrame(), (0, 0))
             if defendingUnit.hp > 0:
-                screen.blit(pygame.transform.flip(combatUnit1, True, False), (0, 0))
+                screen.blit(pygame.transform.flip(defendingUnit.getCombatAniFirstFrame(), True, False), (0, 0))
             myCombatUI.draw(screen, myBattleForcast, font, currentUnit, defendingUnit, enemyUnits, playerUnits)
             if experience > 0:
                 experience = 99
@@ -869,18 +768,18 @@ while running:
 
         elif levelingUp:
             if currentUnit.hp > 0:
-                screen.blit(combatUnit1, (0, 0))
+                screen.blit(currentUnit.getCombatAniFirstFrame(), (0, 0))
             if defendingUnit.hp > 0:
-                screen.blit(pygame.transform.flip(combatUnit1, True, False), (0, 0))
+                screen.blit(pygame.transform.flip(defendingUnit.getCombatAniFirstFrame(), True, False), (0, 0))
             myCombatUI.draw(screen, myBattleForcast, font, currentUnit, defendingUnit, enemyUnits, playerUnits)
             if myLevelUp.draw(screen):
                 levelingUp = False
                 myLevelUp.currUnit = None
         elif addingExp:
             if currentUnit.hp > 0:
-                screen.blit(combatUnit1, (0, 0))
+                screen.blit(currentUnit.getCombatAniFirstFrame(), (0, 0))
             if defendingUnit.hp > 0:
-                screen.blit(pygame.transform.flip(combatUnit1, True, False), (0, 0))
+                screen.blit(pygame.transform.flip(defendingUnit.getCombatAniFirstFrame(), True, False), (0, 0))
             myCombatUI.draw(screen, myBattleForcast, font, currentUnit, defendingUnit, enemyUnits, playerUnits)
             if myExp.currUnit.exp >= 100:
                 levelingUp = True
@@ -916,9 +815,9 @@ while running:
         map1.draw(screen, xCamera, yCamera)
         mainCursor.draw(screen)
         for unit in playerUnits:
-            unit.draw(screen)
+            unit.draw(screen, tileSize, xCamera, yCamera)
         for enemy in enemyUnits:
-            enemy.draw(screen)
+            enemy.draw(screen, tileSize, xCamera, yCamera)
         
         myMapUnitUI.draw(screen, font)
         if selectingAttack:

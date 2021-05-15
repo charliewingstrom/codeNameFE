@@ -8,6 +8,8 @@ class Animation():
         ## index for which frame we are on
         self.index = 0
 
+    def getFirstFrame(self):
+        return self.frames[0]
     ## draws 1 frame each call, if animation is finished, resets index and returns true, else returns false
     def draw(self, screen, x, y, reverse):
         if reverse:
