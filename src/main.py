@@ -7,6 +7,8 @@ from tileMap import Map
 from cursor import Cursor
 from ui import MainMenu, BattleForcast, CombatUI, MapUnitUI, UnitInfo
 from inventory import Inventory, Weapon, HealingItem
+from animation import Animation
+
 
 pygame.init()
 gameWidth = 1920
@@ -106,26 +108,7 @@ font = pygame.font.Font('freesansbold.ttf', 52)
 
 
         
-class Animation():
-    
-    def __init__(self, frames):
-        ## list of frames for the animation
-        self.frames = frames
-        ## index for which frame we are on
-        self.index = 0
 
-    ## draws 1 frame each call, if animation is finished, resets index and returns true, else returns false
-    def draw(self, screen, x, y, reverse):
-        if reverse:
-            screen.blit(pygame.transform.flip(self.frames[self.index], True, False), (x, y))
-        else:
-            screen.blit(self.frames[self.index], (x, y))
-        self.index+=1
-        if self.index == len(self.frames):
-            self.index = 0
-            return True
-        else:
-            return False
 
 class Unit():
 
