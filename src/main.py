@@ -367,7 +367,8 @@ def setTilesInRangeAttackable(startTile, atkRange, tilesInRange):
             atkTile.attackable = True
 
 
-
+## compares the UI elements to the cursor location
+## keeps the UI from covering up the map
 def checkMapUI():
     if mainCursor.X * tileSize > gameWidth / 2:
         myMapUnitUI.X = 10
@@ -380,7 +381,12 @@ def checkMapUI():
     cursorTileUnit = map1.tiles[mainCursor.X][mainCursor.Y].currentUnit
     myMapUnitUI.reset(cursorTileUnit)
 
-
+## given an attacking and defending unit, blit both first frames to the screen (if they are alive)
+def drawFirstFrames(currentUnit, defendingUnit):
+    if currentUnit.hp > 0:
+        screen.blit(currentUnit.getCombatAniFirstFrame(), (0, 0))
+    if defendingUnit.hp > 0:
+        screen.blit(pygame.transform.flip(defendingUnit.getCombatAniFirstFrame(), True, False), (0, 0))
 
 
 # main game loop
@@ -696,16 +702,13 @@ while running:
             if myBattleForcast.attackingUnitWillHit:
                 if currentUnit.combatAnimation.draw(screen, 0, 0, False):
                     ## remove health
-                    print("Damage = " + str(myBattleForcast.attackingUnitDmg))
                     defendingUnit.hp -= myBattleForcast.attackingUnitDmg
                     currentUnitAttacking = False
-                    print("current unit hit")
                     if currentUnit in playerUnits:
                         experience += myBattleForcast.attackingUnitDmg
             ## unit will miss, play miss animation
             else:
                 if currentUnit.combatAnimation.draw(screen, 0, 0, False):
-                    print("current unit miss")
                     currentUnitAttacking = False
                     experience += 1
             myCombatUI.draw(screen, myBattleForcast, font, currentUnit, defendingUnit, enemyUnits, playerUnits)
@@ -721,7 +724,6 @@ while running:
                             defendingUnitAttacking = False
                             if defendingUnit in playerUnits:
                                 experience += myBattleForcast.defendingUnitDmg
-                            print("defending unit hit")
                             if currentUnit.hp <= 0:
                                 if currentUnit in playerUnits:
                                     playerUnits.remove(currentUnit)
@@ -732,7 +734,6 @@ while running:
                     ## unit will miss, play miss animation
                     else:
                         if defendingUnit.combatAnimation.draw(screen, 0, 0, True):
-                            print("defending unit miss")
                             defendingUnitAttacking = False
                             experience += 1
                 else:
@@ -740,7 +741,7 @@ while running:
                     defendingUnitAttacking = False
             else:
                 defendingUnitAttacking = False
-                print("defending unit died")
+
                 ## remove unit from game
                 if defendingUnit in playerUnits:
                     playerUnits.remove(defendingUnit)
@@ -752,10 +753,7 @@ while running:
             myCombatUI.draw(screen, myBattleForcast, font, currentUnit, defendingUnit, enemyUnits, playerUnits)
 
         elif finishedAttacking:
-            if currentUnit.hp > 0:
-                screen.blit(currentUnit.getCombatAniFirstFrame(), (0, 0))
-            if defendingUnit.hp > 0:
-                screen.blit(pygame.transform.flip(defendingUnit.getCombatAniFirstFrame(), True, False), (0, 0))
+            drawFirstFrames(currentUnit, defendingUnit)
             myCombatUI.draw(screen, myBattleForcast, font, currentUnit, defendingUnit, enemyUnits, playerUnits)
             if experience > 0:
                 experience = 99
@@ -767,28 +765,27 @@ while running:
             finishedAttacking = False
 
         elif levelingUp:
-            if currentUnit.hp > 0:
-                screen.blit(currentUnit.getCombatAniFirstFrame(), (0, 0))
-            if defendingUnit.hp > 0:
-                screen.blit(pygame.transform.flip(defendingUnit.getCombatAniFirstFrame(), True, False), (0, 0))
+            drawFirstFrames(currentUnit, defendingUnit)
             myCombatUI.draw(screen, myBattleForcast, font, currentUnit, defendingUnit, enemyUnits, playerUnits)
+
             if myLevelUp.draw(screen):
                 levelingUp = False
                 myLevelUp.currUnit = None
+
         elif addingExp:
-            if currentUnit.hp > 0:
-                screen.blit(currentUnit.getCombatAniFirstFrame(), (0, 0))
-            if defendingUnit.hp > 0:
-                screen.blit(pygame.transform.flip(defendingUnit.getCombatAniFirstFrame(), True, False), (0, 0))
+            drawFirstFrames(currentUnit, defendingUnit)
             myCombatUI.draw(screen, myBattleForcast, font, currentUnit, defendingUnit, enemyUnits, playerUnits)
+
             if myExp.currUnit.exp >= 100:
                 levelingUp = True
                 myLevelUp.currUnit = myExp.currUnit
                 myLevelUp.roll(myExp.currUnit)
                 myExp.currUnit.exp = 0
                 myExp.currUnit.level += 1
+
             elif myExp.draw(screen):
                 addingExp = False
+                checkMapUI()
 
 
         else:

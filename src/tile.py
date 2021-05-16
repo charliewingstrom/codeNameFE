@@ -3,7 +3,6 @@ from pathlib import Path
 
 maxDistance = 256
 
-
 grassTilePic = pygame.image.load(Path(__file__).parent / "../assets/grassTile.png")
 selectablePic = pygame.image.load(Path(__file__).parent / "../assets/selectableHighlight.png")
 attackablePic = pygame.image.load(Path(__file__).parent / "../assets/attackableHighlight.png")
@@ -27,7 +26,7 @@ class Tile():
         self.distance = maxDistance
         self.parent = None
 
-    def __str__(self):
+    def __repr__(self):
         return "X: {0}\tY: {1}".format(self.X, self.Y)
 
     def reset(self):

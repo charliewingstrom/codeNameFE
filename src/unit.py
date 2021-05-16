@@ -48,6 +48,9 @@ class Unit():
 
         self.active = True
 
+    def __repr__(self):
+        return f"Unit({self.name})"
+        
     def getStats(self):
         return [self.maxHp, self.attack, self.defense, self.speed, self.skill, self.luck]
 
