@@ -2,7 +2,7 @@ from tile import Tile
 
 class Map():
 
-    def __init__(self, width, height, background, tileSize):
+    def __init__(self, width, height, background, tileSize, winCondition):
         self.width=width
         self.height=height
         self.background = background
@@ -30,6 +30,9 @@ class Map():
                 if tile.X > 0:
                     tile.adjList.append(self.tiles[tile.X-1][tile.Y])
 
+        ## win condition is a function that returns true if the condition has been met
+        self.winCondition = winCondition
+
     def addUnitToMap(self, unit):
         self.tiles[unit.X][unit.Y].currentUnit = unit
 
@@ -38,6 +41,9 @@ class Map():
             for tile in row:
                 tile.reset()
 
+    def checkForWin(self):
+        return self.winCondition()
+        
     def draw(self, screen, xCamera, yCamera):
         screen.blit(self.background, (xCamera, yCamera))
         for row in self.tiles:
