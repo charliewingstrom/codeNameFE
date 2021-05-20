@@ -70,49 +70,50 @@ class BattleForcast():
                 self.defendingUnitWillHit = False
 
     def draw(self, screen, font, currentUnit, defendingUnit):
-        screen.blit(self.pic, (self.X, self.Y))
+        if currentUnit and defendingUnit:
+            screen.blit(self.pic, (self.X, self.Y))
 
-        pHpText = font.render(str(currentUnit.hp), True, (0,0,0))
-        pHpRect = pHpText.get_rect()
-        pHpRect.center = (self.X+75, self.Y+85)
+            pHpText = font.render(str(currentUnit.hp), True, (0,0,0))
+            pHpRect = pHpText.get_rect()
+            pHpRect.center = (self.X+75, self.Y+85)
 
-        pAttackText = font.render(str(self.attackingUnitDmg), True, (0,0,0))
-        pAttackRect = pAttackText.get_rect()
-        pAttackRect.center = (self.X+75, self.Y+185) 
+            pAttackText = font.render(str(self.attackingUnitDmg), True, (0,0,0))
+            pAttackRect = pAttackText.get_rect()
+            pAttackRect.center = (self.X+75, self.Y+185) 
 
-        pHitText = font.render(str(self.attackingUnitHit), True, (0,0,0))
-        pHitRect = pHitText.get_rect()
-        pHitRect.center = (self.X+75, self.Y+330)
+            pHitText = font.render(str(self.attackingUnitHit), True, (0,0,0))
+            pHitRect = pHitText.get_rect()
+            pHitRect.center = (self.X+75, self.Y+330)
 
-        pCritText = font.render(str(self.attackingUnitCrit), True, (0,0,0))
-        pCritRect = pCritText.get_rect()
-        pCritRect.center = (self.X+75, self.Y+500)
+            pCritText = font.render(str(self.attackingUnitCrit), True, (0,0,0))
+            pCritRect = pCritText.get_rect()
+            pCritRect.center = (self.X+75, self.Y+500)
 
-        eHpText = font.render(str(defendingUnit.hp), True, (0,0,0))
-        eHpRect = eHpText.get_rect()
-        eHpRect.center = (self.X+390, self.Y+85)
+            eHpText = font.render(str(defendingUnit.hp), True, (0,0,0))
+            eHpRect = eHpText.get_rect()
+            eHpRect.center = (self.X+390, self.Y+85)
 
-        eAttackText = font.render(str(self.defendingUnitDmg), True, (0,0,0))
-        eAttackRect = eAttackText.get_rect()
-        eAttackRect.center = (self.X + 390, self.Y+185)
+            eAttackText = font.render(str(self.defendingUnitDmg), True, (0,0,0))
+            eAttackRect = eAttackText.get_rect()
+            eAttackRect.center = (self.X + 390, self.Y+185)
 
-        eHitText = font.render(str(self.defendingUnitHit), True, (0,0,0))
-        eHitRect = eHitText.get_rect()
-        eHitRect.center = (self.X+390, self.Y+330)
+            eHitText = font.render(str(self.defendingUnitHit), True, (0,0,0))
+            eHitRect = eHitText.get_rect()
+            eHitRect.center = (self.X+390, self.Y+330)
 
-        eCritText = font.render(str(self.defendingUnitCrit), True, (0,0,0))
-        eCritRect = eCritText.get_rect()
-        eCritRect.center = (self.X+390, self.Y+500)
+            eCritText = font.render(str(self.defendingUnitCrit), True, (0,0,0))
+            eCritRect = eCritText.get_rect()
+            eCritRect.center = (self.X+390, self.Y+500)
 
-        screen.blit(pHpText, pHpRect)
-        screen.blit(pAttackText, pAttackRect) 
-        screen.blit(pHitText, pHitRect)
-        screen.blit(pCritText, pCritRect)
+            screen.blit(pHpText, pHpRect)
+            screen.blit(pAttackText, pAttackRect) 
+            screen.blit(pHitText, pHitRect)
+            screen.blit(pCritText, pCritRect)
 
-        screen.blit(eHpText, eHpRect)
-        screen.blit(eAttackText, eAttackRect)
-        screen.blit(eHitText, eHitRect)
-        screen.blit(eCritText, eCritRect)
+            screen.blit(eHpText, eHpRect)
+            screen.blit(eAttackText, eAttackRect)
+            screen.blit(eHitText, eHitRect)
+            screen.blit(eCritText, eCritRect)
 
 class CombatUI():
 

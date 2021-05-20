@@ -343,9 +343,25 @@ def getMoveVelocity(start, end, moveSpeed):
     velocityY = (end.Y - start.Y) / moveSpeed
     return (velocityX, velocityY)
 
-def resetAfterAction(unit):
-    if unit:
+def resetAfterAction():
+    global currentUnit
+    global selectingAttack
+    global currentUnitTile 
+    global currentUnitStartingTile 
+    global defendingUnit
+    global selectingTile
+    global selectingAction
+    global selectingItems
+    currentUnitTile = None
+    currentUnitStartingTile = None
+    if currentUnit:
         currentUnit.active = False
+    currentUnit = None
+    defendingUnit = None
+    selectingTile = False
+    selectingAction = False
+    selectingAttack = False
+    selectingItems = False
     currentMap.reset()
 
 def findTilesInAttackRange(startTile, atkRange):
@@ -543,16 +559,7 @@ while running:
                         currentUnit.inventory.down()
                     if event.type == pygame.KEYDOWN and event.key == pygame.K_z:
                         if currentUnit.inventory.activateItem(currentUnit):
-                            currentUnitTile = None
-                            currentUnitStartingTile = None
-                            currentUnit.active = False
-                            currentUnit = None
-                            defendingUnit = None
-                            selectingTile = False
-                            selectingAction = False
-                            selectingAttack = False
-                            selectingItems = False
-                            currentMap.reset()
+                            resetAfterAction()
 
                 elif selectingWeapon:
                     if event.type == pygame.KEYDOWN and event.key == pygame.K_z:
@@ -582,11 +589,7 @@ while running:
                     # action selected from menu
                     if event.type == pygame.KEYDOWN and event.key == pygame.K_z:
                         if menuOptions[menuSelectionIndex] == 'wait':
-                            resetAfterAction(currentUnit)
-                            currentUnit = None
-                            currentUnitStartingTile = None
-                            currentUnitTile = None
-                            selectingAction = False
+                            resetAfterAction()
                             
                             
                         if menuOptions[menuSelectionIndex] == 'attack':
@@ -807,17 +810,9 @@ while running:
             currentUnitAttacking = True
             defendingUnitAttacking = True
             attacking = False
-            finishedAttacking = True
-            currentUnitTile = None
-            currentUnitStartingTile = None
-            currentUnit.active = False
-            currentUnit = None
-            defendingUnit = None
-            selectingTile = False
-            selectingAction = False
             selectingAttack = False
-            
-            currentMap.reset()
+            finishedAttacking = True
+            resetAfterAction()
 
             if currentMap.checkForWin():
                 print("Map is finished")
