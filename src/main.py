@@ -6,7 +6,7 @@ from pathlib import Path
 from tileMap import Map
 from cursor import Cursor
 from ui import MainMenu, BattleForcast, CombatUI, MapUnitUI, UnitInfo
-from inventory import Inventory, Weapon, HealingItem
+from inventory import Inventory, Weapon, HealingItem, Javelin
 from animation import Animation
 from unit import Unit
 
@@ -223,10 +223,7 @@ protag.inventory.addItem(bow)
 Jagen = Unit(3, 5, tileSize)
 Jagen.exp = 90
 Jagen.inventory.addItem(Weapon("Sword"))
-lance = Weapon("Javelin")
-lance.range = [1,2]
-lance.might = 3
-Jagen.inventory.addItem(lance)
+Jagen.inventory.addItem(Javelin())
 Jagen.inventory.addItem(HealingItem())
 Jagen.name = 'Jagen'
 Jagen.attack = 10
@@ -671,19 +668,12 @@ while running:
                             for tile in tilesInRange:
                                 if tile.currentUnit == None or tile.currentUnit == currentUnit:
                                     setTilesInRangeAttackable(tile, currentUnit.inventory.getBestRange(), tilesInRange)
-                                    # tile.selectable = True
-                                    # for atkTile in findTilesInAttackRange(tile, currentUnit.inventory.getBestRange()):
-                                    #     if atkTile not in tilesInRange:
-                                    #         atkTile.attackable = True
                             selectingTile = True
                         elif currentUnit != None and currentUnit in enemyUnits:
                             tilesInRange = findTilesInMovRange(currentUnit)
                             for tile in tilesInRange:
                                 if tile.currentUnit == None:
-                                    tile.selectable = True
-                                    for atkTile in findTilesInAttackRange(tile, currentUnit.inventory.getBestRange()):
-                                        if atkTile not in tilesInRange:
-                                            atkTile.attackable = True
+                                    setTilesInRangeAttackable(tile, currentUnit.inventory.getBestRange(), tilesInRange)
                     
                     if event.type == pygame.KEYDOWN and event.key == pygame.K_x:
                         currentUnit = None
@@ -773,7 +763,6 @@ while running:
             drawFirstFrames(currentUnit, defendingUnit)
             myCombatUI.draw(screen, myBattleForcast, font, currentUnit, defendingUnit, enemyUnits, playerUnits)
             if experience > 0:
-                experience = 99
                 addingExp = True
                 if currentUnit in playerUnits:
                     myExp.setup(currentUnit, experience)

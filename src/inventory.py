@@ -17,7 +17,7 @@ class Inventory():
         return self.weapons + self.items
 
     def addItem(self, item):
-        if type(item) == Weapon:
+        if issubclass(type(item), Weapon):
             self.weapons.append(item)
         else:
             self.items.append(item)
@@ -150,3 +150,9 @@ class Weapon(Item):
         screen.blit(mightT, mightR)
         screen.blit(hitT, hitR)
         screen.blit(critT, critR)
+
+
+class Javelin(Weapon):
+    def __init__(self):
+        super().__init__("Javelin", "Throwable Spear: Good for hitting enemies at a range with more damage than an arrow.")
+        self.range = [1, 2]
