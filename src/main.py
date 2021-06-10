@@ -387,11 +387,14 @@ def findTilesInAttackRange(startTile, atkRange):
                     dist[tile] = dist[currTile] + 1
     return inRange
 
-def setTilesInRangeAttackable(startTile, atkRange, tilesInRange):
-    startTile.selectable = True
-    for atkTile in findTilesInAttackRange(startTile, atkRange):
-        if atkTile not in tilesInRange:
-            atkTile.attackable = True
+def setTilesInRangeAttackable(atkRange, tilesInRange):
+    global currentUnit
+    for tile in tilesInRange:
+        if tile.currentUnit == None or tile.currentUnit == currentUnit:
+            tile.selectable = True
+            for atkTile in findTilesInAttackRange(tile, atkRange):
+                if atkTile not in tilesInRange:
+                    atkTile.attackable = True
 
 
 ## compares the UI elements to the cursor location
@@ -660,20 +663,12 @@ while running:
                         currentUnit = currentTile.currentUnit
                         
                         # get tiles in range of that unit and highlight them
-                        if currentUnit != None and currentUnit.active and currentUnit in playerUnits:
-                            # need to save this for later
-                            currentUnitTile = currentTile
-                            currentUnitStartingTile = currentTile
-                            tilesInRange = findTilesInMovRange(currentUnit)
-                            for tile in tilesInRange:
-                                if tile.currentUnit == None or tile.currentUnit == currentUnit:
-                                    setTilesInRangeAttackable(tile, currentUnit.inventory.getBestRange(), tilesInRange)
-                            selectingTile = True
-                        elif currentUnit != None and currentUnit in enemyUnits:
-                            tilesInRange = findTilesInMovRange(currentUnit)
-                            for tile in tilesInRange:
-                                if tile.currentUnit == None:
-                                    setTilesInRangeAttackable(tile, currentUnit.inventory.getBestRange(), tilesInRange)
+                        if currentUnit != None:
+                            setTilesInRangeAttackable(currentUnit.inventory.getBestRange(), findTilesInMovRange(currentUnit))
+                            if currentUnit.active and currentUnit in playerUnits:
+                                selectingTile = True
+                                currentUnitTile = currentTile
+                                currentUnitStartingTile = currentTile
                     
                     if event.type == pygame.KEYDOWN and event.key == pygame.K_x:
                         currentUnit = None

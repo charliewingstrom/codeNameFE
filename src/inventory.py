@@ -154,5 +154,5 @@ class Weapon(Item):
 
 class Javelin(Weapon):
     def __init__(self):
-        super().__init__("Javelin", "Throwable Spear: Good for hitting enemies at a range with more damage than an arrow.")
+        super().__init__("Javelin", "Throwable Spear")
         self.range = [1, 2]
