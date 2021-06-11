@@ -1,5 +1,6 @@
 import pygame
 import random
+from enum import Enum, auto
 from pathlib import Path
 
 ## custom classes
@@ -60,11 +61,23 @@ defendingUnitAttacking = True
 experience = 0
 
 ## player state
-inMainMenu = True
+class states(Enum):
+    inMainMenu = auto()
+    selectingTile = auto()
+    selectingAction = auto()
+    selectingAttack = auto()
+    selectingItems = auto()
+    selectingWeapon = auto()
+    viewingUnitInfo = auto()
+    attacking = auto()
+    finishedAttacking = auto()
+    addingExp = auto()
+    levelingUp = auto()
+
+currentState = states.inMainMenu
+
 playerTurn = True
 viewingUnitInfo = False
-selectingTile = False
-selectingAction = False
 selectingItems = False
 selectingWeapon = False
 selectingAttack = False
@@ -346,8 +359,6 @@ def resetAfterAction():
     global currentUnitTile 
     global currentUnitStartingTile 
     global defendingUnit
-    global selectingTile
-    global selectingAction
     global selectingItems
     currentUnitTile = None
     currentUnitStartingTile = None
@@ -355,8 +366,6 @@ def resetAfterAction():
         currentUnit.active = False
     currentUnit = None
     defendingUnit = None
-    selectingTile = False
-    selectingAction = False
     selectingAttack = False
     selectingItems = False
     currentMap.reset()
@@ -446,7 +455,7 @@ while running:
                 attacking = True
                 
             else:
-                selectingAction = True
+                currentState = states.selectingAction
                 menuOptions = []
                 menuSelectionIndex = 0
                 menuOptions.insert(0, "wait")
@@ -484,7 +493,7 @@ while running:
 
         ## menu and cursor controls 
         ## if keys (they are up here because you should be able to hold the key)
-        elif playerTurn and not (selectingAction or selectingAttack or selectingWeapon or selectingItems):
+        elif playerTurn and not (currentState in  [states.selectingAction, states.selectingAttack] or selectingWeapon or selectingItems or attacking):
             # cursor controls
             if keys[pygame.K_DOWN]:
                 yCamera += mainCursor.down(yCamera)
@@ -501,7 +510,7 @@ while running:
             # end cursor controls
 
         # menu movement controls
-        elif playerTurn and selectingAction:
+        elif playerTurn and currentState == states.selectingAction:
             if keys[pygame.K_DOWN]:
                 if (menuSelectionIndex < len(menuOptions)-1):
                     menuSelectionIndex+=1
@@ -512,17 +521,18 @@ while running:
 
         for event in pygame.event.get():
             ## quit
-            if event.type == pygame.QUIT:
+            if event.type == pygame.QUIT or event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                 running = False
-            if inMainMenu: 
+            if currentState == states.inMainMenu: 
                 if event.type == pygame.KEYDOWN:
-                    inMainMenu = False
+                    currentState = None
             # player turn
             elif playerTurn:
                 # picking a unit to attack
-                if selectingAttack:
+                if currentState == states.selectingAttack:
                     if event.type == pygame.KEYDOWN and event.key == pygame.K_z:
                         attacking = True
+                        currentState = None
                         myBattleForcast.roll()
 
                     if event.type == pygame.KEYDOWN and (event.key == pygame.K_RIGHT or event.key == pygame.K_UP):
@@ -546,13 +556,12 @@ while running:
                         myBattleForcast.calculate(currentUnit, defendingUnit, findTilesInAttackRange, currentMap)
 
                     if event.type == pygame.KEYDOWN and event.key == pygame.K_x:
-                        selectingAttack = False
-                        selectingAction = True
+                        currentState = states.selectingAction
 
                 elif selectingItems:
                     if event.type == pygame.KEYDOWN and event.key == pygame.K_x:
                         selectingItems = False
-                        selectingAction = True
+                        currentState = states.selectingAction
                     if event.type == pygame.KEYDOWN and event.key == pygame.K_UP:
                         currentUnit.inventory.up()
                     if event.type == pygame.KEYDOWN and event.key == pygame.K_DOWN:
@@ -572,7 +581,7 @@ while running:
                             tile.attackable = True
 
                         selectingWeapon = False
-                        selectingAttack = True
+                        currentState = states.selectingAttack
                         attackUnitIndex = 0
                         defendingUnit = unitsInRange[attackUnitIndex]
                         mainCursor.X = defendingUnit.X
@@ -585,7 +594,7 @@ while running:
                         currentUnit.inventory.down()
 
                 ### selecting action in menu
-                elif selectingAction:
+                elif currentState == states.selectingAction:
                     # action selected from menu
                     if event.type == pygame.KEYDOWN and event.key == pygame.K_z:
                         if menuOptions[menuSelectionIndex] == 'wait':
@@ -593,7 +602,7 @@ while running:
                             
                             
                         if menuOptions[menuSelectionIndex] == 'attack':
-                            selectingAction = False
+                            currentState = None
                             selectingWeapon = True
                             currentUnit.inventory.selectionIndex = 0
                             ## TODO get the weapons that can be used to attack
@@ -606,7 +615,7 @@ while running:
 
                         if menuOptions[menuSelectionIndex] == 'items':
                             selectingItems = True
-                            selectingAction = False
+                            currentState = None
                             currentUnit.inventory.avaliableItems = currentUnit.getInventory()
                     # go back to selecting tile
                     if event.type == pygame.KEYDOWN and event.key == pygame.K_x:
@@ -616,8 +625,8 @@ while running:
                         currentUnit.Y = currentUnitStartingTile.Y
                         currentUnitStartingTile.currentUnit = currentUnit
                         currentUnitTile = currentUnitStartingTile
-                        selectingTile = True
-                        selectingAction = False
+                        # update state
+                        currentState = states.selectingTile
                         tilesInRange = findTilesInMovRange(currentUnit)
                         for tile in tilesInRange:
                             if tile.currentUnit == None or tile.currentUnit == currentUnit:
@@ -627,14 +636,14 @@ while running:
                                         atkTile.attackable = True
 
                 ### selecting what tile to move to 
-                elif selectingTile:
+                elif currentState == states.selectingTile:
                     # Select tile and get ready to move to it
                     if event.type == pygame.KEYDOWN and event.key == pygame.K_z:
                         tileToMoveTo = currentMap.tiles[mainCursor.X][mainCursor.Y]
                         if tileToMoveTo.selectable:
                             targetTile = tileToMoveTo
                             moving = True
-                            selectingTile = False
+                            currentState = None
                             moveVelocity = getMoveVelocity(currentUnitTile, targetTile, moveSpeed)
                             currentMap.reset()
 
@@ -644,7 +653,7 @@ while running:
                         currentUnit = None
                         currentUnitTile = None
                         currentUnitStartingTile = None
-                        selectingTile = False
+                        currentState = None
 
                 elif viewingUnitInfo:
                     if event.type == pygame.KEYDOWN and event.key == pygame.K_x:
@@ -654,7 +663,7 @@ while running:
                 else:
                     if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
                         playerTurn = False
-                        selectingAction = False
+                        currentState = None
                     # Select unit and show their range
                     if event.type == pygame.KEYDOWN and event.key == pygame.K_z:
                         
@@ -666,13 +675,14 @@ while running:
                         if currentUnit != None:
                             setTilesInRangeAttackable(currentUnit.inventory.getBestRange(), findTilesInMovRange(currentUnit))
                             if currentUnit.active and currentUnit in playerUnits:
-                                selectingTile = True
+                                currentState = states.selectingTile
                                 currentUnitTile = currentTile
                                 currentUnitStartingTile = currentTile
                     
                     if event.type == pygame.KEYDOWN and event.key == pygame.K_x:
                         currentUnit = None
                         currentMap.reset()
+                        currentState = None
                     if event.type == pygame.KEYDOWN and event.key == pygame.K_a:
                         currentTile = currentMap.tiles[mainCursor.X][mainCursor.Y]
                         if currentTile.currentUnit != None:
@@ -682,7 +692,7 @@ while running:
                         
     
     #### drawing ####
-    if inMainMenu:
+    if currentState == states.inMainMenu:
         myMainMenu.draw(screen)
     
     ## attacking ####
@@ -702,6 +712,8 @@ while running:
             screen.blit(pygame.transform.flip(defendingUnit.getCombatAniFirstFrame(), True, False), (0, 0))
             
             if myBattleForcast.attackingUnitWillHit:
+                ## animations are called continously, 
+                ## once the animation is complete, it returns true
                 if currentUnit.combatAnimation.draw(screen, 0, 0, False):
                     ## remove health
                     defendingUnit.hp -= myBattleForcast.attackingUnitDmg
@@ -742,6 +754,8 @@ while running:
                     screen.blit(pygame.transform.flip(defendingUnit.getCombatAniFirstFrame(), True, False), (0, 0))
                     defendingUnitAttacking = False
             else:
+                # if here, defending unit has died,
+                # remove from game
                 defendingUnitAttacking = False
 
                 ## remove unit from game
@@ -794,7 +808,7 @@ while running:
             currentUnitAttacking = True
             defendingUnitAttacking = True
             attacking = False
-            selectingAttack = False
+            currentState = None
             finishedAttacking = True
             resetAfterAction()
 
@@ -813,7 +827,7 @@ while running:
             enemy.draw(screen, tileSize, xCamera, yCamera)
         
         myMapUnitUI.draw(screen, font)
-        if selectingAttack:
+        if currentState == states.selectingAttack:
             myBattleForcast.draw(screen, font, currentUnit, unitsInRange[attackUnitIndex])
 
         elif selectingItems:
@@ -821,7 +835,7 @@ while running:
         elif selectingWeapon:
             currentUnit.inventory.draw(screen, font)
 
-        elif selectingAction:
+        elif currentState == states.selectingAction:
             screen.blit(menuCursor, (gameWidth-450, 240+(165*menuSelectionIndex)))
             Y = 200
             if "attack" in menuOptions:
