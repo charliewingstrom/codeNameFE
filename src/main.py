@@ -7,7 +7,7 @@ from pathlib import Path
 from tileMap import Map
 from cursor import Cursor
 from ui import MainMenu, BattleForcast, CombatUI, MapUnitUI, UnitInfo
-from inventory import Inventory, Weapon, HealingItem, Javelin
+from inventory import Inventory, HealingItem, Sword, Bow, Javelin
 from animation import Animation
 from unit import Unit
 
@@ -78,7 +78,6 @@ class states(Enum):
 currentState = states.inMainMenu
 
 playerTurn = True
-viewingUnitInfo = False
 
 ## this might be tricky to add to states because it defaults to True
 ## there will be multiple exits for attacking to finishedAttacking
@@ -229,23 +228,29 @@ myLevelUp = LevelUp()
 
 ## creating units
 protag = Unit(3, 3, tileSize)
-bow = Weapon("bow")
-bow.range = [3,3]
-protag.inventory.addItem(bow)
+protag.inventory.addItem(Bow())
+protag.attack = 7
+protag.defense = 6
+protag.speed = 5
+protag.skill = 7
+protag.luck = 8
 
 Jagen = Unit(3, 5, tileSize)
 Jagen.exp = 90
-Jagen.inventory.addItem(Weapon("Sword"))
+Jagen.inventory.addItem(Sword())
 Jagen.inventory.addItem(Javelin())
 Jagen.inventory.addItem(HealingItem())
 Jagen.name = 'Jagen'
 Jagen.attack = 10
 Jagen.defense = 10
 Jagen.speed = 9
+Jagen.skill = 8
+Jagen.luck = 8
+
 enemy = Unit(9, 5, tileSize)
-enemy.inventory.addItem(Weapon())
+enemy.inventory.addItem(Sword())
 enemy1 = Unit(9, 6, tileSize)
-enemy1.inventory.addItem(Weapon())
+enemy1.inventory.addItem(Sword())
 enemy1.defense = 7
 
 ## setting up the map
@@ -649,9 +654,9 @@ while running:
                         currentUnitStartingTile = None
                         currentState = None
 
-                elif viewingUnitInfo:
+                elif currentState == states.viewingUnitInfo:
                     if event.type == pygame.KEYDOWN and event.key == pygame.K_x:
-                        viewingUnitInfo = False
+                        currentState = None
 
                 ### no unit selected, waiting for next unit to be selected
 
@@ -686,8 +691,7 @@ while running:
                         if currentTile.currentUnit != None:
                             currentUnit = currentTile.currentUnit
                             myUnitInfo.reset(currentUnit)
-                            viewingUnitInfo = True
-                        
+                            currentState = states.viewingUnitInfo
     
     #### drawing ####
     if currentState == states.inMainMenu:
@@ -844,7 +848,7 @@ while running:
             if "wait" in menuOptions:
                 screen.blit(waitButton, (gameWidth - 300, Y))
         
-        elif viewingUnitInfo:
+        elif currentState == states.viewingUnitInfo:
             myUnitInfo.draw(screen, font)
                 
     pygame.display.update()

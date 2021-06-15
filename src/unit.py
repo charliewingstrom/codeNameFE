@@ -24,11 +24,11 @@ class Unit():
         # stats
         self.maxHp = 15
         self.hp = self.maxHp
-        self.attack = 10
-        self.defense = 5
-        self.speed = 6
-        self.skill = 6
-        self.luck = 4
+        self.attack = 5
+        self.defense = 3
+        self.speed = 4
+        self.skill = 4
+        self.luck = 0
         self.mov = 5
 
         # growths

@@ -127,7 +127,7 @@ class HealingItem(Item):
 class Weapon(Item):
     def __init__(self, name = "genericW", description = "Basic Weapon"):
         super().__init__(name, description)
-        self.range = [1, 1]
+        self.range = (1, 1)
         self.uses = 45
         self.might = 5
         self.hit = 80
@@ -152,7 +152,17 @@ class Weapon(Item):
         screen.blit(critT, critR)
 
 
+class Sword(Weapon):
+    def __init__(self):
+        super().__init__("Sword", "Basic Blade")
+        self.hit = 90
+
+class Bow(Weapon):
+    def __init__(self):
+        super().__init__("Bow", "Attack from a Distance")
+        self.range = (2, 3)
+
 class Javelin(Weapon):
     def __init__(self):
         super().__init__("Javelin", "Throwable Spear")
-        self.range = [1, 2]
+        self.range = (1, 2)

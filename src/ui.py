@@ -47,11 +47,14 @@ class BattleForcast():
                 self.defendingUnitCanCounter = True
         
 
+        #TODO calculate crit
         self.attackingUnitDmg = max(0, (attackingUnit.attack + attackingUnit.getEquippedWeapon().might) - defendingUnit.defense)
-        self.attackingUnitHit = int((attackingUnit.getEquippedWeapon().hit + (attackingUnit.skill * 2) + attackingUnit.luck / 2) - ((defendingUnit.speed * 2) + defendingUnit.luck))
+        self.attackingUnitHit = min(100, int((attackingUnit.getEquippedWeapon().hit + (attackingUnit.skill * 2) + attackingUnit.luck / 2) - ((defendingUnit.speed * 2) + defendingUnit.luck)))
+        self.defendingUnitCrit = 0
         if self.defendingUnitCanCounter:
             self.defendingUnitDmg = max(0, (defendingUnit.attack + defendingUnit.getEquippedWeapon().might) - attackingUnit.defense)
-            self.defendingUnitHit = int((defendingUnit.getEquippedWeapon().hit + (defendingUnit.skill * 2) + defendingUnit.luck / 2) - ((attackingUnit.speed * 2) + attackingUnit.luck))
+            self.defendingUnitHit = min(100, int((defendingUnit.getEquippedWeapon().hit + (defendingUnit.skill * 2) + defendingUnit.luck / 2) - ((attackingUnit.speed * 2) + attackingUnit.luck)))
+            self.defendingUnitCrit = 0
         else:
             self.defendingUnitDmg = "-"
             self.defendingUnitHit = "-"
