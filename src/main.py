@@ -85,6 +85,22 @@ finishedAttacking = True
 addingExp = False
 levelingUp = False
 
+
+# states while attacking
+
+class atkStates(Enum):
+    currentUnitAttacking = auto()
+    defendingUnitAttacking = auto()
+
+    currentUnitDoubling = auto()
+    defendingUnitDoubling = auto()
+
+    finishedAttacking = auto()
+    addingExp = auto()
+    levelingUp = auto()
+
+attackingState = atkStates.currentUnitAttacking
+
 ## menu items
 menuOptions = []
 menuOptions.append("wait")
@@ -236,7 +252,6 @@ protag.skill = 7
 protag.luck = 8
 
 Jagen = Unit(3, 5, tileSize)
-Jagen.exp = 90
 Jagen.inventory.addItem(Sword())
 Jagen.inventory.addItem(Javelin())
 Jagen.inventory.addItem(HealingItem())
@@ -251,7 +266,6 @@ enemy = Unit(9, 5, tileSize)
 enemy.inventory.addItem(Sword())
 enemy1 = Unit(9, 6, tileSize)
 enemy1.inventory.addItem(Sword())
-enemy1.defense = 7
 
 ## setting up the map
 def map1Win():
@@ -301,7 +315,7 @@ def findPlayerTarget(tiles, unit):
         for attackableTile in findTilesInAttackRange(tile, unit.getAttackRange()):
             if attackableTile.currentUnit != None and attackableTile.currentUnit in playerUnits:
                 possibleTargets.append((attackableTile.currentUnit, tile))
-    #print(possibleTargets[0][0])
+    
     bestTarget = (None, None)
     for target in possibleTargets:
         if target[0].hp < (unit.attack + unit.getEquippedWeapon().might) - target[0].defense:
@@ -710,7 +724,7 @@ while running:
         #### if the unit will miss
         ##### play miss animation 
 
-        if currentUnitAttacking:
+        if attackingState == atkStates.currentUnitAttacking:
             screen.blit(pygame.transform.flip(defendingUnit.getCombatAniFirstFrame(), True, False), (0, 0))
             
             if myBattleForcast.attackingUnitWillHit:
@@ -719,17 +733,17 @@ while running:
                 if currentUnit.combatAnimation.draw(screen, 0, 0, False):
                     ## remove health
                     defendingUnit.hp -= myBattleForcast.attackingUnitDmg
-                    currentUnitAttacking = False
+                    attackingState = atkStates.defendingUnitAttacking
                     if currentUnit in playerUnits:
                         experience += myBattleForcast.attackingUnitDmg
             ## unit will miss, play miss animation
             else:
                 if currentUnit.combatAnimation.draw(screen, 0, 0, False):
-                    currentUnitAttacking = False
+                    attackingState = atkStates.defendingUnitAttacking
                     experience += 1
             myCombatUI.draw(screen, myBattleForcast, font, currentUnit, defendingUnit, enemyUnits, playerUnits)
 
-        elif defendingUnitAttacking:
+        elif attackingState == atkStates.defendingUnitAttacking:
             if defendingUnit.hp > 0:
                 screen.blit(currentUnit.getCombatAniFirstFrame(), (0, 0))
                 if myBattleForcast.defendingUnitCanCounter:
@@ -737,7 +751,7 @@ while running:
                         if defendingUnit.combatAnimation.draw(screen, 0, 0, True):
                             # remove health
                             currentUnit.hp -= myBattleForcast.defendingUnitDmg
-                            defendingUnitAttacking = False
+                            attackingState = atkStates.finishedAttacking
                             if defendingUnit in playerUnits:
                                 experience += myBattleForcast.defendingUnitDmg
                             if currentUnit.hp <= 0:
@@ -750,15 +764,15 @@ while running:
                     ## unit will miss, play miss animation
                     else:
                         if defendingUnit.combatAnimation.draw(screen, 0, 0, True):
-                            defendingUnitAttacking = False
+                            attackingState = atkStates.finishedAttacking
                             experience += 1
                 else:
                     screen.blit(pygame.transform.flip(defendingUnit.getCombatAniFirstFrame(), True, False), (0, 0))
-                    defendingUnitAttacking = False
+                    attackingState = atkStates.finishedAttacking
             else:
                 # if here, defending unit has died,
                 # remove from game
-                defendingUnitAttacking = False
+                attackingState = atkStates.finishedAttacking
 
                 ## remove unit from game
                 if defendingUnit in playerUnits:
@@ -770,47 +784,48 @@ while running:
                 currentMap.tiles[defendingUnit.X][defendingUnit.Y].currentUnit = None
             myCombatUI.draw(screen, myBattleForcast, font, currentUnit, defendingUnit, enemyUnits, playerUnits)
 
-        elif finishedAttacking:
+        elif attackingState == atkStates.finishedAttacking:
             drawFirstFrames(currentUnit, defendingUnit)
             myCombatUI.draw(screen, myBattleForcast, font, currentUnit, defendingUnit, enemyUnits, playerUnits)
             if experience > 0:
-                addingExp = True
+                attackingState = atkStates.addingExp
                 if currentUnit in playerUnits:
                     myExp.setup(currentUnit, experience)
                 elif defendingUnit in playerUnits:
                     myExp.setup(defendingUnit, experience)
-            finishedAttacking = False
+            else:
+                attackingState = None
 
-        elif levelingUp:
+        elif attackingState == atkStates.levelingUp:
             drawFirstFrames(currentUnit, defendingUnit)
             myCombatUI.draw(screen, myBattleForcast, font, currentUnit, defendingUnit, enemyUnits, playerUnits)
 
             if myLevelUp.draw(screen):
-                levelingUp = False
+                attackingState = atkStates.addingExp
                 myLevelUp.currUnit = None
 
-        elif addingExp:
+        elif attackingState == atkStates.addingExp:
             drawFirstFrames(currentUnit, defendingUnit)
             myCombatUI.draw(screen, myBattleForcast, font, currentUnit, defendingUnit, enemyUnits, playerUnits)
 
             if myExp.currUnit.exp >= 100:
-                levelingUp = True
+                attackingState = atkStates.levelingUp
                 myLevelUp.currUnit = myExp.currUnit
                 myLevelUp.roll(myExp.currUnit)
                 myExp.currUnit.exp = 0
                 myExp.currUnit.level += 1
 
             elif myExp.draw(screen):
-                addingExp = False
+                attackingState = None
                 checkMapUI()
 
 
         else:
-            experience = 0
-            currentUnitAttacking = True
-            defendingUnitAttacking = True
+            # reset for next time
+            attackingState = atkStates.currentUnitAttacking
+            # break out of attacking
             currentState = None
-            finishedAttacking = True
+            experience = 0
             resetAfterAction()
 
             if currentMap.checkForWin():
