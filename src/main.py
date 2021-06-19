@@ -19,19 +19,16 @@ pygame.display.set_caption("Code FE")
 running = True
 
 #------ load assets --------
-## Characters
-
-
 ## Menu
 waitButton = pygame.image.load(Path(__file__).parent / "../assets/wait-button.png")
 itemsButton = pygame.image.load(Path(__file__).parent / "../assets/items-button.png")
 attackButton = pygame.image.load(Path(__file__).parent / "../assets/attack-button.png")
 menuCursor = pygame.image.load(Path(__file__).parent / "../assets/menu-cursor.png")
 
-### Combat and UI
 ## backgrounds
 attacingBackground = pygame.image.load(Path(__file__).parent / "../assets/attacking-background.png")
 map1background = pygame.image.load(Path(__file__).parent / "../assets/level1Background.png")
+map2background = pygame.image.load(Path(__file__).parent / "../assets/map2-background.png")
 #---------------------------
 
 # globals
@@ -106,7 +103,6 @@ menuSelectionIndex = 0
 
 ## unit arrays
 playerUnits = []
-enemyUnits = []
 activeEnemyUnits = []
 
 ### attacking selection
@@ -141,7 +137,7 @@ Jagen.inventory.addItem(Sword())
 Jagen.inventory.addItem(Javelin())
 Jagen.inventory.addItem(HealingItem())
 Jagen.name = 'Jagen'
-Jagen.attack = 10
+Jagen.attack = 15
 Jagen.defense = 10
 Jagen.speed = 9
 Jagen.skill = 8
@@ -156,7 +152,7 @@ enemy1.inventory.addItem(Sword())
 def map1Win():
     return enemy.hp <= 0
 
-map1 = Map(mapWidth, mapHeight, map1background, tileSize, map1Win)
+map1 = Map(mapWidth, mapHeight, map1background, tileSize, map1Win, [enemy, enemy1])
 
 # set unique tiles
 for i in range(3):
@@ -174,19 +170,28 @@ for i in range(5):
 for i in range(14):
     map1.tiles[i][7].walkable = False
 
+# map2
+
+enemy3 = Unit(1, 2, tileSize)
+enemy3.inventory.addItem(Sword())
+enemy4 = Unit(2, 1, tileSize)
+enemy4.inventory.addItem(Sword())
+
+def map2Win():
+    return enemy4.hp <= 0
+
+map2 = Map(12, 12, map2background, tileSize, map2Win, [enemy3, enemy4])
+
+
 currentMap = map1
 
 # Setting up for game
-currentMap.addUnitToMap(enemy)
-currentMap.addUnitToMap(enemy1)
 currentMap.addUnitToMap(protag)
 currentMap.addUnitToMap(Jagen)
 
 playerUnits.append(protag)
 playerUnits.append(Jagen)
 
-enemyUnits.append(enemy)
-enemyUnits.append(enemy1)
 
 activeEnemyUnits.append(enemy)
 activeEnemyUnits.append(enemy1)
@@ -236,7 +241,7 @@ def findTilesInMovRange(unit):
                             tile.parent = currTile
                         queue.append(tile)
         else:
-            if currTile.distance <= currentUnit.mov and currTile.walkable and (currTile.currentUnit == None or currTile.currentUnit in enemyUnits):
+            if currTile.distance <= currentUnit.mov and currTile.walkable and (currTile.currentUnit == None or currTile.currentUnit in currentMap.enemyUnits):
                 tilesInRange.append(currTile)
                 added.append(currTile)
                 for tile in currTile.adjList:
@@ -368,7 +373,7 @@ while running:
                 ## TODO check to see if they can attack with any weapon (ie all ranges)
                 for tile in findTilesInAttackRange(currentUnitTile, currentUnit.inventory.getBestRange()):
                     tile.attackable = True
-                    if tile.currentUnit != None and tile.currentUnit in enemyUnits:
+                    if tile.currentUnit != None and tile.currentUnit in currentMap.enemyUnits:
                         unitsInRange.append(tile.currentUnit)
                 if len(unitsInRange) > 0:
                     menuOptions.insert(0, "attack")
@@ -390,7 +395,7 @@ while running:
                 playerTurn = True
                 for unit in playerUnits:
                     unit.active = True
-                for unit in enemyUnits:
+                for unit in currentMap.enemyUnits:
                     activeEnemyUnits.append(unit)
         
 
@@ -477,7 +482,7 @@ while running:
                         unitsInRange = []
                         currentMap.reset()
                         for tile in findTilesInAttackRange(currentUnitTile, currentUnit.inventory.avaliableItems[0].range):
-                            if tile.currentUnit != None and tile.currentUnit in enemyUnits:
+                            if tile.currentUnit != None and tile.currentUnit in currentMap.enemyUnits:
                                 unitsInRange.append(tile.currentUnit)
                             tile.attackable = True
                         currentState = states.selectingAttack
@@ -511,7 +516,7 @@ while running:
                             currentUnit.inventory.avaliableItems = []
                             for weapon in currentUnit.inventory.weapons:
                                 for tile in findTilesInAttackRange(currentUnitTile, weapon.range):
-                                    if tile.currentUnit != None and tile.currentUnit in enemyUnits:
+                                    if tile.currentUnit != None and tile.currentUnit in currentMap.enemyUnits:
                                         currentUnit.inventory.avaliableItems.append(weapon)
                                         break
 
@@ -629,7 +634,7 @@ while running:
                 if currentUnit.combatAnimation.draw(screen, 0, 0, False):
                     attackingState = atkStates.defendingUnitAttacking
                     experience += 1
-            myCombatUI.draw(screen, myBattleForcast, font, currentUnit, defendingUnit, enemyUnits, playerUnits)
+            myCombatUI.draw(screen, myBattleForcast, font, currentUnit, defendingUnit, currentMap.enemyUnits, playerUnits)
 
         elif attackingState == atkStates.defendingUnitAttacking:
             if defendingUnit.hp > 0:
@@ -645,8 +650,8 @@ while running:
                             if currentUnit.hp <= 0:
                                 if currentUnit in playerUnits:
                                     playerUnits.remove(currentUnit)
-                                elif currentUnit in enemyUnits:
-                                    enemyUnits.remove(currentUnit)
+                                elif currentUnit in currentMap.enemyUnits:
+                                    currentMap.enemyUnits.remove(currentUnit)
                                     experience += 30
                                 currentMap.tiles[currentUnit.X][currentUnit.Y].currentUnit = None
                     ## unit will miss, play miss animation
@@ -665,16 +670,16 @@ while running:
                 ## remove unit from game
                 if defendingUnit in playerUnits:
                     playerUnits.remove(defendingUnit)
-                elif defendingUnit in enemyUnits:
-                    enemyUnits.remove(defendingUnit)
+                elif defendingUnit in currentMap.enemyUnits:
+                    currentMap.enemyUnits.remove(defendingUnit)
                     activeEnemyUnits.remove(defendingUnit)
                     experience += 30
                 currentMap.tiles[defendingUnit.X][defendingUnit.Y].currentUnit = None
-            myCombatUI.draw(screen, myBattleForcast, font, currentUnit, defendingUnit, enemyUnits, playerUnits)
+            myCombatUI.draw(screen, myBattleForcast, font, currentUnit, defendingUnit, currentMap.enemyUnits, playerUnits)
 
         elif attackingState == atkStates.finishedAttacking:
             drawFirstFrames(currentUnit, defendingUnit)
-            myCombatUI.draw(screen, myBattleForcast, font, currentUnit, defendingUnit, enemyUnits, playerUnits)
+            myCombatUI.draw(screen, myBattleForcast, font, currentUnit, defendingUnit, currentMap.enemyUnits, playerUnits)
             if experience > 0:
                 attackingState = atkStates.addingExp
                 if currentUnit in playerUnits:
@@ -686,7 +691,7 @@ while running:
 
         elif attackingState == atkStates.levelingUp:
             drawFirstFrames(currentUnit, defendingUnit)
-            myCombatUI.draw(screen, myBattleForcast, font, currentUnit, defendingUnit, enemyUnits, playerUnits)
+            myCombatUI.draw(screen, myBattleForcast, font, currentUnit, defendingUnit, currentMap.enemyUnits, playerUnits)
 
             if myLevelUp.draw(screen, font):
                 attackingState = atkStates.addingExp
@@ -694,7 +699,7 @@ while running:
 
         elif attackingState == atkStates.addingExp:
             drawFirstFrames(currentUnit, defendingUnit)
-            myCombatUI.draw(screen, myBattleForcast, font, currentUnit, defendingUnit, enemyUnits, playerUnits)
+            myCombatUI.draw(screen, myBattleForcast, font, currentUnit, defendingUnit, currentMap.enemyUnits, playerUnits)
 
             if myExp.currUnit.exp >= 100:
                 attackingState = atkStates.levelingUp
@@ -717,7 +722,7 @@ while running:
             resetAfterAction()
 
             if currentMap.checkForWin():
-                print("Map is finished")
+                currentMap = map2
     
     
     
@@ -727,7 +732,7 @@ while running:
         mainCursor.draw(screen)
         for unit in playerUnits:
             unit.draw(screen, tileSize, xCamera, yCamera)
-        for enemy in enemyUnits:
+        for enemy in currentMap.enemyUnits:
             enemy.draw(screen, tileSize, xCamera, yCamera)
         
         myMapUnitUI.draw(screen, font)
