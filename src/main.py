@@ -723,6 +723,12 @@ while running:
 
             if currentMap.checkForWin():
                 currentMap = map2
+                for i in range(len(playerUnits)):
+                    tmpPlayerUnit = playerUnits[i]
+                    currentMap.tiles[0][i].currentUnit = tmpPlayerUnit
+                    tmpPlayerUnit.X = 0
+                    tmpPlayerUnit.Y = i
+
     
     
     

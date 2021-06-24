@@ -36,6 +36,7 @@ class Tile():
         self.attackable = False
 
     def draw(self, screen, xCamera, yCamera):
+        pygame.draw.rect(screen, (128, 128, 128),pygame.Rect(self.X*self.tileSize + xCamera, self.Y*self.tileSize + yCamera, self.tileSize, self.tileSize), 1)
         if self.currentUnit != None:
             screen.blit(self.occupiedPic, (self.X*self.tileSize + xCamera, self.Y*self.tileSize + yCamera))
         elif self.attackable:
