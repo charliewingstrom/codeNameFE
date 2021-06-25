@@ -39,6 +39,7 @@ tileSize = 96
 mapWidth = 32
 mapHeight = 19
 maxDistance = 256
+maps = []
 
 ## camera
 yCamera = 0
@@ -182,6 +183,7 @@ def map2Win():
 
 map2 = Map(12, 12, map2background, tileSize, map2Win, [enemy3, enemy4])
 
+maps.append(map2)
 
 currentMap = map1
 
@@ -721,13 +723,26 @@ while running:
             experience = 0
             resetAfterAction()
 
+            ## check if we have to transition to the next map
             if currentMap.checkForWin():
-                currentMap = map2
-                for i in range(len(playerUnits)):
-                    tmpPlayerUnit = playerUnits[i]
-                    currentMap.tiles[0][i].currentUnit = tmpPlayerUnit
-                    tmpPlayerUnit.X = 0
-                    tmpPlayerUnit.Y = i
+                if len(maps) == 0:
+                    running = False
+                else:
+                    currentMap = maps.pop(0)
+                    # setup players
+                    for i in range(len(playerUnits)):
+                        tmpPlayerUnit = playerUnits[i]
+                        tmpPlayerUnit.X = 0
+                        tmpPlayerUnit.Y = i
+                        currentMap.addUnitToMap(tmpPlayerUnit)
+                        tmpPlayerUnit.active = True
+
+                    # setup enemies
+                    activeEnemyUnits = []
+                    for unit in currentMap.enemyUnits:
+                        activeEnemyUnits.append(unit)
+                
+                    
 
     
     
