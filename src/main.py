@@ -59,6 +59,7 @@ experience = 0
 ## player state
 class states(Enum):
     inMainMenu = auto()
+    selectingUnit = auto()
     selectingTile = auto()
     selectingAction = auto()
     selectingAttack = auto()
@@ -277,7 +278,7 @@ def resetAfterAction():
         currentUnit.active = False
     currentUnit = None
     defendingUnit = None
-    currentState = None
+    currentState = states.selectingUnit
     currentMap.reset()
 
 def findTilesInAttackRange(startTile, atkRange):
@@ -372,7 +373,6 @@ while running:
                 if len(currentUnit.getInventory()) > 0:
                     menuOptions.insert(0, "items")
                 unitsInRange = []
-                ## TODO check to see if they can attack with any weapon (ie all ranges)
                 for tile in findTilesInAttackRange(currentUnitTile, currentUnit.inventory.getBestRange()):
                     tile.attackable = True
                     if tile.currentUnit != None and tile.currentUnit in currentMap.enemyUnits:
@@ -435,7 +435,7 @@ while running:
                 running = False
             if currentState == states.inMainMenu: 
                 if event.type == pygame.KEYDOWN:
-                    currentState = None
+                    currentState = states.selectingUnit
             # player turn
             elif playerTurn:
                 # picking a unit to attack
@@ -514,7 +514,6 @@ while running:
                             currentState = states.selectingWeapon
                             
                             currentUnit.inventory.selectionIndex = 0
-                            ## TODO get the weapons that can be used to attack
                             currentUnit.inventory.avaliableItems = []
                             for weapon in currentUnit.inventory.weapons:
                                 for tile in findTilesInAttackRange(currentUnitTile, weapon.range):
@@ -551,7 +550,7 @@ while running:
                         if tileToMoveTo.selectable:
                             targetTile = tileToMoveTo
                             moving = True
-                            currentState = None
+                            currentState = states.selectingUnit
                             moveVelocity = getMoveVelocity(currentUnitTile, targetTile, moveSpeed)
                             currentMap.reset()
 
@@ -561,21 +560,21 @@ while running:
                         currentUnit = None
                         currentUnitTile = None
                         currentUnitStartingTile = None
-                        currentState = None
+                        currentState = states.selectingUnit
 
                 elif currentState == states.viewingUnitInfo:
                     if event.type == pygame.KEYDOWN and event.key == pygame.K_x:
-                        currentState = None
+                        currentState = states.selectingUnit
 
                 ### no unit selected, waiting for next unit to be selected
 
                 ## TODO 
                 ## add a new state that fits this tree
                 ## probably selectingNextUnit .... 
-                elif currentState != states.attacking:
+                elif currentState == states.selectingUnit:
                     if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
                         playerTurn = False
-                        currentState = None
+                        
                     # Select unit and show their range
                     if event.type == pygame.KEYDOWN and event.key == pygame.K_z:
                         
@@ -594,7 +593,7 @@ while running:
                     if event.type == pygame.KEYDOWN and event.key == pygame.K_x:
                         currentUnit = None
                         currentMap.reset()
-                        currentState = None
+                        currentState = states.selectingUnit
                     if event.type == pygame.KEYDOWN and event.key == pygame.K_a:
                         currentTile = currentMap.tiles[mainCursor.X][mainCursor.Y]
                         if currentTile.currentUnit != None:
@@ -719,7 +718,7 @@ while running:
             # reset for next time
             attackingState = atkStates.currentUnitAttacking
             # break out of attacking
-            currentState = None
+            currentState = states.selectingUnit
             experience = 0
             resetAfterAction()
 
