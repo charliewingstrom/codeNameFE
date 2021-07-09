@@ -48,8 +48,9 @@ xCamera = 0
 ## movement
 moving = False
 moveVelocity = ()
-moveSpeed = 10
+moveSpeed = 2
 targetTile = None
+path = []
 
 ## combat
 currentUnitAttacking = True
@@ -260,9 +261,20 @@ def findTilesInMovRange(unit):
             toReturn.append(tile)
     return toReturn
 
+def findPath(startingTile):
+    toReturn = []
+    tmpTile = startingTile
+    while tmpTile != None:
+        toReturn.append(tmpTile)
+        tmpTile = tmpTile.parent
+
+    return list(reversed(toReturn))
+
+
 def getMoveVelocity(start, end, moveSpeed):
-    velocityX = (end.X - start.X) / moveSpeed
-    velocityY = (end.Y - start.Y) / moveSpeed
+    velocityX = round((end.X - start.X) / moveSpeed, 1)
+    velocityY = round((end.Y - start.Y) / moveSpeed, 1)
+
     return (velocityX, velocityY)
 
 def resetAfterAction():
@@ -350,35 +362,43 @@ while running:
     if moving:
         currentUnit.X += moveVelocity[0]
         currentUnit.Y += moveVelocity[1]
-        if round(currentUnit.X) == targetTile.X and round(currentUnit.Y) == targetTile.Y:
-            ## finish moving
+        print(round(currentUnit.X, 1), round(currentUnit.Y, 1))
+        if round(currentUnit.X, 1) == targetTile.X and round(currentUnit.Y, 1) == targetTile.Y:
+            tmpTile = targetTile
             currentUnit.X = targetTile.X
             currentUnit.Y = targetTile.Y
-            currentUnitStartingTile.currentUnit = None
-            targetTile.currentUnit = currentUnit
-            currentUnitTile = targetTile
-
-            moving = False
-            if not playerTurn:
-                print("setup attack...")
-                myBattleForcast.calculate(currentUnit, defendingUnit, findTilesInAttackRange, currentMap)
-                myBattleForcast.roll()
-                currentState = states.attacking
-                
+            if len(path) > 0:
+                targetTile = path.pop(0)
+                moveVelocity = getMoveVelocity(tmpTile, targetTile, moveSpeed)
             else:
-                currentState = states.selectingAction
-                menuOptions = []
-                menuSelectionIndex = 0
-                menuOptions.insert(0, "wait")
-                if len(currentUnit.getInventory()) > 0:
-                    menuOptions.insert(0, "items")
-                unitsInRange = []
-                for tile in findTilesInAttackRange(currentUnitTile, currentUnit.inventory.getBestRange()):
-                    tile.attackable = True
-                    if tile.currentUnit != None and tile.currentUnit in currentMap.enemyUnits:
-                        unitsInRange.append(tile.currentUnit)
-                if len(unitsInRange) > 0:
-                    menuOptions.insert(0, "attack")
+
+                ## finish moving
+                path = []
+                
+                currentUnitStartingTile.currentUnit = None
+                targetTile.currentUnit = currentUnit
+                currentUnitTile = targetTile
+
+                moving = False
+                if not playerTurn:
+                    myBattleForcast.calculate(currentUnit, defendingUnit, findTilesInAttackRange, currentMap)
+                    myBattleForcast.roll()
+                    currentState = states.attacking
+                    
+                else:
+                    currentState = states.selectingAction
+                    menuOptions = []
+                    menuSelectionIndex = 0
+                    menuOptions.insert(0, "wait")
+                    if len(currentUnit.getInventory()) > 0:
+                        menuOptions.insert(0, "items")
+                    unitsInRange = []
+                    for tile in findTilesInAttackRange(currentUnitTile, currentUnit.inventory.getBestRange()):
+                        tile.attackable = True
+                        if tile.currentUnit != None and tile.currentUnit in currentMap.enemyUnits:
+                            unitsInRange.append(tile.currentUnit)
+                    if len(unitsInRange) > 0:
+                        menuOptions.insert(0, "attack")
     # not moving
     else: 
         ## automated enemy phase actions
@@ -388,8 +408,11 @@ while running:
                 currentUnitStartingTile = currentMap.tiles[currentUnit.X][currentUnit.Y]
                 enemyTilesInRange = findTilesInMovRange(currentUnit)
                 defendingUnit, targetTile = findPlayerTarget(enemyTilesInRange, currentUnit)
+
                 ## for now if a unit is not in range, don't move
                 if defendingUnit != None:
+                    path = findPath(targetTile)
+                    targetTile = path.pop(0)
                     moveVelocity = getMoveVelocity(currentUnitStartingTile, targetTile, moveSpeed)
                     moving = True
                 
@@ -546,11 +569,13 @@ while running:
                 elif currentState == states.selectingTile:
                     # Select tile and get ready to move to it
                     if event.type == pygame.KEYDOWN and event.key == pygame.K_z:
-                        tileToMoveTo = currentMap.tiles[mainCursor.X][mainCursor.Y]
-                        if tileToMoveTo.selectable:
-                            targetTile = tileToMoveTo
+                        targetTile = currentMap.tiles[mainCursor.X][mainCursor.Y]
+                        if targetTile.selectable:
+                            path = findPath(targetTile)
+                            targetTile = path.pop(0)
                             moving = True
                             currentState = states.selectingUnit
+
                             moveVelocity = getMoveVelocity(currentUnitTile, targetTile, moveSpeed)
                             currentMap.reset()
 
@@ -728,6 +753,7 @@ while running:
                     running = False
                 else:
                     currentMap = maps.pop(0)
+                    playerTurn = True
                     # setup players
                     for i in range(len(playerUnits)):
                         tmpPlayerUnit = playerUnits[i]
