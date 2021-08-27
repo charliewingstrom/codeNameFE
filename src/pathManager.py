@@ -54,12 +54,15 @@ class PathManager():
         self.__velocity = (velocityX, velocityY)
 
     def moveUnitByVelocity(self, unit):
-        if unit:
+        finishedMoving = False
+        if unit and self.__velocity != (0, 0):
             unit.X += self.__velocity[0]
             unit.Y += self.__velocity[1]
 
             if round(unit.X, 1) == self.__targetTile.X and round(unit.Y, 1) == self.__targetTile.Y:
                 unit.X, unit.Y = self.__targetTile.X, self.__targetTile.Y
-                return True
+                finishedMoving = True
+        else:
+            finishedMoving = True
 
-        return False
+        return finishedMoving

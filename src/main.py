@@ -49,8 +49,6 @@ xCamera = 0
 moving = False
 
 ## combat
-currentUnitAttacking = True
-defendingUnitAttacking = True
 experience = 0
 
 ## player state
@@ -373,7 +371,7 @@ while running:
                 currentUnitStartingTile = currentMap.tiles[currentUnit.X][currentUnit.Y]
                 enemyTilesInRange = findTilesInMovRange(currentUnit)
                 for tile in enemyTilesInRange:
-                    if tile.currentUnit == None:
+                    if tile.currentUnit == None or tile.currentUnit == currentUnit:
                         tile.selectable = True
                 defendingUnit, targetTile = findPlayerTarget(enemyTilesInRange, currentUnit)
 
