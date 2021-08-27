@@ -6,7 +6,7 @@ maxDistance = 256
 grassTilePic = pygame.image.load(Path(__file__).parent / "../assets/grassTile.png")
 selectablePic = pygame.image.load(Path(__file__).parent / "../assets/selectableHighlight.png")
 attackablePic = pygame.image.load(Path(__file__).parent / "../assets/attackableHighlight.png")
-occupiedPic = pygame.image.load(Path(__file__).parent / "../assets/occupiedHighlight.png")
+inPathPic = pygame.image.load(Path(__file__).parent / "../assets/occupiedHighlight.png")
 
 class Tile():
 
@@ -21,7 +21,8 @@ class Tile():
         self.selectablePic = pygame.transform.scale(selectablePic, (tileSize, tileSize))
         self.attackable = False
         self.attackablePic = pygame.transform.scale(attackablePic, (tileSize, tileSize))
-        self.occupiedPic = pygame.transform.scale(occupiedPic, (tileSize, tileSize))
+        self.inPath = False
+        self.inPathPic = pygame.transform.scale(inPathPic, (tileSize, tileSize))
         self.adjList = []
         self.distance = maxDistance
         self.parent = None
@@ -36,10 +37,15 @@ class Tile():
         self.attackable = False
 
     def draw(self, screen, xCamera, yCamera):
-        pygame.draw.rect(screen, (128, 128, 128),pygame.Rect(self.X*self.tileSize + xCamera, self.Y*self.tileSize + yCamera, self.tileSize, self.tileSize), 1)
         if self.currentUnit != None:
-            screen.blit(self.occupiedPic, (self.X*self.tileSize + xCamera, self.Y*self.tileSize + yCamera))
-        elif self.attackable:
+            color = (0, 0, 0)
+        else:
+            color = (128, 128, 128)
+        pygame.draw.rect(screen, color,pygame.Rect(self.X*self.tileSize + xCamera, self.Y*self.tileSize + yCamera, self.tileSize, self.tileSize), 1)
+        
+        if self.attackable:
             screen.blit(self.attackablePic, (self.X*self.tileSize + xCamera, self.Y*self.tileSize + yCamera))
+        elif self.inPath:
+            screen.blit(self.inPathPic, (self.X*self.tileSize + xCamera, self.Y*self.tileSize + yCamera))
         elif self.selectable:
             screen.blit(self.selectablePic, (self.X*self.tileSize + xCamera, self.Y*self.tileSize + yCamera))

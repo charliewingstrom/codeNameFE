@@ -3,13 +3,13 @@ from enum import Enum, auto
 from pathlib import Path
 
 ## custom classes
+from pathManager import PathManager
 from tileMap import Map
 from cursor import Cursor
 from ui import MainMenu, BattleForcast, CombatUI, MapUnitUI, UnitInfo
 from exp import Exp, LevelUp
 from inventory import HealingItem, Sword, Bow, Javelin
 from unit import Unit
-
 
 pygame.init()
 gameWidth = 1920
@@ -47,10 +47,6 @@ xCamera = 0
 
 ## movement
 moving = False
-moveVelocity = ()
-moveSpeed = 2
-targetTile = None
-path = []
 
 ## combat
 currentUnitAttacking = True
@@ -83,7 +79,6 @@ finishedAttacking = True
 addingExp = False
 levelingUp = False
 
-
 # states while attacking
 
 class atkStates(Enum):
@@ -114,10 +109,8 @@ attackUnitIndex = 0
 
 font = pygame.font.Font('freesansbold.ttf', 52)
 
-
 ## custom class instances
 myMainMenu = MainMenu()
-
 myBattleForcast = BattleForcast(gameWidth)
 mainCursor = Cursor(tileSize, mapWidth, mapHeight, gameWidth, gameHeight)
 myCombatUI = CombatUI(0, gameHeight - 385)
@@ -125,6 +118,8 @@ myUnitInfo = UnitInfo()
 myMapUnitUI = MapUnitUI(gameWidth, gameHeight)
 myExp = Exp()
 myLevelUp = LevelUp(gameWidth, gameHeight)
+
+myPathManager = PathManager()
 
 ## creating units
 protag = Unit(3, 3, tileSize)
@@ -140,7 +135,7 @@ Jagen.inventory.addItem(Sword())
 Jagen.inventory.addItem(Javelin())
 Jagen.inventory.addItem(HealingItem())
 Jagen.name = 'Jagen'
-Jagen.attack = 15
+Jagen.attack = 3
 Jagen.defense = 10
 Jagen.speed = 9
 Jagen.skill = 8
@@ -196,12 +191,8 @@ currentMap.addUnitToMap(Jagen)
 playerUnits.append(protag)
 playerUnits.append(Jagen)
 
-
 activeEnemyUnits.append(enemy)
 activeEnemyUnits.append(enemy1)
-
-
-
 
 def findPlayerTarget(tiles, unit):
     possibleTargets = []
@@ -261,22 +252,6 @@ def findTilesInMovRange(unit):
             toReturn.append(tile)
     return toReturn
 
-def findPath(startingTile):
-    toReturn = []
-    tmpTile = startingTile
-    while tmpTile != None:
-        toReturn.append(tmpTile)
-        tmpTile = tmpTile.parent
-
-    return list(reversed(toReturn))
-
-
-def getMoveVelocity(start, end, moveSpeed):
-    velocityX = round((end.X - start.X) / moveSpeed, 1)
-    velocityY = round((end.Y - start.Y) / moveSpeed, 1)
-
-    return (velocityX, velocityY)
-
 def resetAfterAction():
     global currentUnit
     global currentUnitTile 
@@ -328,6 +303,8 @@ def setTilesInRangeAttackable(atkRange, tilesInRange):
                 if atkTile not in tilesInRange:
                     atkTile.attackable = True
 
+def getTileCursorIsOn(tileMap, cursor):
+    return tileMap.tiles[cursor.X][cursor.Y]
 
 ## compares the UI elements to the cursor location
 ## keeps the UI from covering up the map
@@ -340,7 +317,7 @@ def checkMapUI():
         myBattleForcast.X = gameWidth - 500
     
     ## check if cursor is over a player
-    cursorTileUnit = currentMap.tiles[mainCursor.X][mainCursor.Y].currentUnit
+    cursorTileUnit = getTileCursorIsOn(currentMap, mainCursor).currentUnit
     myMapUnitUI.reset(cursorTileUnit)
 
 ## given an attacking and defending unit, blit both first frames to the screen (if they are alive)
@@ -353,31 +330,19 @@ def drawFirstFrames(currentUnit, defendingUnit):
 
 # main game loop
 while running:
-
-    #### moving ####
     keys = pygame.key.get_pressed()
-
     
     # if something is moving there shouldn't be any other input accepted
     if moving:
-        currentUnit.X += moveVelocity[0]
-        currentUnit.Y += moveVelocity[1]
-        print(round(currentUnit.X, 1), round(currentUnit.Y, 1))
-        if round(currentUnit.X, 1) == targetTile.X and round(currentUnit.Y, 1) == targetTile.Y:
-            tmpTile = targetTile
-            currentUnit.X = targetTile.X
-            currentUnit.Y = targetTile.Y
-            if len(path) > 0:
-                targetTile = path.pop(0)
-                moveVelocity = getMoveVelocity(tmpTile, targetTile, moveSpeed)
-            else:
+        
+        if myPathManager.moveUnitByVelocity(currentUnit):
+            stillMoving, lastTile = myPathManager.followPath()
+            if not stillMoving:
 
                 ## finish moving
-                path = []
-                
                 currentUnitStartingTile.currentUnit = None
-                targetTile.currentUnit = currentUnit
-                currentUnitTile = targetTile
+                currentUnitTile = lastTile
+                currentUnitTile.currentUnit = currentUnit
 
                 moving = False
                 if not playerTurn:
@@ -407,17 +372,22 @@ while running:
                 currentUnit = activeEnemyUnits.pop(0)
                 currentUnitStartingTile = currentMap.tiles[currentUnit.X][currentUnit.Y]
                 enemyTilesInRange = findTilesInMovRange(currentUnit)
+                for tile in enemyTilesInRange:
+                    if tile.currentUnit == None:
+                        tile.selectable = True
                 defendingUnit, targetTile = findPlayerTarget(enemyTilesInRange, currentUnit)
 
                 ## for now if a unit is not in range, don't move
                 if defendingUnit != None:
-                    path = findPath(targetTile)
-                    targetTile = path.pop(0)
-                    moveVelocity = getMoveVelocity(currentUnitStartingTile, targetTile, moveSpeed)
+                    myPathManager.resetPath(targetTile)
+                    myPathManager.followPath()
                     moving = True
+                    
+                currentMap.reset()
                 
             else:
                 playerTurn = True
+                currentUnit = None
                 for unit in playerUnits:
                     unit.active = True
                 for unit in currentMap.enemyUnits:
@@ -428,18 +398,27 @@ while running:
         ## if keys (they are up here because you should be able to hold the key)
         elif playerTurn and not (currentState in  [states.selectingAction, states.selectingAttack, states.selectingItems, states.selectingWeapon, states.attacking]):
             # cursor controls
+            arrowKeyPressed = False
             if keys[pygame.K_DOWN]:
                 yCamera += mainCursor.down(yCamera)
                 checkMapUI()
+                arrowKeyPressed = True
             if keys[pygame.K_UP]:
                 yCamera += mainCursor.up(yCamera)
                 checkMapUI()
+                arrowKeyPressed = True
             if keys[pygame.K_RIGHT]:
                 xCamera += mainCursor.right(xCamera)
                 checkMapUI()
+                arrowKeyPressed = True
             if keys[pygame.K_LEFT]:
                 xCamera += mainCursor.left(xCamera)
                 checkMapUI()
+                arrowKeyPressed = True
+            if arrowKeyPressed:
+                cursorTile = getTileCursorIsOn(currentMap, mainCursor)
+                myPathManager.resetPath(cursorTile)
+
             # end cursor controls
 
         # menu movement controls
@@ -564,38 +543,37 @@ while running:
                                 for atkTile in findTilesInAttackRange(tile, currentUnit.inventory.getBestRange()):
                                     if atkTile not in tilesInRange:
                                         atkTile.attackable = True
+                        cursorTile = getTileCursorIsOn(currentMap, mainCursor)
+                        myPathManager.resetPath(cursorTile)
+                        
 
                 ### selecting what tile to move to 
                 elif currentState == states.selectingTile:
                     # Select tile and get ready to move to it
                     if event.type == pygame.KEYDOWN and event.key == pygame.K_z:
-                        targetTile = currentMap.tiles[mainCursor.X][mainCursor.Y]
-                        if targetTile.selectable:
-                            path = findPath(targetTile)
-                            targetTile = path.pop(0)
+                        if getTileCursorIsOn(currentMap, mainCursor).selectable:
                             moving = True
                             currentState = states.selectingUnit
-
-                            moveVelocity = getMoveVelocity(currentUnitTile, targetTile, moveSpeed)
+                            myPathManager.followPath()
                             currentMap.reset()
 
                     # Stop selecting tile
                     elif event.type == pygame.KEYDOWN and event.key == pygame.K_x:
+                        # clear path
+                        myPathManager.emptyPath()
                         currentMap.reset()
                         currentUnit = None
                         currentUnitTile = None
                         currentUnitStartingTile = None
                         currentState = states.selectingUnit
+                        
+                        
 
                 elif currentState == states.viewingUnitInfo:
                     if event.type == pygame.KEYDOWN and event.key == pygame.K_x:
                         currentState = states.selectingUnit
 
                 ### no unit selected, waiting for next unit to be selected
-
-                ## TODO 
-                ## add a new state that fits this tree
-                ## probably selectingNextUnit .... 
                 elif currentState == states.selectingUnit:
                     if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
                         playerTurn = False
@@ -604,7 +582,7 @@ while running:
                     if event.type == pygame.KEYDOWN and event.key == pygame.K_z:
                         
                         # get the unit that cursor is on
-                        currentTile = currentMap.tiles[mainCursor.X][mainCursor.Y]
+                        currentTile = getTileCursorIsOn(currentMap, mainCursor)
                         currentUnit = currentTile.currentUnit
                         
                         # get tiles in range of that unit and highlight them
@@ -620,7 +598,7 @@ while running:
                         currentMap.reset()
                         currentState = states.selectingUnit
                     if event.type == pygame.KEYDOWN and event.key == pygame.K_a:
-                        currentTile = currentMap.tiles[mainCursor.X][mainCursor.Y]
+                        currentTile = getTileCursorIsOn(currentMap, mainCursor)
                         if currentTile.currentUnit != None:
                             currentUnit = currentTile.currentUnit
                             myUnitInfo.reset(currentUnit)
@@ -767,10 +745,6 @@ while running:
                     for unit in currentMap.enemyUnits:
                         activeEnemyUnits.append(unit)
                 
-                    
-
-    
-    
     
     else:
         screen.fill((0,0,0))
