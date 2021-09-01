@@ -10,6 +10,7 @@ from ui import MainMenu, BattleForcast, CombatUI, MapUnitUI, UnitInfo
 from exp import Exp, LevelUp
 from inventory import HealingItem, Sword, Bow, Javelin
 from unit import Unit
+from combatManager import CombatManager
 
 pygame.init()
 gameWidth = 1920
@@ -118,6 +119,7 @@ myExp = Exp()
 myLevelUp = LevelUp(gameWidth, gameHeight)
 
 myPathManager = PathManager()
+myCombatManager = CombatManager(screen)
 
 ## creating units
 protag = Unit(3, 3, tileSize)
@@ -347,6 +349,7 @@ while running:
                     myBattleForcast.calculate(currentUnit, defendingUnit, findTilesInAttackRange, currentMap)
                     myBattleForcast.roll()
                     currentState = states.attacking
+                    myCombatManager.setupAttack(currentUnit, defendingUnit, myBattleForcast, False)
                     
                 else:
                     currentState = states.selectingAction
@@ -443,6 +446,7 @@ while running:
                     if event.type == pygame.KEYDOWN and event.key == pygame.K_z:
                         currentState = states.attacking
                         myBattleForcast.roll()
+                        myCombatManager.setupAttack(currentUnit, defendingUnit, myBattleForcast, True)
 
                     if event.type == pygame.KEYDOWN and (event.key == pygame.K_RIGHT or event.key == pygame.K_UP):
                         if attackUnitIndex < len(unitsInRange) - 1:
@@ -594,7 +598,9 @@ while running:
                     if event.type == pygame.KEYDOWN and event.key == pygame.K_x:
                         currentUnit = None
                         currentMap.reset()
+                        myPathManager.emptyPath()
                         currentState = states.selectingUnit
+                        
                     if event.type == pygame.KEYDOWN and event.key == pygame.K_a:
                         currentTile = getTileCursorIsOn(currentMap, mainCursor)
                         if currentTile.currentUnit != None:
