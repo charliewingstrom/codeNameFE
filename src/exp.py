@@ -33,8 +33,6 @@ class Exp():
                 return True
         return False
 
-
-
 class LevelUp():
     def __init__(self, gameWidth, gameHeight):
         self.currUnit = None

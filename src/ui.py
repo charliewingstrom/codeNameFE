@@ -120,34 +120,31 @@ class BattleForcast():
 
 class CombatUI():
 
-    def __init__(self, X, Y):
+    def __init__(self, X, Y, font):
         self.X = X
         self.Y = Y
+        self.__font = font
         self.pic = combatUI
         self.enemyPic = combatUIRed
         
-    def draw(self, screen, battleForcast, font, currentUnit, defendingUnit, enemyUnits, playerUnits):
+    def draw(self, screen, battleForcast, currentUnit, defendingUnit):
         DUOffset = 1075
-        if currentUnit in enemyUnits:
-            screen.blit(self.enemyPic, (self.X, self.Y))
-            screen.blit(self.pic, (self.X + DUOffset, self.Y))
-        elif currentUnit in playerUnits:
-            screen.blit(self.pic, (self.X, self.Y))
-            screen.blit(self.enemyPic, (self.X + DUOffset, self.Y))
-        if currentUnit in enemyUnits or currentUnit in playerUnits:
-            CUNameText = font.render(currentUnit.name, True, (0,0,0))
+        screen.blit(self.pic, (self.X, self.Y))
+        screen.blit(self.pic, (self.X + DUOffset, self.Y))
+        if currentUnit.hp > 0:
+            CUNameText = self.__font.render(currentUnit.name, True, (0,0,0))
             CUNameRect = CUNameText.get_rect()
             CUNameRect.center = (self.X + (len(currentUnit.name) * 25), self.Y + 100)
 
-            CUAttackText = font.render(str(battleForcast.attackingUnitDmg), True, (0,0,0))
+            CUAttackText = self.__font.render(str(battleForcast.attackingUnitDmg), True, (0,0,0))
             CUAttackRect = CUAttackText.get_rect()
             CUAttackRect.center = (self.X + 185, self.Y + 330)
 
-            CUHitText = font.render(str(battleForcast.attackingUnitHit), True, (0,0,0))
+            CUHitText = self.__font.render(str(battleForcast.attackingUnitHit), True, (0,0,0))
             CUHitRect = CUHitText.get_rect()
             CUHitRect.center = (self.X + 450, self.Y + 330)
 
-            CUCritText = font.render(str(battleForcast.attackingUnitCrit), True, (0,0,0))
+            CUCritText = self.__font.render(str(battleForcast.attackingUnitCrit), True, (0,0,0))
             CUCritRect = CUCritText.get_rect()
             CUCritRect.center = (self.X + 720, self.Y + 330)
 
@@ -155,22 +152,28 @@ class CombatUI():
                 screen.blit(healthbarEmptyPiece, (self.X + 50 + (20*i), self.Y + 140))
             for i in range(currentUnit.hp):
                 screen.blit(healthbarfullPiece, (self.X + 50 + (20*i), self.Y + 140))
+                
+            screen.blit(CUNameText, CUNameRect)
+            screen.blit(CUAttackText, CUAttackRect)
+            screen.blit(CUHitText, CUHitRect)
+            screen.blit(CUCritText, CUCritRect)
             
+        if defendingUnit and defendingUnit.hp > 0:
             ## defending unit stuff
-            DUNameText = font.render(defendingUnit.name, True, (0,0,0))
+            DUNameText = self.__font.render(defendingUnit.name, True, (0,0,0))
             DUNameRect = DUNameText.get_rect()
             DUNameRect.center = (self.X + DUOffset + (len(defendingUnit.name) * 25), self.Y + 100)
 
-            DUAttackText = font.render(str(battleForcast.defendingUnitDmg), True, (0,0,0))
+            DUAttackText = self.__font.render(str(battleForcast.defendingUnitDmg), True, (0,0,0))
             DUAttackRect = DUAttackText.get_rect()
             DUAttackRect.center = (self.X + DUOffset + 185, self.Y + 330)
 
-            DUHitText = font.render(str(battleForcast.defendingUnitHit), True, (0,0,0))
+            DUHitText = self.__font.render(str(battleForcast.defendingUnitHit), True, (0,0,0))
             DUHitRect = DUHitText.get_rect()
             DUHitRect.center = (self.X + DUOffset + 450, self.Y + 330)
 
-            DUCritText = font.render(str(battleForcast.defendingUnitCrit), True, (0,0,0))
-            DUCritRect = CUCritText.get_rect()
+            DUCritText = self.__font.render(str(battleForcast.defendingUnitCrit), True, (0,0,0))
+            DUCritRect = DUCritText.get_rect()
             DUCritRect.center = (self.X + 720 + DUOffset, self.Y + 330)
 
             for i in range(defendingUnit.maxHp):
@@ -178,14 +181,6 @@ class CombatUI():
             for i in range(defendingUnit.hp):
                 screen.blit(healthbarfullPiece, (self.X + 50 + (20*i) + DUOffset, self.Y + 140))
 
-            # draw
-            ## current unit
-            screen.blit(CUNameText, CUNameRect)
-            screen.blit(CUAttackText, CUAttackRect)
-            screen.blit(CUHitText, CUHitRect)
-            screen.blit(CUCritText, CUCritRect)
-
-            ## defending unit
             screen.blit(DUNameText, DUNameRect)
             screen.blit(DUAttackText, DUAttackRect)
             screen.blit(DUHitText, DUHitRect)

@@ -84,7 +84,7 @@ class Unit():
             return self.getEquippedWeapon().range
         return [0,0]
 
-    def getCombatAniFirstFrame(self):
+    def drawFirstFrame(self):
         return self.combatAnimation.getFirstFrame()
 
     def draw(self, screen, tileSize, xCamera, yCamera):
