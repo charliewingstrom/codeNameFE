@@ -9,7 +9,7 @@ class UnitHolder():
         self.__units.add(unit)
 
     def addUnitSet(self, units : set):
-        self.__units = units
+        self.__units.update(units)
 
     def removeUnit(self, unit, unitTile):
         # discard does not throw an error if unit is not in units
@@ -22,11 +22,12 @@ class UnitHolder():
             unit.draw(screen, tileSize, xCamera, yCamera)
 
     def addPlayerUnitsToNewMap(self, tileMap):
+        tmpUnits = set()
+        for unit in self.__units:
+            if unit.getIsPlayer():
+                tmpUnits.add(unit)
+
+        self.__units = tmpUnits
         for unit in self.__units: 
-            if not unit.getIsPlayer():
-                self.__units.discard(unit)
-            else:
-                try:
-                    tileMap.addUnitToStartTile(unit)
-                except:
-                    self.__tooManyPlayerUnits = True
+            if tileMap.addUnitToStartTile(unit):
+                break

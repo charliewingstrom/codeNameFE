@@ -2,7 +2,7 @@ from tile import Tile
 
 class Map():
 
-    def __init__(self, width, height, background, tileSize, winCondition, enemyUnits = []):
+    def __init__(self, width, height, background, tileSize, winCondition, enemyUnits = set()):
         self.width=width
         self.height=height
         self.background = background
@@ -30,9 +30,14 @@ class Map():
                 if tile.X > 0:
                     tile.adjList.append(self.tiles[tile.X-1][tile.Y])
 
+        self.startTiles = []
+
+        for i in range(10):
+            self.startTiles.append(self.tiles[i][0])
+
         ## win condition is a function that returns true if the condition has been met
         self.winCondition = winCondition
-        self.enemyUnits = []
+        self.enemyUnits = enemyUnits
         for unit in enemyUnits:
             self.addUnitToMap(unit, True)
 
@@ -40,10 +45,24 @@ class Map():
         try: 
             self.tiles[unit.X][unit.Y].currentUnit = unit
             if isEnemy:
-                self.enemyUnits.append(unit)
+                self.enemyUnits.add(unit)
         except IndexError as e:
             print(f"{e} tileMap : addUnitToMap => Unit X or Y out of map range")
 
+    ## will throw an exception if number of units is greater than 
+    ## the number of start tiles
+    def addUnitToStartTile(self, unit):
+        for tile in self.startTiles:
+            if tile.currentUnit == None:
+                tile.currentUnit = unit
+                unit.X = tile.X
+                unit.Y = tile.Y
+                unit.active = True
+                break
+        else:
+            return True
+        return False
+                    
     def reset(self):
         for row in self.tiles:
             for tile in row:

@@ -1,5 +1,8 @@
 import pygame
-from pathlib import Path
+
+from pathlib    import Path
+from enum       import Enum, auto
+
 from inventory import Inventory
 from animation import Animation
 
@@ -14,12 +17,21 @@ combatUnit4 = pygame.image.load(Path(__file__).parent / "../assets/Combat-4.png"
 combatUnit5 = pygame.image.load(Path(__file__).parent / "../assets/Combat-5.png")
 combatUnit6 = pygame.image.load(Path(__file__).parent / "../assets/Combat-6.png")
 
+class UnitType(Enum):
+    Player  = auto()
+    Enemy   = auto()
+    Other   = auto()
+
 class Unit():
 
-    def __init__(self, X, Y, tileSize):
+    def __init__(self, X, Y, tileSize, isPlayer = False):
         self.name = "generic"
         self.level = 1
         self.exp = 0
+        if isPlayer:
+            self.__unitType = UnitType.Player
+        else:
+            self.__unitType = UnitType.Enemy 
         
         # stats
         self.maxHp = 15
@@ -50,6 +62,9 @@ class Unit():
 
     def __repr__(self):
         return f"Unit({self.name})"
+        
+    def getIsPlayer(self):
+        return self.__unitType == UnitType.Player
         
     def getStats(self):
         return [self.maxHp, self.attack, self.defense, self.speed, self.skill, self.luck]

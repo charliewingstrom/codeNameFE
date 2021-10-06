@@ -1,16 +1,18 @@
 import pygame
-from enum import Enum, auto
-from pathlib import Path
+
+from enum       import Enum, auto
+from pathlib    import Path
 
 ## custom classes
-from pathManager import PathManager
-from tileMap import Map
-from cursor import Cursor
-from ui import MainMenu, BattleForcast, CombatUI, MapUnitUI, UnitInfo
-from exp import Exp, LevelUp
-from inventory import HealingItem, Sword, Bow, Javelin
-from unit import Unit
-from combatManager import CombatManager
+from pathManager    import PathManager
+from tileMap        import Map
+from cursor         import Cursor
+from ui             import MainMenu, BattleForcast, CombatUI, MapUnitUI, UnitInfo
+from exp            import Exp, LevelUp
+from inventory      import HealingItem, Sword, Bow, Javelin
+from unit           import Unit
+from unitHolder     import UnitHolder
+from combatManager  import CombatManager
 
 pygame.init()
 gameWidth = 1920
@@ -92,6 +94,9 @@ font = pygame.font.Font('freesansbold.ttf', 52)
 
 ## custom class instances
 myMainMenu = MainMenu()
+
+myUnitHolder = UnitHolder()
+
 myBattleForcast = BattleForcast(gameWidth)
 mainCursor = Cursor(tileSize, mapWidth, mapHeight, gameWidth, gameHeight)
 myUnitInfo = UnitInfo()
@@ -103,7 +108,7 @@ myPathManager = PathManager()
 myCombatManager = CombatManager(screen, gameWidth, gameHeight, font)
 
 ## creating units
-protag = Unit(3, 3, tileSize)
+protag = Unit(3, 3, tileSize, True)
 protag.inventory.addItem(Bow())
 protag.attack = 7
 protag.defense = 6
@@ -111,7 +116,7 @@ protag.speed = 5
 protag.skill = 7
 protag.luck = 8
 
-Jagen = Unit(3, 5, tileSize)
+Jagen = Unit(3, 5, tileSize, True)
 Jagen.inventory.addItem(Sword())
 Jagen.inventory.addItem(Javelin())
 Jagen.inventory.addItem(HealingItem())
@@ -131,7 +136,7 @@ enemy1.inventory.addItem(Sword())
 def map1Win():
     return enemy.hp <= 0
 
-map1 = Map(mapWidth, mapHeight, map1background, tileSize, map1Win, [enemy, enemy1])
+map1 = Map(mapWidth, mapHeight, map1background, tileSize, map1Win, {enemy, enemy1})
 
 # set unique tiles
 for i in range(3):
@@ -159,7 +164,7 @@ enemy4.inventory.addItem(Sword())
 def map2Win():
     return enemy4.hp <= 0
 
-map2 = Map(12, 12, map2background, tileSize, map2Win, [enemy3, enemy4])
+map2 = Map(12, 12, map2background, tileSize, map2Win, {enemy3, enemy4})
 
 maps.append(map2)
 
@@ -169,17 +174,16 @@ currentMap = map1
 currentMap.addUnitToMap(protag)
 currentMap.addUnitToMap(Jagen)
 
-playerUnits.append(protag)
-playerUnits.append(Jagen)
-
-activeEnemyUnits.append(enemy)
-activeEnemyUnits.append(enemy1)
+myUnitHolder.addUnit(protag)
+myUnitHolder.addUnit(Jagen)
+myUnitHolder.addUnit(enemy)
+myUnitHolder.addUnit(enemy1)
 
 def findPlayerTarget(tiles, unit):
     possibleTargets = []
     for tile in tiles:
         for attackableTile in findTilesInAttackRange(tile, unit.getAttackRange()):
-            if attackableTile.currentUnit != None and attackableTile.currentUnit in playerUnits:
+            if attackableTile.currentUnit != None and attackableTile.currentUnit.getIsPlayer():
                 possibleTargets.append((attackableTile.currentUnit, tile))
     
     bestTarget = (None, None)
@@ -205,8 +209,8 @@ def findTilesInMovRange(unit):
     while len(queue) > 0:
         queue.sort(key=lambda tile:tile.distance)
         currTile = queue.pop(0)
-        if unit in playerUnits:
-            if currTile.distance <= currentUnit.mov and currTile.walkable and (currTile.currentUnit == None or currTile.currentUnit in playerUnits):
+        if unit.getIsPlayer():
+            if currTile.distance <= currentUnit.mov and currTile.walkable and (currTile.currentUnit == None or currTile.currentUnit.getIsPlayer()):
                 tilesInRange.append(currTile)
                 added.append(currTile)
                 for tile in currTile.adjList:
@@ -288,12 +292,13 @@ def getTileCursorIsOn(tileMap, cursor):
     return tileMap.tiles[cursor.X][cursor.Y]
 
 def removeUnitFromGame(unit):
+    ## TODO change this when playerUnits is gone
     global playerUnits
     global currentMap
     global activeEnemyUnits
     if unit in playerUnits:
         playerUnits.remove(unit)
-    elif unit in currentMap.enemyUnits:
+    if unit in currentMap.enemyUnits:
         currentMap.enemyUnits.remove(unit)
         if unit in activeEnemyUnits:
             activeEnemyUnits.remove(unit)
@@ -385,6 +390,9 @@ while running:
             else:
                 playerTurn = True
                 currentUnit = None
+                # TODO
+                # for unit in currentMap.units:
+                #   unit.active = True
                 for unit in playerUnits:
                     unit.active = True
                 for unit in currentMap.enemyUnits:
@@ -586,7 +594,7 @@ while running:
                         # get tiles in range of that unit and highlight them
                         if currentUnit != None:
                             setTilesInRangeAttackable(currentUnit.inventory.getBestRange(), findTilesInMovRange(currentUnit))
-                            if currentUnit.active and currentUnit in playerUnits:
+                            if currentUnit.active and currentUnit.getIsPlayer():
                                 currentState = states.selectingTile
                                 currentUnitTile = currentTile
                                 currentUnitStartingTile = currentTile
@@ -630,16 +638,16 @@ while running:
 
         elif myCombatManager.runSequence():
             if currentUnit.hp <= 0:
-                removeUnitFromGame(currentUnit)
+                myUnitHolder.removeUnit(currentUnit, getTileCursorIsOn(currentMap, currentUnit))
             if defendingUnit.hp <= 0:
-                removeUnitFromGame(defendingUnit)
+                myUnitHolder.removeUnit(defendingUnit, getTileCursorIsOn(currentMap, defendingUnit))
                 
             if myCombatManager.getExp() > 0:
                 attackingState = atkStates.addingExp
-                if currentUnit.hp > 0 and currentUnit in playerUnits:
+                if currentUnit.hp > 0 and currentUnit.getIsPlayer():
                     myExp.setup(currentUnit, myCombatManager.getExp())
 
-                elif defendingUnit.hp > 0 and defendingUnit in playerUnits:
+                elif defendingUnit.hp > 0 and defendingUnit.getIsPlayer():
                     myExp.setup(defendingUnit, myCombatManager.getExp())
 
                 else:
@@ -661,29 +669,18 @@ while running:
                 else:
                     currentMap = maps.pop(0)
                     playerTurn = True
-                    # setup players
-                    for i in range(len(playerUnits)):
-                        tmpPlayerUnit = playerUnits[i]
-                        tmpPlayerUnit.X = 0
-                        tmpPlayerUnit.Y = i
-                        currentMap.addUnitToMap(tmpPlayerUnit)
-                        tmpPlayerUnit.active = True
 
-                    # setup enemies
-                    activeEnemyUnits = []
-                    for unit in currentMap.enemyUnits:
-                        activeEnemyUnits.append(unit)
-        
-                
+                    mainCursor.resetMap(currentMap)
+                    myUnitHolder.addPlayerUnitsToNewMap(currentMap)
+                    myUnitHolder.addUnitSet(currentMap.enemyUnits)
+
     else:
         screen.fill((0,0,0))
         currentMap.draw(screen, xCamera, yCamera)
         mainCursor.draw(screen)
-        for unit in playerUnits:
-            unit.draw(screen, tileSize, xCamera, yCamera)
-        for enemy in currentMap.enemyUnits:
-            enemy.draw(screen, tileSize, xCamera, yCamera)
         
+        myUnitHolder.drawUnits(screen, tileSize, xCamera, yCamera)
+
         myMapUnitUI.draw(screen, font)
         if currentState == states.selectingAttack:
             myBattleForcast.draw(screen, font, currentUnit, unitsInRange[attackUnitIndex])
