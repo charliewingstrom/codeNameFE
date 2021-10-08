@@ -99,8 +99,8 @@ class Unit():
             return self.getEquippedWeapon().range
         return [0,0]
 
-    def drawFirstFrame(self):
-        return self.combatAnimation.getFirstFrame()
+    def drawFirstFrame(self, screen, x, y, reverse):
+        return self.combatAnimation.drawFirstFrame(screen, x, y, reverse)
 
     def draw(self, screen, tileSize, xCamera, yCamera):
         screen.blit(self.fieldPics[0], (self.X*tileSize + xCamera, self.Y*tileSize + yCamera))

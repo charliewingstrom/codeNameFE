@@ -81,6 +81,9 @@ class CombatManager():
                 if self.__attackingUnitIsPlayer:
                     self.__exp += 2
 
+        if self.__defendingUnit.hp > 0:
+            self.__defendingUnit.drawFirstFrame(self.__screen, 0, 0, True)
+        
         return actionFinished
 
     ## Handles the transitions between attack actions

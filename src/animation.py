@@ -8,8 +8,12 @@ class Animation():
         ## index for which frame we are on
         self.index = 0
 
-    def getFirstFrame(self):
-        return self.frames[0]
+    def drawFirstFrame(self, screen, x, y, reverse):
+        if reverse:
+            screen.blit(pygame.transform.flip(self.frames[0], True, False), (x, y))
+        else:
+            screen.blit(self.frames[0], (x, y))
+            
     ## draws 1 frame each call, if animation is finished, resets index and returns true, else returns false
     def draw(self, screen, x, y, reverse):
         if reverse:
