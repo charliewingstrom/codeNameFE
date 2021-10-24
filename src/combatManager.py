@@ -42,7 +42,8 @@ class CombatManager():
         ## when miss animations are added in, this needs to be an if based on whether the runningUnit will hit
         self.__runningAction            = self.__runningUnit.combatAnimation.draw 
         self.__dmg                      = self.__battleForcast.attackingUnitDmg
-        self.__willHit                  = self.__battleForcast.attackingUnitWillHit
+        self.__willAttack               = True
+        self.__willHit                  = self.__willAttack and self.__battleForcast.attackingUnitWillHit
         self.__state                    = atkStates.currentUnitAttacking
         self.__exp                      = 0
 
@@ -62,27 +63,30 @@ class CombatManager():
     def __run(self):
         actionFinished = False
         # check if runningUnit will hit
-        if self.__willHit:
-            # play hit animation
-            if self.__runningAction(self.__screen, 0, 0, self.__runningUnit != self.__attackingUnit):
-                actionFinished = True
-                self.__standingUnit.hp -= self.__dmg
-                if self.__attackingUnitIsPlayer:
-                    self.__exp += self.__dmg
-                    # standingUnitDied
-                    if self.__standingUnit.hp <= 0:
-                        self.__exp += 30
-            
-            ## TODO may need to play "finishing" animation here
+        if self.__willAttack:
+            if self.__willHit:
+                # play hit animation
+                if self.__runningAction(self.__screen, 0, 0, self.__runningUnit != self.__attackingUnit):
+                    actionFinished = True
+                    self.__standingUnit.hp -= self.__dmg
+                    if self.__attackingUnitIsPlayer:
+                        self.__exp += self.__dmg
+                        # standingUnitDied
+                        if self.__standingUnit.hp <= 0:
+                            self.__exp += 30
+                
+                ## TODO may need to play "finishing" animation here
+            else:
+                # play miss animation
+                if self.__runningAction(self.__screen, 0, 0, self.__runningUnit != self.__attackingUnit):
+                    actionFinished = True
+                    if self.__attackingUnitIsPlayer:
+                        self.__exp += 2
         else:
-            # play miss animation
-            if self.__runningAction(self.__screen, 0, 0, self.__runningUnit != self.__attackingUnit):
-                actionFinished = True
-                if self.__attackingUnitIsPlayer:
-                    self.__exp += 2
+            actionFinished = True
 
-        if self.__defendingUnit.hp > 0:
-            self.__defendingUnit.drawFirstFrame(self.__screen, 0, 0, True)
+        if self.__standingUnit.hp > 0:
+            self.__standingUnit.drawFirstFrame(self.__screen, 0, 0, self.__standingUnit == self.__defendingUnit)
         
         return actionFinished
 
@@ -101,7 +105,8 @@ class CombatManager():
                 self.__standingUnit             = self.__attackingUnit
                 self.__runningAction            = self.__runningUnit.combatAnimation.draw
                 self.__dmg                      = self.__battleForcast.defendingUnitDmg
-                self.__willHit                  = self.__battleForcast.defendingUnitCanCounter and self.__battleForcast.defendingUnitWillHit
+                self.__willAttack               = self.__battleForcast.defendingUnitCanCounter
+                self.__willHit                  = self.__willAttack and self.__battleForcast.defendingUnitWillHit
                 self.__attackingUnitIsPlayer    = not self.__attackingUnitIsPlayer
 
         elif self.__state == atkStates.defendingUnitAttacking:

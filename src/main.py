@@ -319,12 +319,7 @@ def checkMapUI():
     cursorTileUnit = getTileCursorIsOn(currentMap, mainCursor).currentUnit
     myMapUnitUI.reset(cursorTileUnit)
 
-## given an attacking and defending unit, blit both first frames to the screen (if they are alive)
-# def drawFirstFrames(currentUnit, defendingUnit):
-#     if currentUnit.hp > 0:
-#         screen.blit(currentUnit.getCombatAniFirstFrame(), (0, 0))
-#     if defendingUnit.hp > 0:
-#         screen.blit(pygame.transform.flip(defendingUnit.getCombatAniFirstFrame(), True, False), (0, 0))
+## TODO need a function to setup a new map (including the first map of the game)
 
 
 # main game loop
