@@ -24,7 +24,7 @@ class UnitType(Enum):
 
 class Unit():
 
-    def __init__(self, X, Y, tileSize, isPlayer = False):
+    def __init__(self, X, Y, tileSize, startingInventory, isPlayer = False):
         self.name = "generic"
         self.level = 1
         self.exp = 0
@@ -50,7 +50,11 @@ class Unit():
         self.speedG = 50
         self.skillG = 50
         self.luckG = 50
+        
         self.inventory = Inventory()
+        for item in startingInventory:
+            self.inventory.addItem(item)
+
         self.X = X
         self.Y = Y
 

@@ -6,8 +6,8 @@ cursorPic = pygame.image.load(Path(__file__).parent / "../assets/cursor.png")
 class Cursor():
 
     def __init__(self, tileSize, mapWidth, mapHeight, gameWidth, gameHeight):
-        self.X = 1
-        self.Y = 2
+        self.X = 3
+        self.Y = 3
         self.tileSize = tileSize
         self.__mapWidth = mapWidth
         self.__mapHeight = mapHeight
@@ -49,7 +49,7 @@ class Cursor():
                 return self.tileSize
         return 0
 
-    def resetMap(self, tileMap):
+    def resetFromMap(self, tileMap):
         self.__mapWidth   = tileMap.width
         self.__mapHeight  = tileMap.height
 

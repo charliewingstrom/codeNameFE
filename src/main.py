@@ -5,14 +5,13 @@ from pathlib    import Path
 
 ## custom classes
 from pathManager    import PathManager
-from tileMap        import Map
-from cursor         import Cursor
-from ui             import MainMenu, BattleForcast, CombatUI, MapUnitUI, UnitInfo
+from ui             import MainMenu, BattleForecast, MapUnitUI, UnitInfo
 from exp            import Exp, LevelUp
 from inventory      import HealingItem, Sword, Bow, Javelin
 from unit           import Unit
 from unitHolder     import UnitHolder
 from combatManager  import CombatManager
+from mapManager     import MapManager
 
 pygame.init()
 gameWidth = 1920
@@ -30,8 +29,6 @@ menuCursor = pygame.image.load(Path(__file__).parent / "../assets/menu-cursor.pn
 
 ## backgrounds
 attacingBackground = pygame.image.load(Path(__file__).parent / "../assets/attacking-background.png")
-map1background = pygame.image.load(Path(__file__).parent / "../assets/level1Background.png")
-map2background = pygame.image.load(Path(__file__).parent / "../assets/map2-background.png")
 #---------------------------
 
 # globals
@@ -39,14 +36,7 @@ currentUnit = None
 defendingUnit = None
 ## map
 tileSize = 96
-mapWidth = 32
-mapHeight = 19
 maxDistance = 256
-maps = []
-
-## camera
-yCamera = 0
-xCamera = 0
 
 ## movement
 moving = False
@@ -82,9 +72,7 @@ menuOptions = []
 menuOptions.append("wait")
 menuSelectionIndex = 0
 
-## unit arrays
-playerUnits = []
-activeEnemyUnits = []
+
 
 ### attacking selection
 unitsInRange = []
@@ -97,29 +85,15 @@ myMainMenu = MainMenu()
 
 myUnitHolder = UnitHolder()
 
-myBattleForcast = BattleForcast(gameWidth)
-mainCursor = Cursor(tileSize, mapWidth, mapHeight, gameWidth, gameHeight)
-myUnitInfo = UnitInfo()
-myMapUnitUI = MapUnitUI(gameWidth, gameHeight)
-myExp = Exp()
-myLevelUp = LevelUp(gameWidth, gameHeight)
-
-myPathManager = PathManager()
-myCombatManager = CombatManager(screen, gameWidth, gameHeight, font)
-
 ## creating units
-protag = Unit(3, 3, tileSize, True)
-protag.inventory.addItem(Bow())
+protag = Unit(3, 3, tileSize, [Bow()], True)
 protag.attack = 7
 protag.defense = 6
 protag.speed = 5
 protag.skill = 7
 protag.luck = 8
 
-Jagen = Unit(3, 5, tileSize, True)
-Jagen.inventory.addItem(Sword())
-Jagen.inventory.addItem(Javelin())
-Jagen.inventory.addItem(HealingItem())
+Jagen = Unit(3, 5, tileSize, [Sword(), Javelin(), HealingItem()], True)
 Jagen.name = 'Jagen'
 Jagen.attack = 15
 Jagen.defense = 10
@@ -127,57 +101,17 @@ Jagen.speed = 9
 Jagen.skill = 8
 Jagen.luck = 8
 
-enemy = Unit(9, 5, tileSize)
-enemy.inventory.addItem(Sword())
-enemy1 = Unit(9, 6, tileSize)
-enemy1.inventory.addItem(Sword())
-
-## setting up the map
-def map1Win():
-    return enemy.hp <= 0
-
-map1 = Map(mapWidth, mapHeight, map1background, tileSize, map1Win, {enemy, enemy1})
-
-# set unique tiles
-for i in range(3):
-    map1.tiles[i][4].walkable = False
-for i in range(5):
-    map1.tiles[4][i].walkable = False
-for i in range(3):
-    map1.tiles[i+5][4].walkable = False
-for i in range(5):
-    map1.tiles[9][i].walkable = False
-for i in range(3):
-    map1.tiles[i+10][4].walkable = False
-for i in range(5):
-    map1.tiles[14][i].walkable = False
-for i in range(14):
-    map1.tiles[i][7].walkable = False
-
-# map2
-
-enemy3 = Unit(1, 2, tileSize)
-enemy3.inventory.addItem(Sword())
-enemy4 = Unit(2, 1, tileSize)
-enemy4.inventory.addItem(Sword())
-
-def map2Win():
-    return enemy4.hp <= 0
-
-map2 = Map(12, 12, map2background, tileSize, map2Win, {enemy3, enemy4})
-
-maps.append(map2)
-
-currentMap = map1
-
-# Setting up for game
-currentMap.addUnitToMap(protag)
-currentMap.addUnitToMap(Jagen)
-
 myUnitHolder.addUnit(protag)
 myUnitHolder.addUnit(Jagen)
-myUnitHolder.addUnit(enemy)
-myUnitHolder.addUnit(enemy1)
+
+myBattleForecast = BattleForecast(gameWidth)
+myMapManager    = MapManager(tileSize, gameWidth, gameHeight, myUnitHolder)
+myUnitInfo      = UnitInfo()
+myMapUnitUI     = MapUnitUI(gameWidth, gameHeight)
+myExp           = Exp()
+myLevelUp       = LevelUp(gameWidth, gameHeight)
+myPathManager   = PathManager()
+myCombatManager = CombatManager(screen, gameWidth, gameHeight, font)
 
 def findPlayerTarget(tiles, unit):
     possibleTargets = []
@@ -198,8 +132,8 @@ def findPlayerTarget(tiles, unit):
     return bestTarget        
 
 def findTilesInMovRange(unit):
-    currentMap.reset()
-    currentTile = currentMap.tiles[unit.X][unit.Y]
+    myMapManager.resetCurrentMap
+    currentTile = myMapManager.getTileUnitIsOn(unit)
     currentTile.distance = 0
     queue = []
     added = []
@@ -221,7 +155,7 @@ def findTilesInMovRange(unit):
                             tile.parent = currTile
                         queue.append(tile)
         else:
-            if currTile.distance <= currentUnit.mov and currTile.walkable and (currTile.currentUnit == None or currTile.currentUnit in currentMap.enemyUnits):
+            if currTile.distance <= currentUnit.mov and currTile.walkable and (currTile.currentUnit == None or currTile.currentUnit in myUnitHolder.getEnemies()):
                 tilesInRange.append(currTile)
                 added.append(currTile)
                 for tile in currTile.adjList:
@@ -251,7 +185,7 @@ def resetAfterAction():
     currentUnit = None
     defendingUnit = None
     currentState = states.selectingUnit
-    currentMap.reset()
+    myMapManager.resetCurrentMap()
 
 def findTilesInAttackRange(startTile, atkRange):
 
@@ -288,39 +222,11 @@ def setTilesInRangeAttackable(atkRange, tilesInRange):
                 if atkTile not in tilesInRange:
                     atkTile.attackable = True
 
-def getTileCursorIsOn(tileMap, cursor):
-    return tileMap.tiles[cursor.X][cursor.Y]
-
-def removeUnitFromGame(unit):
-    ## TODO change this when playerUnits is gone
-    global playerUnits
-    global currentMap
-    global activeEnemyUnits
-    if unit in playerUnits:
-        playerUnits.remove(unit)
-    if unit in currentMap.enemyUnits:
-        currentMap.enemyUnits.remove(unit)
-        if unit in activeEnemyUnits:
-            activeEnemyUnits.remove(unit)
-
-    currentMap.tiles[unit.X][unit.Y].currentUnit = None
-
-## compares the UI elements to the cursor location
-## keeps the UI from covering up the map
-def checkMapUI():
-    if mainCursor.X * tileSize > gameWidth / 2:
-        myMapUnitUI.X = 10
-        myBattleForcast.X = 10
-    else:
-        myMapUnitUI.X = gameWidth - 460
-        myBattleForcast.X = gameWidth - 500
-    
-    ## check if cursor is over a player
-    cursorTileUnit = getTileCursorIsOn(currentMap, mainCursor).currentUnit
-    myMapUnitUI.reset(cursorTileUnit)
-
-## TODO need a function to setup a new map (including the first map of the game)
-
+# TODO
+# def aimAtUnit(defendingUnit, unitsInRange, attackUnitIndex, myMapManager, myBattleForecast):
+#     defendingUnit = unitsInRange[attackUnitIndex]
+#     myMapManager.setCursorOnUnit(defendingUnit)
+#     myBattleForecast.calculate(currentUnit, defendingUnit, findTilesInAttackRange, myMapManager.getCurrentMap())
 
 # main game loop
 while running:
@@ -342,10 +248,10 @@ while running:
 
                 moving = False
                 if not playerTurn:
-                    myBattleForcast.calculate(currentUnit, defendingUnit, findTilesInAttackRange, currentMap)
-                    myBattleForcast.roll()
+                    myBattleForecast.calculate(currentUnit, defendingUnit, findTilesInAttackRange, myMapManager.getCurrentMap())
+                    myBattleForecast.roll()
                     currentState = states.attacking
-                    myCombatManager.setupAttack(currentUnit, defendingUnit, myBattleForcast, False)
+                    myCombatManager.setupAttack(currentUnit, defendingUnit, myBattleForecast, False)
                     
                 else:
                     currentState = states.selectingAction
@@ -357,7 +263,7 @@ while running:
                     unitsInRange = []
                     for tile in findTilesInAttackRange(currentUnitTile, currentUnit.inventory.getBestRange()):
                         tile.attackable = True
-                        if tile.currentUnit != None and tile.currentUnit in currentMap.enemyUnits:
+                        if tile.currentUnit != None and tile.currentUnit in myUnitHolder.getEnemies():
                             unitsInRange.append(tile.currentUnit)
                     if len(unitsInRange) > 0:
                         menuOptions.insert(0, "attack")
@@ -365,9 +271,10 @@ while running:
     else: 
         ## automated enemy phase actions
         if not playerTurn and currentState != states.attacking:
-            if len(activeEnemyUnits) > 0:
-                currentUnit = activeEnemyUnits.pop(0)
-                currentUnitStartingTile = currentMap.tiles[currentUnit.X][currentUnit.Y]
+            activeEnemyUnit = myUnitHolder.getActiveEnemyUnit()
+            if activeEnemyUnit:
+                currentUnit = activeEnemyUnit
+                currentUnitStartingTile = myMapManager.getTileUnitIsOn(currentUnit)
                 enemyTilesInRange = findTilesInMovRange(currentUnit)
                 for tile in enemyTilesInRange:
                     if tile.currentUnit == None or tile.currentUnit == currentUnit:
@@ -380,47 +287,21 @@ while running:
                     myPathManager.followPath()
                     moving = True
                     
-                currentMap.reset()
+                myMapManager.resetCurrentMap()
                 
             else:
                 playerTurn = True
                 currentUnit = None
-                # TODO
-                # for unit in currentMap.units:
-                #   unit.active = True
-                for unit in playerUnits:
-                    unit.active = True
-                for unit in currentMap.enemyUnits:
-                    activeEnemyUnits.append(unit)
+                myUnitHolder.resetForNextTurn()
         
-
         ## menu and cursor controls 
         ## if keys (they are up here because you should be able to hold the key)
         elif playerTurn and not (currentState in  [states.selectingAction, states.selectingAttack, states.selectingItems, states.selectingWeapon, states.attacking]):
             # cursor controls
-            arrowKeyPressed = False
-            if keys[pygame.K_DOWN]:
-                yCamera += mainCursor.down(yCamera)
-                checkMapUI()
-                arrowKeyPressed = True
-            if keys[pygame.K_UP]:
-                yCamera += mainCursor.up(yCamera)
-                checkMapUI()
-                arrowKeyPressed = True
-            if keys[pygame.K_RIGHT]:
-                xCamera += mainCursor.right(xCamera)
-                checkMapUI()
-                arrowKeyPressed = True
-            if keys[pygame.K_LEFT]:
-                xCamera += mainCursor.left(xCamera)
-                checkMapUI()
-                arrowKeyPressed = True
-            if arrowKeyPressed:
-                cursorTile = getTileCursorIsOn(currentMap, mainCursor)
-                myPathManager.resetPath(cursorTile)
-
-            # end cursor controls
-
+            # get the arrow keys pressed 
+            arrowKeys = [keys[pygame.K_DOWN], keys[pygame.K_UP], keys[pygame.K_RIGHT], keys[pygame.K_LEFT]]
+            myMapManager.checkUI(arrowKeys, myMapUnitUI, myBattleForecast, myPathManager)
+            
         # menu movement controls
         elif playerTurn and currentState == states.selectingAction:
             if keys[pygame.K_DOWN]:
@@ -444,8 +325,8 @@ while running:
                 if currentState == states.selectingAttack:
                     if event.type == pygame.KEYDOWN and event.key == pygame.K_z:
                         currentState = states.attacking
-                        myBattleForcast.roll()
-                        myCombatManager.setupAttack(currentUnit, defendingUnit, myBattleForcast, True)
+                        myBattleForecast.roll()
+                        myCombatManager.setupAttack(currentUnit, defendingUnit, myBattleForecast, True)
 
                     if event.type == pygame.KEYDOWN and (event.key == pygame.K_RIGHT or event.key == pygame.K_UP):
                         if attackUnitIndex < len(unitsInRange) - 1:
@@ -453,9 +334,8 @@ while running:
                         else:
                             attackUnitIndex = 0
                         defendingUnit = unitsInRange[attackUnitIndex]
-                        mainCursor.X = defendingUnit.X
-                        mainCursor.Y = defendingUnit.Y
-                        myBattleForcast.calculate(currentUnit, defendingUnit, findTilesInAttackRange, currentMap)
+                        myMapManager.setCursorOnUnit(defendingUnit)
+                        myBattleForecast.calculate(currentUnit, defendingUnit, findTilesInAttackRange, myMapManager.getCurrentMap())
 
                     if event.type == pygame.KEYDOWN and (event.key == pygame.K_LEFT or event.key == pygame.K_DOWN):
                         if attackUnitIndex > 0:
@@ -463,9 +343,8 @@ while running:
                         else:
                             attackUnitIndex = len(unitsInRange)-1
                         defendingUnit = unitsInRange[attackUnitIndex]
-                        mainCursor.X = defendingUnit.X
-                        mainCursor.Y = defendingUnit.Y
-                        myBattleForcast.calculate(currentUnit, defendingUnit, findTilesInAttackRange, currentMap)
+                        myMapManager.setCursorOnUnit(defendingUnit)
+                        myBattleForecast.calculate(currentUnit, defendingUnit, findTilesInAttackRange, myMapManager.getCurrentMap())
 
                     if event.type == pygame.KEYDOWN and event.key == pygame.K_x:
                         currentState = states.selectingWeapon
@@ -485,17 +364,16 @@ while running:
                     if event.type == pygame.KEYDOWN and event.key == pygame.K_z:
                         currentUnit.inventory.equipSelectedWeapon()
                         unitsInRange = []
-                        currentMap.reset()
+                        myMapManager.resetCurrentMap()
                         for tile in findTilesInAttackRange(currentUnitTile, currentUnit.inventory.avaliableItems[0].range):
-                            if tile.currentUnit != None and tile.currentUnit in currentMap.enemyUnits:
+                            if tile.currentUnit != None and tile.currentUnit in myUnitHolder.getEnemies():
                                 unitsInRange.append(tile.currentUnit)
                             tile.attackable = True
                         currentState = states.selectingAttack
                         attackUnitIndex = 0
                         defendingUnit = unitsInRange[attackUnitIndex]
-                        mainCursor.X = defendingUnit.X
-                        mainCursor.Y = defendingUnit.Y
-                        myBattleForcast.calculate(currentUnit, defendingUnit, findTilesInAttackRange, currentMap)
+                        myMapManager.setCursorOnUnit(defendingUnit)
+                        myBattleForecast.calculate(currentUnit, defendingUnit, findTilesInAttackRange, myMapManager.getCurrentMap())
 
                     if event.type == pygame.KEYDOWN and event.key == pygame.K_x:
                         currentState = states.selectingAction
@@ -520,7 +398,7 @@ while running:
                             currentUnit.inventory.avaliableItems = []
                             for weapon in currentUnit.inventory.weapons:
                                 for tile in findTilesInAttackRange(currentUnitTile, weapon.range):
-                                    if tile.currentUnit != None and tile.currentUnit in currentMap.enemyUnits:
+                                    if tile.currentUnit != None and tile.currentUnit in myUnitHolder.getEnemies():
                                         currentUnit.inventory.avaliableItems.append(weapon)
                                         break
 
@@ -529,7 +407,7 @@ while running:
                             currentUnit.inventory.avaliableItems = currentUnit.getInventory()
                     # go back to selecting tile
                     if event.type == pygame.KEYDOWN and event.key == pygame.K_x:
-                        currentMap.reset()
+                        myMapManager.resetCurrentMap()
                         currentUnitTile.currentUnit = None
                         currentUnit.X = currentUnitStartingTile.X
                         currentUnit.Y = currentUnitStartingTile.Y
@@ -544,7 +422,7 @@ while running:
                                 for atkTile in findTilesInAttackRange(tile, currentUnit.inventory.getBestRange()):
                                     if atkTile not in tilesInRange:
                                         atkTile.attackable = True
-                        cursorTile = getTileCursorIsOn(currentMap, mainCursor)
+                        cursorTile = myMapManager.getTileCursorIsOn()
                         myPathManager.resetPath(cursorTile)
                         
 
@@ -552,17 +430,17 @@ while running:
                 elif currentState == states.selectingTile:
                     # Select tile and get ready to move to it
                     if event.type == pygame.KEYDOWN and event.key == pygame.K_z:
-                        if getTileCursorIsOn(currentMap, mainCursor).selectable:
+                        if myMapManager.getTileCursorIsOn().selectable:
                             moving = True
                             currentState = states.selectingUnit
                             myPathManager.followPath()
-                            currentMap.reset()
+                            myMapManager.resetCurrentMap()
 
                     # Stop selecting tile
                     elif event.type == pygame.KEYDOWN and event.key == pygame.K_x:
                         # clear path
                         myPathManager.emptyPath()
-                        currentMap.reset()
+                        myMapManager.resetCurrentMap()
                         currentUnit = None
                         currentUnitTile = None
                         currentUnitStartingTile = None
@@ -583,7 +461,7 @@ while running:
                     if event.type == pygame.KEYDOWN and event.key == pygame.K_z:
                         
                         # get the unit that cursor is on
-                        currentTile = getTileCursorIsOn(currentMap, mainCursor)
+                        currentTile = myMapManager.getTileCursorIsOn()
                         currentUnit = currentTile.currentUnit
                         
                         # get tiles in range of that unit and highlight them
@@ -596,12 +474,12 @@ while running:
                     
                     if event.type == pygame.KEYDOWN and event.key == pygame.K_x:
                         currentUnit = None
-                        currentMap.reset()
+                        myMapManager.resetCurrentMap()
                         myPathManager.emptyPath()
                         currentState = states.selectingUnit
                         
                     if event.type == pygame.KEYDOWN and event.key == pygame.K_a:
-                        currentTile = getTileCursorIsOn(currentMap, mainCursor)
+                        currentTile = myMapManager.getTileCursorIsOn()
                         if currentTile.currentUnit != None:
                             currentUnit = currentTile.currentUnit
                             myUnitInfo.reset(currentUnit)
@@ -633,9 +511,11 @@ while running:
 
         elif myCombatManager.runSequence():
             if currentUnit.hp <= 0:
-                myUnitHolder.removeUnit(currentUnit, getTileCursorIsOn(currentMap, currentUnit))
+                myUnitHolder.removeUnit(currentUnit)
+                myMapManager.getTileUnitIsOn(currentUnit).currentUnit = None
             if defendingUnit.hp <= 0:
-                myUnitHolder.removeUnit(defendingUnit, getTileCursorIsOn(currentMap, defendingUnit))
+                myUnitHolder.removeUnit(defendingUnit)
+                myMapManager.getTileUnitIsOn(defendingUnit).currentUnit = None
                 
             if myCombatManager.getExp() > 0:
                 attackingState = atkStates.addingExp
@@ -658,27 +538,22 @@ while running:
             resetAfterAction()
 
             ## check if we have to transition to the next map
-            if currentMap.checkForWin():
-                if len(maps) == 0:
-                    running = False
-                else:
-                    currentMap = maps.pop(0)
-                    playerTurn = True
-
-                    mainCursor.resetMap(currentMap)
-                    myUnitHolder.addPlayerUnitsToNewMap(currentMap)
-                    myUnitHolder.addUnitSet(currentMap.enemyUnits)
+            mapComplete, noMoreMaps = myMapManager.checkForMapCompletion()
+            if mapComplete and not noMoreMaps:
+                playerTurn = True
+                myUnitHolder.moveToNextMap(myMapManager.getCurrentMap())
+            if noMoreMaps:
+                running = False
 
     else:
         screen.fill((0,0,0))
-        currentMap.draw(screen, xCamera, yCamera)
-        mainCursor.draw(screen)
+        myMapManager.draw(screen)
         
-        myUnitHolder.drawUnits(screen, tileSize, xCamera, yCamera)
+        myUnitHolder.drawUnits(screen, tileSize, myMapManager.getCameraX(), myMapManager.getCameraY())
 
         myMapUnitUI.draw(screen, font)
         if currentState == states.selectingAttack:
-            myBattleForcast.draw(screen, font, currentUnit, unitsInRange[attackUnitIndex])
+            myBattleForecast.draw(screen, font, currentUnit, unitsInRange[attackUnitIndex])
 
         elif currentState == states.selectingItems:
             currentUnit.inventory.draw(screen, font)            

@@ -19,7 +19,7 @@ class MainMenu():
     def draw(self, screen):
         screen.blit(mainMenuPic, (0,0))
 
-class BattleForcast():
+class BattleForecast():
 
     def __init__(self, gameWidth):
         self.X = gameWidth - 500

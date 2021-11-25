@@ -33,27 +33,29 @@ class Map():
         self.startTiles = []
 
         for i in range(10):
-            self.startTiles.append(self.tiles[i][0])
+            self.startTiles.append(self.tiles[i][5])
 
         ## win condition is a function that returns true if the condition has been met
         self.winCondition = winCondition
-        self.enemyUnits = enemyUnits
         for unit in enemyUnits:
-            self.addUnitToMap(unit, True)
+            self.addUnitToMap(unit)
 
-    def addUnitToMap(self, unit, isEnemy : bool = False):
+        # for unit in playerUnits:
+        #     self.addUnitToStartTile(unit)
+
+    # for adding enemies
+    def addUnitToMap(self, unit):
         try: 
             self.tiles[unit.X][unit.Y].currentUnit = unit
-            if isEnemy:
-                self.enemyUnits.add(unit)
         except IndexError as e:
             print(f"{e} tileMap : addUnitToMap => Unit X or Y out of map range")
 
     ## will throw an exception if number of units is greater than 
     ## the number of start tiles
+    ## for adding players
     def addUnitToStartTile(self, unit):
         for tile in self.startTiles:
-            if tile.currentUnit == None:
+            if tile.currentUnit == None and tile.walkable:
                 tile.currentUnit = unit
                 unit.X = tile.X
                 unit.Y = tile.Y
