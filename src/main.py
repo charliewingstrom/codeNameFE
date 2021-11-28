@@ -6,6 +6,7 @@ from pathlib    import Path
 ## custom classes
 from pathManager    import PathManager
 from ui             import MainMenu, BattleForecast, MapUnitUI, UnitInfo
+from menu           import Menu, menuOptions
 from exp            import Exp, LevelUp
 from inventory      import HealingItem, Sword, Bow, Javelin
 from unit           import Unit
@@ -21,12 +22,6 @@ pygame.display.set_caption("Code FE")
 running = True
 
 #------ load assets --------
-## Menu
-waitButton = pygame.image.load(Path(__file__).parent / "../assets/wait-button.png")
-itemsButton = pygame.image.load(Path(__file__).parent / "../assets/items-button.png")
-attackButton = pygame.image.load(Path(__file__).parent / "../assets/attack-button.png")
-menuCursor = pygame.image.load(Path(__file__).parent / "../assets/menu-cursor.png")
-
 ## backgrounds
 attacingBackground = pygame.image.load(Path(__file__).parent / "../assets/attacking-background.png")
 #---------------------------
@@ -67,13 +62,6 @@ class atkStates(Enum):
 
 attackingState = atkStates.attacking
 
-## menu items
-menuOptions = []
-menuOptions.append("wait")
-menuSelectionIndex = 0
-
-
-
 ### attacking selection
 unitsInRange = []
 attackUnitIndex = 0
@@ -112,6 +100,7 @@ myExp           = Exp()
 myLevelUp       = LevelUp(gameWidth, gameHeight)
 myPathManager   = PathManager()
 myCombatManager = CombatManager(screen, gameWidth, gameHeight, font)
+actionMenu      = Menu()
 
 def findPlayerTarget(tiles, unit):
     possibleTargets = []
@@ -222,6 +211,14 @@ def setTilesInRangeAttackable(atkRange, tilesInRange):
                 if atkTile not in tilesInRange:
                     atkTile.attackable = True
 
+def getEnemyUnitsInRange(unit, range, mapManager, unitHolder):
+    unitsInRange = []
+    for tile in findTilesInAttackRange(mapManager.getTileUnitIsOn(unit), range):
+        tile.attackable = True
+        if tile.currentUnit != None and tile.currentUnit in unitHolder.getEnemies():
+            unitsInRange.append(tile.currentUnit)
+    return unitsInRange
+
 # TODO
 # def aimAtUnit(defendingUnit, unitsInRange, attackUnitIndex, myMapManager, myBattleForecast):
 #     defendingUnit = unitsInRange[attackUnitIndex]
@@ -255,18 +252,9 @@ while running:
                     
                 else:
                     currentState = states.selectingAction
-                    menuOptions = []
-                    menuSelectionIndex = 0
-                    menuOptions.insert(0, "wait")
-                    if len(currentUnit.getInventory()) > 0:
-                        menuOptions.insert(0, "items")
-                    unitsInRange = []
-                    for tile in findTilesInAttackRange(currentUnitTile, currentUnit.inventory.getBestRange()):
-                        tile.attackable = True
-                        if tile.currentUnit != None and tile.currentUnit in myUnitHolder.getEnemies():
-                            unitsInRange.append(tile.currentUnit)
-                    if len(unitsInRange) > 0:
-                        menuOptions.insert(0, "attack")
+                    unitsInRange = getEnemyUnitsInRange(currentUnit, currentUnit.inventory.getBestRange(), myMapManager, myUnitHolder)
+                    actionMenu.checkForMenuOptions(currentUnit, unitsInRange)
+
     # not moving
     else: 
         ## automated enemy phase actions
@@ -304,13 +292,8 @@ while running:
             
         # menu movement controls
         elif playerTurn and currentState == states.selectingAction:
-            if keys[pygame.K_DOWN]:
-                if (menuSelectionIndex < len(menuOptions)-1):
-                    menuSelectionIndex+=1
-            if keys[pygame.K_UP]:
-                if (menuSelectionIndex > 0):
-                    menuSelectionIndex-=1
-        # end menu movement controls
+            menuKeys = [keys[pygame.K_DOWN], keys[pygame.K_UP]]
+            actionMenu.checkForMenuControls(menuKeys)
 
         for event in pygame.event.get():
             ## quit
@@ -363,12 +346,8 @@ while running:
                 elif currentState == states.selectingWeapon:
                     if event.type == pygame.KEYDOWN and event.key == pygame.K_z:
                         currentUnit.inventory.equipSelectedWeapon()
-                        unitsInRange = []
                         myMapManager.resetCurrentMap()
-                        for tile in findTilesInAttackRange(currentUnitTile, currentUnit.inventory.avaliableItems[0].range):
-                            if tile.currentUnit != None and tile.currentUnit in myUnitHolder.getEnemies():
-                                unitsInRange.append(tile.currentUnit)
-                            tile.attackable = True
+                        unitsInRange = getEnemyUnitsInRange(currentUnit, currentUnit.inventory.avaliableItems[0].range, myMapManager, myUnitHolder)
                         currentState = states.selectingAttack
                         attackUnitIndex = 0
                         defendingUnit = unitsInRange[attackUnitIndex]
@@ -387,13 +366,12 @@ while running:
                 elif currentState == states.selectingAction:
                     # action selected from menu
                     if event.type == pygame.KEYDOWN and event.key == pygame.K_z:
-                        if menuOptions[menuSelectionIndex] == 'wait':
+                        selectedOption = actionMenu.selectOption()
+                        if selectedOption == menuOptions.wait:
                             resetAfterAction()
                             
-                            
-                        if menuOptions[menuSelectionIndex] == 'attack':
+                        elif selectedOption == menuOptions.attack:
                             currentState = states.selectingWeapon
-                            
                             currentUnit.inventory.selectionIndex = 0
                             currentUnit.inventory.avaliableItems = []
                             for weapon in currentUnit.inventory.weapons:
@@ -402,9 +380,10 @@ while running:
                                         currentUnit.inventory.avaliableItems.append(weapon)
                                         break
 
-                        if menuOptions[menuSelectionIndex] == 'items':                            
+                        elif selectedOption == menuOptions.items:                            
                             currentState = states.selectingItems
                             currentUnit.inventory.avaliableItems = currentUnit.getInventory()
+
                     # go back to selecting tile
                     if event.type == pygame.KEYDOWN and event.key == pygame.K_x:
                         myMapManager.resetCurrentMap()
@@ -561,16 +540,7 @@ while running:
             currentUnit.inventory.draw(screen, font)
 
         elif currentState == states.selectingAction:
-            screen.blit(menuCursor, (gameWidth-450, 240+(165*menuSelectionIndex)))
-            Y = 200
-            if "attack" in menuOptions:
-                screen.blit(attackButton, (gameWidth - 300, Y))
-                Y+= 165
-            if "items" in menuOptions:
-                screen.blit(itemsButton, (gameWidth - 300, Y))
-                Y+= 165
-            if "wait" in menuOptions:
-                screen.blit(waitButton, (gameWidth - 300, Y))
+            actionMenu.draw(screen, gameWidth)
         
         elif currentState == states.viewingUnitInfo:
             myUnitInfo.draw(screen, font)
