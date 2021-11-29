@@ -40,6 +40,7 @@ class BattleForecast():
         self.defendingUnitCanCounter = True
 
     def calculate(self, attackingUnit, defendingUnit, findTilesInAttackRange, map1):
+        #TODO could I do this outside of this function?
         ## need to check if defendingUnit is in range to counter attack
         self.defendingUnitCanCounter = False
         for tile in findTilesInAttackRange(map1.tiles[defendingUnit.X][defendingUnit.Y], defendingUnit.getAttackRange()):

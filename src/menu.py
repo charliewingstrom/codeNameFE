@@ -18,7 +18,7 @@ class Menu(object):
         self.__options          = []
         self.__selectionIndex   = 0
 
-    def checkForMenuOptions(self, currentUnit, unitsInRange):
+    def checkForMenuOptions(self, currentUnit, areUnitsInRange):
         self.__options          = []
         self.__selectionIndex   = 0
 
@@ -26,7 +26,7 @@ class Menu(object):
         if len(currentUnit.getInventory()) > 0:
             self.__options.insert(0, menuOptions.items)
 
-        if len(unitsInRange) > 0:
+        if areUnitsInRange:
             self.__options.insert(0, menuOptions.attack)
 
     def checkForMenuControls(self, menuKeys):
