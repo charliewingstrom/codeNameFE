@@ -39,14 +39,14 @@ moving = False
 
 ## player state
 class states(Enum):
-    inMainMenu = auto()
-    selectingUnit = auto()
-    selectingTile = auto()
+    inMainMenu      = auto()
+    selectingUnit   = auto()
+    selectingTile   = auto()
     selectingAction = auto()
     selectingAttack = auto()
-    selectingItems = auto()
+    selectingItems  = auto()
     selectingWeapon = auto()
-    attacking = auto()
+    attacking       = auto()
     viewingUnitInfo = auto()
 
 currentState = states.inMainMenu
@@ -327,7 +327,7 @@ while running:
                         currentState = states.selectingAttack
                         currentUnit.inventory.equipSelectedWeapon()
                         myMapManager.resetCurrentMap()
-                        tilesInAttackRange = findTilesInAttackRange(myMapManager.getTileUnitIsOn(currentUnit), currentUnit.inventory.avaliableItems[0].range)
+                        tilesInAttackRange = findTilesInAttackRange(myMapManager.getTileUnitIsOn(currentUnit), currentUnit.inventory.getEquippedWeapon().range)
                         selectingAttack.getEnemyUnitsInRange(tilesInAttackRange, myUnitHolder)
                         defendingUnit = selectingAttack.getTargetedUnit()
                         myMapManager.setCursorOnUnit(defendingUnit)
@@ -350,14 +350,8 @@ while running:
                             resetAfterAction()
                             
                         elif selectedOption == menuOptions.attack:
+                            currentUnit.inventory.getAvaliableWeapons(findTilesInAttackRange, myMapManager.getTileUnitIsOn(currentUnit), myUnitHolder.getEnemies())
                             currentState = states.selectingWeapon
-                            currentUnit.inventory.selectionIndex = 0
-                            currentUnit.inventory.avaliableItems = []
-                            for weapon in currentUnit.inventory.weapons:
-                                for tile in findTilesInAttackRange(currentUnitTile, weapon.range):
-                                    if tile.currentUnit != None and tile.currentUnit in myUnitHolder.getEnemies():
-                                        currentUnit.inventory.avaliableItems.append(weapon)
-                                        break
 
                         elif selectedOption == menuOptions.items:                            
                             currentState = states.selectingItems
