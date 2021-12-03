@@ -208,6 +208,14 @@ def setTilesInRangeAttackable(atkRange, tilesInRange):
                 if atkTile not in tilesInRange:
                     atkTile.attackable = True
 
+def canDefendingUnitCounter(currentUnit, defendingUnit):
+    toReturn = False
+    for tile in findTilesInAttackRange(myMapManager.getTileUnitIsOn(defendingUnit), defendingUnit.getAttackRange()):
+        if tile.currentUnit == currentUnit:
+            toReturn = True
+            break
+    return toReturn
+
 # main game loop
 while running:
     keys = pygame.key.get_pressed()
@@ -228,7 +236,7 @@ while running:
 
                 moving = False
                 if not playerTurn:
-                    myBattleForecast.calculate(currentUnit, defendingUnit, findTilesInAttackRange, myMapManager.getCurrentMap())
+                    myBattleForecast.calculate(currentUnit, defendingUnit, canDefendingUnitCounter(currentUnit, defendingUnit))
                     myBattleForecast.roll()
                     currentState = states.attacking
                     myCombatManager.setupAttack(currentUnit, defendingUnit, myBattleForecast, False)
@@ -300,13 +308,13 @@ while running:
                         selectingAttack.moveUp()
                         defendingUnit = selectingAttack.getTargetedUnit()
                         myMapManager.setCursorOnUnit(defendingUnit)
-                        myBattleForecast.calculate(currentUnit, defendingUnit, findTilesInAttackRange, myMapManager.getCurrentMap())
+                        myBattleForecast.calculate(currentUnit, defendingUnit, canDefendingUnitCounter(currentUnit, defendingUnit))
 
                     if event.type == pygame.KEYDOWN and (event.key == pygame.K_LEFT or event.key == pygame.K_DOWN):
                         selectingAttack.moveDown()
                         defendingUnit = selectingAttack.getTargetedUnit()
                         myMapManager.setCursorOnUnit(defendingUnit)
-                        myBattleForecast.calculate(currentUnit, defendingUnit, findTilesInAttackRange, myMapManager.getCurrentMap())
+                        myBattleForecast.calculate(currentUnit, defendingUnit, canDefendingUnitCounter(currentUnit, defendingUnit))
 
                     if event.type == pygame.KEYDOWN and event.key == pygame.K_x:
                         currentState = states.selectingWeapon
@@ -331,7 +339,7 @@ while running:
                         selectingAttack.getEnemyUnitsInRange(tilesInAttackRange, myUnitHolder)
                         defendingUnit = selectingAttack.getTargetedUnit()
                         myMapManager.setCursorOnUnit(defendingUnit)
-                        myBattleForecast.calculate(currentUnit, defendingUnit, findTilesInAttackRange, myMapManager.getCurrentMap())
+                        myBattleForecast.calculate(currentUnit, defendingUnit, canDefendingUnitCounter(currentUnit, defendingUnit))
 
                     if event.type == pygame.KEYDOWN and event.key == pygame.K_x:
                         currentState = states.selectingAction

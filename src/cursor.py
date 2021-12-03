@@ -50,8 +50,8 @@ class Cursor():
         return 0
 
     def resetFromMap(self, tileMap):
-        self.__mapWidth   = tileMap.width
-        self.__mapHeight  = tileMap.height
+        self.__mapWidth   = tileMap.getWidth()
+        self.__mapHeight  = tileMap.getHeight()
 
     def draw(self, screen):
         screen.blit(self.pic, ((self.X*self.tileSize) - (self.xCameraOffset*self.tileSize), (self.Y*self.tileSize) - (self.yCameraOffset*self.tileSize)))

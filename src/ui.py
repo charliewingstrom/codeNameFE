@@ -39,15 +39,9 @@ class BattleForecast():
 
         self.defendingUnitCanCounter = True
 
-    def calculate(self, attackingUnit, defendingUnit, findTilesInAttackRange, map1):
-        #TODO could I do this outside of this function?
-        ## need to check if defendingUnit is in range to counter attack
-        self.defendingUnitCanCounter = False
-        for tile in findTilesInAttackRange(map1.tiles[defendingUnit.X][defendingUnit.Y], defendingUnit.getAttackRange()):
-            if tile.currentUnit == attackingUnit:
-                self.defendingUnitCanCounter = True
+    def calculate(self, attackingUnit, defendingUnit, defendingUnitCanCounter):
+        self.defendingUnitCanCounter = defendingUnitCanCounter
         
-
         #TODO calculate crit
         self.attackingUnitDmg = max(0, (attackingUnit.attack + attackingUnit.getEquippedWeapon().might) - defendingUnit.defense)
         self.attackingUnitHit = min(100, int((attackingUnit.getEquippedWeapon().hit + (attackingUnit.skill * 2) + attackingUnit.luck / 2) - ((defendingUnit.speed * 2) + defendingUnit.luck)))

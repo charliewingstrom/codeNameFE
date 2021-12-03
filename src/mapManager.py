@@ -39,19 +39,19 @@ class MapManager():
 
         # set unique tiles
         for i in range(3):
-            map1.tiles[i][4].walkable = False
+            map1.getTileAt(i, 4).walkable = False
         for i in range(5):
-            map1.tiles[4][i].walkable = False
+            map1.getTileAt(4, i).walkable = False
         for i in range(3):
-            map1.tiles[i+5][4].walkable = False
+            map1.getTileAt(i+5, 4).walkable = False
         for i in range(5):
-            map1.tiles[9][i].walkable = False
+            map1.getTileAt(9, i).walkable = False
         for i in range(3):
-            map1.tiles[i+10][4].walkable = False
+            map1.getTileAt(i+10, 4).walkable = False
         for i in range(5):
-            map1.tiles[14][i].walkable = False
+            map1.getTileAt(14, i).walkable = False
         for i in range(14):
-            map1.tiles[i][7].walkable = False
+            map1.getTileAt(i, 7).walkable = False
 
         self.__maps.append(map1)
 
@@ -92,13 +92,13 @@ class MapManager():
         return mapComplete, noMoreMaps
 
     def getTileUnitIsOn(self, unit):
-        toReturn = self.__currentMap.tiles[unit.X][unit.Y]
+        toReturn = self.__currentMap.getTileAt(unit.X, unit.Y)
         if toReturn.currentUnit != unit:
             print("Get Tile Unit is on failed")
         return toReturn
 
     def getTileCursorIsOn(self):
-        return self.__currentMap.tiles[self.__cursor.X][self.__cursor.Y]
+        return self.__currentMap.getTileAt(self.__cursor.X, self.__cursor.Y)
 
     def setCursorOnUnit(self, unit):
         self.__cursor.X = unit.X
