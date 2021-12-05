@@ -23,13 +23,16 @@ class Tile():
         self.attackablePic = pygame.transform.scale(attackablePic, (tileSize, tileSize))
         self.inPath = False
         self.inPathPic = pygame.transform.scale(inPathPic, (tileSize, tileSize))
-        self.adjList = []
+        self.__adjList = []
         self.distance = maxDistance
         self.parent = None
 
     def __repr__(self):
         return "X: {0}\tY: {1}".format(self.X, self.Y)
 
+    def getAdjList(self):
+        return self.__adjList
+        
     def reset(self):
         self.parent = None
         self.distance = maxDistance

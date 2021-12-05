@@ -13,7 +13,7 @@ from unit               import Unit
 from unitHolder         import UnitHolder
 from combatManager      import CombatManager
 from mapManager         import MapManager
-from selectingAttack    import SelectingAttack
+from selectingUnit      import SelectingUnit
 
 pygame.init()
 gameWidth = 1920
@@ -45,8 +45,10 @@ class states(Enum):
     selectingAction = auto()
     selectingAttack = auto()
     selectingItems  = auto()
+    selectingTrade  = auto()
     selectingWeapon = auto()
     attacking       = auto()
+    trading         = auto()
     viewingUnitInfo = auto()
 
 currentState = states.inMainMenu
@@ -97,7 +99,8 @@ myLevelUp       = LevelUp(gameWidth, gameHeight)
 myPathManager   = PathManager()
 myCombatManager = CombatManager(screen, gameWidth, gameHeight, font)
 actionMenu      = Menu()
-selectingAttack = SelectingAttack()
+selectingAttack = SelectingUnit()
+selectingTrade  = SelectingUnit()
 
 def findPlayerTarget(tiles, unit):
     possibleTargets = []
@@ -133,7 +136,7 @@ def findTilesInMovRange(unit):
             if currTile.distance <= currentUnit.mov and currTile.walkable and (currTile.currentUnit == None or currTile.currentUnit.getIsPlayer()):
                 tilesInRange.append(currTile)
                 added.append(currTile)
-                for tile in currTile.adjList:
+                for tile in currTile.getAdjList():
                     if tile not in added:
                         altDist = currTile.distance + 1
                         if tile.distance > altDist:
@@ -144,7 +147,7 @@ def findTilesInMovRange(unit):
             if currTile.distance <= currentUnit.mov and currTile.walkable and (currTile.currentUnit == None or currTile.currentUnit in myUnitHolder.getEnemies()):
                 tilesInRange.append(currTile)
                 added.append(currTile)
-                for tile in currTile.adjList:
+                for tile in currTile.getAdjList():
                     if tile not in added:
                         altDist = currTile.distance + 1
                         if tile.distance > altDist:
@@ -174,7 +177,6 @@ def resetAfterAction():
     myMapManager.resetCurrentMap()
 
 def findTilesInAttackRange(startTile, atkRange):
-
     rangeMin = atkRange[0]
     rangeMax = atkRange[1]
     visited = []
@@ -192,7 +194,7 @@ def findTilesInAttackRange(startTile, atkRange):
         if dist[currTile] <= rangeMax:
             if dist[currTile] >= rangeMin:
                 inRange.append(currTile)
-            for tile in currTile.adjList:
+            for tile in currTile.getAdjList():
                 if tile not in visited:
                     visited.append(tile)
                     queue.append(tile)
@@ -245,8 +247,9 @@ while running:
                     currentState = states.selectingAction
                     #;)
                     tilesInAttackRange = findTilesInAttackRange(myMapManager.getTileUnitIsOn(currentUnit), currentUnit.inventory.getBestRange())
-                    selectingAttack.getEnemyUnitsInRange(tilesInAttackRange, myUnitHolder)
-                    actionMenu.checkForMenuOptions(currentUnit, selectingAttack.areUnitsInRange())
+                    selectingAttack.getUnitsInRange(tilesInAttackRange, myUnitHolder.getEnemies())
+                    selectingTrade.getUnitsInRange(myMapManager.getTileUnitIsOn(currentUnit).getAdjList(), myUnitHolder.getPlayers())
+                    actionMenu.checkForMenuOptions(currentUnit, selectingAttack.areUnitsInRange(), selectingTrade.areUnitsInRange())
 
     # not moving
     else: 
@@ -277,7 +280,9 @@ while running:
         
         ## menu and cursor controls 
         ## if keys (they are up here because you should be able to hold the key)
-        elif playerTurn and not (currentState in  [states.selectingAction, states.selectingAttack, states.selectingItems, states.selectingWeapon, states.attacking]):
+        ## TODO maybe these should be a variable OR there should be one state that 
+        ## covers when the cursor controls should be active...
+        elif playerTurn and not (currentState in [states.selectingAction, states.selectingAttack, states.selectingTrade, states.selectingItems, states.selectingWeapon, states.attacking]):
             # cursor controls
             # get the arrow keys pressed 
             arrowKeys = [keys[pygame.K_DOWN], keys[pygame.K_UP], keys[pygame.K_RIGHT], keys[pygame.K_LEFT]]
@@ -330,13 +335,34 @@ while running:
                         if currentUnit.inventory.activateItem(currentUnit):
                             resetAfterAction()
 
+                elif currentState == states.selectingTrade:
+                    if event.type == pygame.KEYDOWN and event.key == pygame.K_z:
+                        pass
+                        # TODO implement trading
+                        # currentState = states.trading
+
+                    if event.type == pygame.KEYDOWN and (event.key == pygame.K_RIGHT or event.key == pygame.K_UP):
+                        selectingTrade.moveUp()
+                        defendingUnit = selectingTrade.getTargetedUnit()
+                        myMapManager.setCursorOnUnit(defendingUnit)
+                        # TODO draw defendingUnit inventory
+                        ## also below case
+
+                    if event.type == pygame.KEYDOWN and (event.key == pygame.K_LEFT or event.key == pygame.K_DOWN):
+                        selectingTrade.moveDown()
+                        defendingUnit = selectingTrade.getTargetedUnit()
+                        myMapManager.setCursorOnUnit(defendingUnit)
+
+                    if event.type == pygame.KEYDOWN and event.key == pygame.K_x:
+                        currentState = states.selectingAction
+
                 elif currentState == states.selectingWeapon:
                     if event.type == pygame.KEYDOWN and event.key == pygame.K_z:
                         currentState = states.selectingAttack
                         currentUnit.inventory.equipSelectedWeapon()
                         myMapManager.resetCurrentMap()
                         tilesInAttackRange = findTilesInAttackRange(myMapManager.getTileUnitIsOn(currentUnit), currentUnit.inventory.getEquippedWeapon().range)
-                        selectingAttack.getEnemyUnitsInRange(tilesInAttackRange, myUnitHolder)
+                        selectingAttack.getUnitsInRange(tilesInAttackRange, myUnitHolder.getEnemies())
                         defendingUnit = selectingAttack.getTargetedUnit()
                         myMapManager.setCursorOnUnit(defendingUnit)
                         myBattleForecast.calculate(currentUnit, defendingUnit, canDefendingUnitCounter(currentUnit, defendingUnit))
@@ -363,7 +389,15 @@ while running:
 
                         elif selectedOption == menuOptions.items:                            
                             currentState = states.selectingItems
-                            currentUnit.inventory.avaliableItems = currentUnit.getInventory()
+                            currentUnit.inventory.setAllItemsAvaliable()
+
+                        elif selectedOption == menuOptions.trade:
+                            currentState = states.selectingTrade
+                            currentUnit.inventory.setAllItemsAvaliable()
+                            defendingUnit = selectingTrade.getTargetedUnit()
+                            defendingUnit.inventory.setAllItemsAvaliable()
+                            myMapManager.setCursorOnUnit(defendingUnit)
+
 
                     # go back to selecting tile
                     if event.type == pygame.KEYDOWN and event.key == pygame.K_x:
@@ -518,9 +552,13 @@ while running:
             myBattleForecast.draw(screen, font, currentUnit, selectingAttack.getTargetedUnit())
 
         elif currentState == states.selectingItems:
-            currentUnit.inventory.draw(screen, font)            
+            currentUnit.inventory.draw(screen, font)         
+
         elif currentState == states.selectingWeapon:
             currentUnit.inventory.draw(screen, font)
+
+        elif currentState == states.trading:
+            defendingUnit.inventory.draw(screen, font)
 
         elif currentState == states.selectingAction:
             actionMenu.draw(screen, gameWidth)

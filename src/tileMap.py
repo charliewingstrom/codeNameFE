@@ -22,13 +22,13 @@ class Map():
         for row in self.__tiles:
             for tile in row:
                 if tile.Y < self.__height-1:
-                    tile.adjList.append(self.__tiles[tile.X][tile.Y+1])
+                    tile.getAdjList().append(self.__tiles[tile.X][tile.Y+1])
                 if tile.Y > 0:
-                    tile.adjList.append(self.__tiles[tile.X][tile.Y-1])
+                    tile.getAdjList().append(self.__tiles[tile.X][tile.Y-1])
                 if tile.X < self.__width-1:
-                    tile.adjList.append(self.__tiles[tile.X+1][tile.Y])
+                    tile.getAdjList().append(self.__tiles[tile.X+1][tile.Y])
                 if tile.X > 0:
-                    tile.adjList.append(self.__tiles[tile.X-1][tile.Y])
+                    tile.getAdjList().append(self.__tiles[tile.X-1][tile.Y])
 
         self.__startTiles = []
 
@@ -63,10 +63,11 @@ class Map():
         return False
     
     def getTileAt(self, X, Y):
-        try:
-            return self.__tiles[X][Y]
-        except IndexError as e:
-            print("getTileAt failed, ", str(e))
+        if X >= 0 and Y >= 0:
+            try:
+                return self.__tiles[X][Y]
+            except IndexError as e:
+                print("getTileAt failed, ", str(e))
             
 
     def getWidth(self):

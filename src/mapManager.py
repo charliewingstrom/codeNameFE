@@ -91,6 +91,9 @@ class MapManager():
 
         return mapComplete, noMoreMaps
 
+    def getTileAt(self, X, Y):
+        return self.__currentMap.getTileAt(X, Y)
+        
     def getTileUnitIsOn(self, unit):
         toReturn = self.__currentMap.getTileAt(unit.X, unit.Y)
         if toReturn.currentUnit != unit:

@@ -10,6 +10,7 @@ menuCursor = pygame.image.load(Path(__file__).parent / "../assets/menu-cursor.pn
 class menuOptions(Enum):
     wait    = auto()
     items   = auto()
+    trade   = auto()
     attack  = auto()
 
 class Menu(object):
@@ -18,15 +19,19 @@ class Menu(object):
         self.__options          = []
         self.__selectionIndex   = 0
 
-    def checkForMenuOptions(self, currentUnit, areUnitsInRange):
+    def checkForMenuOptions(self, currentUnit, isEnemyInRange, isTradeInRange):
         self.__options          = []
         self.__selectionIndex   = 0
 
         self.__options.insert(0, menuOptions.wait)
+        
+        if isTradeInRange:
+            self.__options.insert(0, menuOptions.trade)
+
         if len(currentUnit.getInventory()) > 0:
             self.__options.insert(0, menuOptions.items)
 
-        if areUnitsInRange:
+        if isEnemyInRange:
             self.__options.insert(0, menuOptions.attack)
 
     def checkForMenuControls(self, menuKeys):
@@ -41,10 +46,17 @@ class Menu(object):
     def draw(self, screen, gameWidth):
         screen.blit(menuCursor, (gameWidth-450, 240+(165*self.__selectionIndex)))
         Y = 200
+        # TODO rewrite this so that the order will always be the same as 
+        # what is found in checkMenuOptions
+        # Possibly use a dictionary with menuOptions as keys and 
+        # images (buttons) as values
         if menuOptions.attack in self.__options:
             screen.blit(attackButton, (gameWidth - 300, Y))
             Y+= 165
         if menuOptions.items in self.__options:
+            screen.blit(itemsButton, (gameWidth - 300, Y))
+            Y+= 165
+        if menuOptions.trade in self.__options:
             screen.blit(itemsButton, (gameWidth - 300, Y))
             Y+= 165
         if menuOptions.wait in self.__options:

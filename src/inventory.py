@@ -10,6 +10,7 @@ class Inventory():
         self.Y = 300
         self.__weapons          = []
         self.__items            = []
+        # items or weapons that can currently be used 
         self.__avaliableItems   = []
         self.__selectionIndex   = 0
         
@@ -34,6 +35,11 @@ class Inventory():
                 self.__items.remove(activatedItem)
             self.__selectionIndex = 0
             return True
+
+    def trade(self, unit):
+        itemToTrade = self.__avaliableItems.pop(self.__selectionIndex)
+        unit.inventory.addItem(itemToTrade)
+        self.__selectionIndex = 0
 
     def getAvaliableWeapons(self, findTilesInAttackRange, startTile, enemies):
         self.__selectionIndex = 0
@@ -69,6 +75,9 @@ class Inventory():
                     largestRange[0] = weapon.range[0]
         return largestRange
 
+    def setAllItemsAvaliable(self):
+        self.__avaliableItems = self.__weapons + self.__items
+    
     def draw(self, screen, font):
         Yoffset = 50
         screen.blit(inventoryUI, (self.X, self.Y))
@@ -81,6 +90,7 @@ class Inventory():
             Yoffset += 75
 
         screen.blit(inventoryUI, (self.X+630, self.Y))
+
         highlightedItem = self.__avaliableItems[self.__selectionIndex]
 
         highlightedItem.drawDesc(screen, font, self.X + 630, self.Y)
