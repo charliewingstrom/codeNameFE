@@ -1,6 +1,7 @@
 import  pygame
 
 from pathlib    import Path
+from mapParser  import MapParser
 from unit       import Unit
 from tileMap    import Map
 from cursor     import Cursor
@@ -13,6 +14,8 @@ map2background = pygame.image.load(Path(__file__).parent / "../assets/map2-backg
 
 
 class MapManager():
+
+    mapParser = MapParser()
 
     def __init__(self, tileSize, gameWidth, gameHeight, myUnitHolder):
         firstMapWidth = 32
@@ -33,39 +36,27 @@ class MapManager():
         def map1Win():
             return map1Enemies[0].hp <= 0
 
-        map1 = Map(firstMapWidth, firstMapHeight, map1background, tileSize, map1Win, set(map1Enemies))
+        map1tiles = MapManager.mapParser.parse("one.json")        
+
+        map1 = Map(map1background, map1tiles, map1Win, set(map1Enemies))
 
         myUnitHolder.setEnemiesToMap(map1, map1Enemies)
 
-        # set unique tiles
-        for i in range(3):
-            map1.getTileAt(i, 4).walkable = False
-        for i in range(5):
-            map1.getTileAt(4, i).walkable = False
-        for i in range(3):
-            map1.getTileAt(i+5, 4).walkable = False
-        for i in range(5):
-            map1.getTileAt(9, i).walkable = False
-        for i in range(3):
-            map1.getTileAt(i+10, 4).walkable = False
-        for i in range(5):
-            map1.getTileAt(14, i).walkable = False
-        for i in range(14):
-            map1.getTileAt(i, 7).walkable = False
-
         self.__maps.append(map1)
 
-        # map2
-        map2enemies = [Unit(1, 2, tileSize, [Sword()]), Unit(2, 1, tileSize, [Sword()])]
+        # # map2
+        # map2enemies = [Unit(1, 2, tileSize, [Sword()]), Unit(2, 1, tileSize, [Sword()])]
 
-        def map2Win():
-            return map2enemies[0].hp <= 0
+        # def map2Win():
+        #     return map2enemies[0].hp <= 0
 
-        map2 = Map(12, 12, map2background, tileSize, map2Win, set(map2enemies))
+        # map2tiles = MapManager.mapParser.parse("two.json")  
 
-        myUnitHolder.setEnemiesToMap(map2, map2enemies)
+        # map2 = Map(map2background, map2tiles, map2Win, set(map2enemies))
 
-        self.__maps.append(map2)
+        # myUnitHolder.setEnemiesToMap(map2, map2enemies)
+
+        # self.__maps.append(map2)
 
         self.__setupNextMap()
         myUnitHolder.moveToNextMap(self.__currentMap)
