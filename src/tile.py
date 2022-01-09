@@ -13,19 +13,20 @@ class Tile():
     def __init__(self, X, Y, tileSize):
         self.X = X
         self.Y = Y
-        self.tileSize = tileSize
-        self.currentUnit = None
-        self.pic = pygame.transform.scale(grassTilePic, (tileSize, tileSize))
-        self.walkable = True
-        self.selectable = False
-        self.selectablePic = pygame.transform.scale(selectablePic, (tileSize, tileSize))
-        self.attackable = False
-        self.attackablePic = pygame.transform.scale(attackablePic, (tileSize, tileSize))
-        self.inPath = False
-        self.inPathPic = pygame.transform.scale(inPathPic, (tileSize, tileSize))
-        self.__adjList = []
-        self.distance = maxDistance
-        self.parent = None
+        self.tileSize       = tileSize
+        self.__color        = (128, 128, 128)
+        self.currentUnit    = None
+        self.distance       = maxDistance
+        self.parent         = None
+        self.walkable       = True
+        self.pic            = pygame.transform.scale(grassTilePic, (tileSize, tileSize))
+        self.selectable     = False
+        self.selectablePic  = pygame.transform.scale(selectablePic, (tileSize, tileSize))
+        self.attackable     = False
+        self.attackablePic  = pygame.transform.scale(attackablePic, (tileSize, tileSize))
+        self.inPath         = False
+        self.inPathPic      = pygame.transform.scale(inPathPic, (tileSize, tileSize))
+        self.__adjList      = []
 
     def __repr__(self):
         return "X: {0}\tY: {1}".format(self.X, self.Y)
@@ -39,12 +40,18 @@ class Tile():
         self.selectable = False
         self.attackable = False
 
+    def setColor(self, color):
+        self.__color = color
+
     def draw(self, screen, xCamera, yCamera):
         if self.currentUnit != None:
             color = (0, 0, 0)
         else:
-            color = (128, 128, 128)
-        pygame.draw.rect(screen, color,pygame.Rect(self.X*self.tileSize + xCamera, self.Y*self.tileSize + yCamera, self.tileSize, self.tileSize), 1)
+            color = self.__color
+
+        # TODO add tile textures
+        pygame.draw.rect(screen, color, pygame.Rect(self.X*self.tileSize + xCamera, self.Y*self.tileSize + yCamera, self.tileSize, self.tileSize))
+        pygame.draw.rect(screen, (100, 100, 100), pygame.Rect(self.X*self.tileSize + xCamera, self.Y*self.tileSize + yCamera, self.tileSize, self.tileSize), 2)
         
         if self.attackable:
             screen.blit(self.attackablePic, (self.X*self.tileSize + xCamera, self.Y*self.tileSize + yCamera))

@@ -30,15 +30,12 @@ class MapParser(object):
 
 
     def parseTile(self, tileInfo : str, inputTile : Tile):
-        tileInfo = list(tileInfo)
+        tileInfo = tileInfo.split(',')
         while tileInfo:
             match tileInfo.pop(0):
                 case "1":
                     inputTile.walkable = False
+                    inputTile.setColor((0,0,0))
 
                 case _ :
                     pass
-
-# myMapParser = MapParser()
-
-# myMapParser.parse("one.json")
