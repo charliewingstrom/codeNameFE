@@ -1,21 +1,8 @@
 import pygame
-
-from pathlib    import Path
-from enum       import Enum, auto
-
-from inventory import Inventory
-from animation import Animation
-
-
-protagPicA = pygame.image.load(Path(__file__).parent / "../assets/protag_A.png")
-protagPicB = pygame.image.load(Path(__file__).parent / "../assets/protag_B.png")
-
-combatUnit1 = pygame.image.load(Path(__file__).parent / "../assets/Combat-1.png")
-combatUnit2 = pygame.image.load(Path(__file__).parent / "../assets/Combat-2.png")
-combatUnit3 = pygame.image.load(Path(__file__).parent / "../assets/Combat-3.png")
-combatUnit4 = pygame.image.load(Path(__file__).parent / "../assets/Combat-4.png")
-combatUnit5 = pygame.image.load(Path(__file__).parent / "../assets/Combat-5.png")
-combatUnit6 = pygame.image.load(Path(__file__).parent / "../assets/Combat-6.png")
+from enum           import Enum, auto
+from assetLoader    import AssetLoader
+from inventory      import Inventory
+from animation      import Animation
 
 class UnitType(Enum):
     Player  = auto()
@@ -58,9 +45,10 @@ class Unit():
         self.X = X
         self.Y = Y
 
-        self.fieldPics = [pygame.transform.scale(protagPicA, (tileSize, tileSize)), pygame.transform.scale(protagPicB, (tileSize, tileSize))] 
+        self.fieldPics = [pygame.transform.scale(AssetLoader.assets["protag_A.png"], (tileSize, tileSize)), pygame.transform.scale(AssetLoader.assets["protag_B.png"], (tileSize, tileSize))] 
         self.aniTimer = 5
-        self.combatAnimation = Animation([combatUnit1,combatUnit2, combatUnit3,combatUnit4, combatUnit5, combatUnit6,combatUnit5, combatUnit4, combatUnit3, combatUnit2, combatUnit1])
+        self.combatAnimation = Animation([AssetLoader.assets["Combat-1.png"],AssetLoader.assets["Combat-2.png"], AssetLoader.assets["Combat-3.png"],AssetLoader.assets["Combat-4.png"], AssetLoader.assets["Combat-5.png"], 
+                                        AssetLoader.assets["Combat-6.png"],AssetLoader.assets["Combat-5.png"], AssetLoader.assets["Combat-4.png"], AssetLoader.assets["Combat-3.png"], AssetLoader.assets["Combat-2.png"], AssetLoader.assets["Combat-1.png"]])
 
         self.active = True
 

@@ -1,9 +1,6 @@
-from pathlib import Path
 import pygame 
 import random
-
-levelUpUI = pygame.image.load(Path(__file__).parent / "../assets/levelUp.png") 
-
+from assetLoader import AssetLoader
 
 class Exp():
 
@@ -40,8 +37,9 @@ class LevelUp():
         self.levelIndex = 0
         self.hasLeveledStat = [False, False, False, False, False, False]
         self.statsLeveled = []
-        self.X = (gameWidth/2)-(levelUpUI.get_width()/2)
-        self.Y = (gameHeight/2)-(levelUpUI.get_height()/2)
+        self.levelUpUI = AssetLoader.assets["levelUp.png"]
+        self.X = (gameWidth/2)-(self.levelUpUI.get_width()/2)
+        self.Y = (gameHeight/2)-(self.levelUpUI.get_height()/2)
     
     def roll(self, unit):
         self.currUnit = unit
@@ -60,7 +58,7 @@ class LevelUp():
 
     def draw(self, screen, font):
         if self.currUnit != None:
-            screen.blit(levelUpUI, (self.X, self.Y))
+            screen.blit(self.levelUpUI, (self.X, self.Y))
 
             hpT = font.render(str(self.currUnit.maxHp)+self.getHasLeveled(0), True, (0,0,0))
             hpR = hpT.get_rect()

@@ -14,6 +14,7 @@ from unitHolder         import UnitHolder
 from combatManager      import CombatManager
 from mapManager         import MapManager
 from selectingUnit      import SelectingUnit
+from assetLoader        import AssetLoader
 
 pygame.init()
 pygame.display.set_caption("Code FE")
@@ -53,6 +54,9 @@ class Game(object):
         self.__gameWidth = 1920
         self.__gameHeight = 1080
         self.__screen = pygame.display.set_mode((self.__gameWidth, self.__gameHeight))
+        self.__assetLoader= AssetLoader()
+        self.__assetLoader.loadAssets()
+        
         self.__currentState = states.inMainMenu
 
         self.__playerTurn = True
@@ -102,6 +106,7 @@ class Game(object):
         self.__actionMenu      = Menu()
         self.__selectingAttack = SelectingUnit()
         self.__selectingTrade  = SelectingUnit()
+        
 
     def findPlayerTarget(self, tiles, unit):
         possibleTargets = []

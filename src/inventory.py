@@ -1,13 +1,14 @@
-import pygame
-from pathlib import Path
-inventoryUI = pygame.image.load(Path(__file__).parent / "../assets/inventory.png") 
-menuCursor = pygame.image.load(Path(__file__).parent / "../assets/menu-cursor.png")
+from assetLoader import AssetLoader
 
 class Inventory():
     
     def __init__(self):
         self.X = 300
         self.Y = 300
+        
+        self.UI         = AssetLoader.assets["inventory.png"]
+        self.menuCursor = AssetLoader.assets["menu-cursor.png"]
+        
         self.__weapons          = []
         self.__items            = []
         # items or weapons that can currently be used 
@@ -80,8 +81,8 @@ class Inventory():
     
     def draw(self, screen, font):
         Yoffset = 50
-        screen.blit(inventoryUI, (self.X, self.Y))
-        screen.blit(menuCursor, (self.X+15, self.Y+15+(75*self.__selectionIndex)))
+        screen.blit(self.UI, (self.X, self.Y))
+        screen.blit(self.menuCursor, (self.X+15, self.Y+15+(75*self.__selectionIndex)))
         for item in self.__avaliableItems:
             itemT = font.render(item.name, True, (0,0,0))
             itemR = itemT.get_rect()
@@ -89,7 +90,7 @@ class Inventory():
             screen.blit(itemT, itemR)
             Yoffset += 75
 
-        screen.blit(inventoryUI, (self.X+630, self.Y))
+        screen.blit(self.UI, (self.X+630, self.Y))
 
         highlightedItem = self.__avaliableItems[self.__selectionIndex]
 
@@ -113,10 +114,11 @@ class Item():
         self.name = name
         self.description = description
         self.uses = 1
+        self.UI = AssetLoader.assets["inventory.png"]
 
     def drawDesc(self, screen, font, x, y):
-        screen.blit(inventoryUI, (x, y))
-        middle = inventoryUI.get_width() / 2
+        screen.blit(self.UI, (x, y))
+        middle = self.UI.get_width() / 2
         descT = font.render(self.description, True, (0,0,0))
         descR = descT.get_rect()
         descR.center = (x+ middle, y + 50)

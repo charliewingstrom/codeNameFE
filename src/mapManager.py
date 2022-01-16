@@ -1,17 +1,10 @@
-import  pygame
-
-from pathlib    import Path
-from mapParser  import MapParser
-from unit       import Unit
-from tileMap    import Map
-from cursor     import Cursor
-from camera     import Camera
-from inventory  import HealingItem, Sword, Bow, Javelin
-
-map1background = pygame.image.load(Path(__file__).parent / "../assets/level1Background.png")
-map2background = pygame.image.load(Path(__file__).parent / "../assets/map2-background.png")
-
-
+from assetLoader    import AssetLoader
+from mapParser      import MapParser
+from unit           import Unit
+from tileMap        import Map
+from cursor         import Cursor
+from camera         import Camera
+from inventory      import HealingItem, Sword, Bow, Javelin
 
 class MapManager():
 
@@ -38,7 +31,7 @@ class MapManager():
 
         map1tiles = MapManager.mapParser.parse("one.json")        
 
-        map1 = Map(map1background, map1tiles, map1Win, set(map1Enemies))
+        map1 = Map(AssetLoader.assets["level1Background.png"], map1tiles, map1Win, set(map1Enemies))
 
         myUnitHolder.setEnemiesToMap(map1, map1Enemies)
 

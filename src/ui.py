@@ -1,30 +1,20 @@
-import pygame
-from pathlib import Path
 import random
-
-mainMenuPic = pygame.image.load(Path(__file__).parent / "../assets/main-menu.png")
-battleForecastPic = pygame.image.load(Path(__file__).parent / "../assets/battle-forecast.png")
-
-combatUI = pygame.image.load(Path(__file__).parent / "../assets/Combat-UI.png")
-combatUIRed = pygame.image.load(Path(__file__).parent / "../assets/Combat-UI-red.png")
-healthbarfullPiece = pygame.image.load(Path(__file__).parent / "../assets/healthbar-piece.png")
-healthbarEmptyPiece = pygame.image.load(Path(__file__).parent / "../assets/healthbar-piece-empty.png")
-
-mapUnitUI = pygame.image.load(Path(__file__).parent / "../assets/map-unit-UI.png")
-
-unitInfoPic = pygame.image.load(Path(__file__).parent / "../assets/unit-info.png")
+from assetLoader import AssetLoader
 
 class MainMenu():
 
+    def __init__(self):
+        self.pic = AssetLoader.assets["main-menu.png"]
+
     def draw(self, screen):
-        screen.blit(mainMenuPic, (0,0))
+        screen.blit(self.pic, (0,0))
 
 class BattleForecast():
 
     def __init__(self, gameWidth):
         self.X = gameWidth - 500
         self.Y = 200
-        self.pic = battleForecastPic
+        self.pic = AssetLoader.assets["battle-forecast.png"]
 
         self.attackingUnitDmg = 0
         self.defendingUnitDmg = 0
@@ -119,8 +109,10 @@ class CombatUI():
         self.X = X
         self.Y = Y
         self.__font = font
-        self.pic = combatUI
-        self.enemyPic = combatUIRed
+        self.pic            = AssetLoader.assets["Combat-UI.png"]
+        self.enemyPic       = AssetLoader.assets["Combat-UI-red.png"]
+        self.HealthBarPic   = AssetLoader.assets["healthbar-piece.png"]
+        self.EmptyPic       = AssetLoader.assets["healthbar-piece-empty.png"]
         
     def draw(self, screen, battleForcast, currentUnit, defendingUnit):
         DUOffset = 1075
@@ -144,9 +136,9 @@ class CombatUI():
             CUCritRect.center = (self.X + 720, self.Y + 330)
 
             for i in range(currentUnit.maxHp):
-                screen.blit(healthbarEmptyPiece, (self.X + 50 + (20*i), self.Y + 140))
+                screen.blit(self.EmptyPic, (self.X + 50 + (20*i), self.Y + 140))
             for i in range(currentUnit.hp):
-                screen.blit(healthbarfullPiece, (self.X + 50 + (20*i), self.Y + 140))
+                screen.blit(self.HealthBarPic, (self.X + 50 + (20*i), self.Y + 140))
                 
             screen.blit(CUNameText, CUNameRect)
             screen.blit(CUAttackText, CUAttackRect)
@@ -172,9 +164,9 @@ class CombatUI():
             DUCritRect.center = (self.X + 720 + DUOffset, self.Y + 330)
 
             for i in range(defendingUnit.maxHp):
-                screen.blit(healthbarEmptyPiece, (self.X + 50 + (20*i) + DUOffset, self.Y + 140))
+                screen.blit(self.EmptyPic, (self.X + 50 + (20*i) + DUOffset, self.Y + 140))
             for i in range(defendingUnit.hp):
-                screen.blit(healthbarfullPiece, (self.X + 50 + (20*i) + DUOffset, self.Y + 140))
+                screen.blit(self.HealthBarPic, (self.X + 50 + (20*i) + DUOffset, self.Y + 140))
 
             screen.blit(DUNameText, DUNameRect)
             screen.blit(DUAttackText, DUAttackRect)
@@ -186,7 +178,7 @@ class MapUnitUI():
     def __init__(self, gameWidth, gameHeight):
         self.X = gameWidth - 460
         self.Y = gameHeight - 280
-        self.pic = mapUnitUI
+        self.pic = AssetLoader.assets["map-unit-UI.png"]
         self.currUnit = None
     
     def reset(self, unit):
@@ -218,7 +210,7 @@ class MapUnitUI():
 class UnitInfo():
 
     def __init__(self):
-        self.pic = unitInfoPic
+        self.pic = AssetLoader.assets["unit-info.png"]
         self.currUnit = None
     def reset(self, unit):
         self.currUnit = unit

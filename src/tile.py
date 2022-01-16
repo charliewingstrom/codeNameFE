@@ -1,31 +1,25 @@
 import pygame
-from pathlib import Path
+from assetLoader import AssetLoader
 
 maxDistance = 256
-
-grassTilePic = pygame.image.load(Path(__file__).parent / "../assets/grassTile.png")
-selectablePic = pygame.image.load(Path(__file__).parent / "../assets/selectableHighlight.png")
-attackablePic = pygame.image.load(Path(__file__).parent / "../assets/attackableHighlight.png")
-inPathPic = pygame.image.load(Path(__file__).parent / "../assets/occupiedHighlight.png")
 
 class Tile():
 
     def __init__(self, X, Y, tileSize):
-        self.X = X
-        self.Y = Y
+        self.X              = X
+        self.Y              = Y
         self.tileSize       = tileSize
         self.__color        = (128, 128, 128)
         self.currentUnit    = None
         self.distance       = maxDistance
         self.parent         = None
         self.walkable       = True
-        self.pic            = pygame.transform.scale(grassTilePic, (tileSize, tileSize))
         self.selectable     = False
-        self.selectablePic  = pygame.transform.scale(selectablePic, (tileSize, tileSize))
+        self.selectablePic  = pygame.transform.scale(AssetLoader.assets["selectableHighlight.png"], (tileSize, tileSize))
         self.attackable     = False
-        self.attackablePic  = pygame.transform.scale(attackablePic, (tileSize, tileSize))
+        self.attackablePic  = pygame.transform.scale(AssetLoader.assets["attackableHighlight.png"], (tileSize, tileSize))
         self.inPath         = False
-        self.inPathPic      = pygame.transform.scale(inPathPic, (tileSize, tileSize))
+        self.inPathPic      = pygame.transform.scale(AssetLoader.assets["occupiedHighlight.png"], (tileSize, tileSize))
         self.__adjList      = []
 
     def __repr__(self):
@@ -50,9 +44,12 @@ class Tile():
             color = self.__color
 
         # TODO add tile textures
-        pygame.draw.rect(screen, color, pygame.Rect(self.X*self.tileSize + xCamera, self.Y*self.tileSize + yCamera, self.tileSize, self.tileSize))
+        # TODO try to draw this without lagging
+        screen.blit(self.pic, (self.X*self.tileSize + xCamera, self.Y*self.tileSize + yCamera))
+        #pygame.draw.rect(screen, color, pygame.Rect(self.X*self.tileSize + xCamera, self.Y*self.tileSize + yCamera, self.tileSize, self.tileSize))
         pygame.draw.rect(screen, (100, 100, 100), pygame.Rect(self.X*self.tileSize + xCamera, self.Y*self.tileSize + yCamera, self.tileSize, self.tileSize), 2)
         
+
         if self.attackable:
             screen.blit(self.attackablePic, (self.X*self.tileSize + xCamera, self.Y*self.tileSize + yCamera))
         elif self.inPath:

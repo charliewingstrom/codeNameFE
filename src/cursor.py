@@ -1,7 +1,6 @@
 import pygame
 from pathlib import Path
-
-cursorPic = pygame.image.load(Path(__file__).parent / "../assets/cursor.png")
+from assetLoader import AssetLoader
 
 class Cursor():
 
@@ -15,7 +14,7 @@ class Cursor():
         self.gameHeight = gameHeight
         self.yCameraOffset = 0
         self.xCameraOffset = 0
-        self.pic = pygame.transform.scale(cursorPic, (tileSize, tileSize))
+        self.pic = pygame.transform.scale(AssetLoader.assets["cursor.png"], (tileSize, tileSize))
 
     def down(self, yCamera):
         if self.Y < self.__mapHeight-1:
