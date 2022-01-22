@@ -19,13 +19,6 @@ from assetLoader        import AssetLoader
 pygame.init()
 pygame.display.set_caption("Code FE")
 
-#------ load assets --------
-## backgrounds
-attacingBackground = pygame.image.load(Path(__file__).parent / "../assets/attacking-background.png")
-#---------------------------
-
-# globals
-
 ## player state
 class states(Enum):
     inMainMenu      = auto()
@@ -51,25 +44,29 @@ font = pygame.font.Font('freesansbold.ttf', 52)
 
 class Game(object):
     def __init__(self):
-        self.__gameWidth = 1920
-        self.__gameHeight = 1080
-        self.__screen = pygame.display.set_mode((self.__gameWidth, self.__gameHeight))
-        self.__assetLoader= AssetLoader()
+        self.__gameWidth    = 1920
+        self.__gameHeight   = 1080
+        self.__screen       = pygame.display.set_mode((self.__gameWidth, self.__gameHeight))
+        self.__assetLoader  = AssetLoader()
         self.__assetLoader.loadAssets()
         
+        self.__attackingBackground = self.__assetLoader.assets["attacking-background.png"]
+
         self.__currentState = states.inMainMenu
 
-        self.__playerTurn = True
-        self.__running = True
-        self.__currentUnit = None
-        self.__defendingUnit = None
+        self.__playerTurn               = True
+        self.__running                  = True
+        self.__currentUnit              = None
+        self.__defendingUnit            = None
+        self.__currentUnitTile          = None
+        self.__currentUnitStartingTile  = None
+
         ## map
         self.__tileSize = 96
 
         ## movement
         self.__moving = False
         self.__attackingState = atkStates.attacking
-
 
         ## custom class instances
         self.__mainMenu = MainMenu()
@@ -167,11 +164,8 @@ class Game(object):
         return toReturn
 
     def resetAfterAction(self):
-        global currentUnitTile 
-        global currentUnitStartingTile 
-        
-        currentUnitTile = None
-        currentUnitStartingTile = None
+        self.__currentUnitTile = None
+        self.__currentUnitStartingTile = None
         if self.__currentUnit:
             self.__currentUnit.active = False
         self.__currentUnit = None
@@ -233,11 +227,11 @@ class Game(object):
                     if not stillMoving:
 
                         ## finish moving
-                        currentUnitStartingTile.currentUnit = None
+                        self.__currentUnitStartingTile.currentUnit = None
 
                         if lastTile:
-                            currentUnitTile = lastTile
-                            currentUnitTile.currentUnit = self.__currentUnit
+                            self.__currentUnitTile = lastTile
+                            self.__currentUnitTile.currentUnit = self.__currentUnit
 
                         self.__moving = False
                         if not self.__playerTurn:
@@ -261,7 +255,7 @@ class Game(object):
                     activeEnemyUnit = self.__unitHolder.getActiveEnemyUnit()
                     if activeEnemyUnit:
                         self.__currentUnit = activeEnemyUnit
-                        currentUnitStartingTile = self.__mapManager.getTileUnitIsOn(self.__currentUnit)
+                        self.__currentUnitStartingTile = self.__mapManager.getTileUnitIsOn(self.__currentUnit)
                         enemyTilesInRange = self.findTilesInMovRange(self.__currentUnit)
                         for tile in enemyTilesInRange:
                             if tile.currentUnit == None or tile.currentUnit == self.__currentUnit:
@@ -405,11 +399,11 @@ class Game(object):
                             # go back to selecting tile
                             if event.type == pygame.KEYDOWN and event.key == pygame.K_x:
                                 self.__mapManager.resetCurrentMap()
-                                currentUnitTile.currentUnit = None
-                                self.__currentUnit.X = currentUnitStartingTile.X
-                                self.__currentUnit.Y = currentUnitStartingTile.Y
-                                currentUnitStartingTile.currentUnit = self.__currentUnit
-                                currentUnitTile = currentUnitStartingTile
+                                self.__currentUnitTile.currentUnit = None
+                                self.__currentUnit.X = self.__currentUnitStartingTile.X
+                                self.__currentUnit.Y = self.__currentUnitStartingTile.Y
+                                self.__currentUnitStartingTile.currentUnit = self.__currentUnit
+                                self.__currentUnitTile = self.__currentUnitStartingTile
                                 # update state
                                 self.__currentState = states.selectingTile
                                 tilesInRange = self.findTilesInMovRange(self.__currentUnit)
@@ -441,8 +435,8 @@ class Game(object):
                                 self.__pathManager.emptyPath()
                                 self.__mapManager.resetCurrentMap()
                                 self.__currentUnit = None
-                                currentUnitTile = None
-                                currentUnitStartingTile = None
+                                self.__currentUnitTile = None
+                                self.__currentUnitStartingTile = None
                                 self.__currentState = states.selectingUnit
                                 
                                 
@@ -468,8 +462,8 @@ class Game(object):
                                     self.setTilesInRangeAttackable(self.__currentUnit.inventory.getBestRange(), self.findTilesInMovRange(self.__currentUnit))
                                     if self.__currentUnit.active and self.__currentUnit.getIsPlayer():
                                         self.__currentState = states.selectingTile
-                                        currentUnitTile = currentTile
-                                        currentUnitStartingTile = currentTile
+                                        self.__currentUnitTile = currentTile
+                                        self.__currentUnitStartingTile = currentTile
                             
                             if event.type == pygame.KEYDOWN and event.key == pygame.K_x:
                                 self.__currentUnit = None
@@ -490,7 +484,7 @@ class Game(object):
             
             ## attacking ####
             elif self.__currentState == states.attacking:
-                self.__screen.blit(attacingBackground, (0, 0))
+                self.__screen.blit(self.__attackingBackground, (0, 0))
                 
                 if self.__attackingState == atkStates.levelingUp:
                     if self.__levelUp.draw(self.__screen, font):

@@ -11,6 +11,7 @@ class MapManager():
     mapParser = MapParser()
 
     def __init__(self, tileSize, gameWidth, gameHeight, myUnitHolder):
+        #TODO this is kind of a hack..
         firstMapWidth = 32
         firstMapHeight = 19
 
