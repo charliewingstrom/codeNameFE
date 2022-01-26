@@ -1,7 +1,7 @@
 import json
-import pygame
 from tile           import Tile
-from pathlib        import Path
+from unit           import Unit
+from inventory      import Sword
 from assetLoader    import AssetLoader
 
 class MapParser(object):
@@ -10,9 +10,10 @@ class MapParser(object):
     tileSize = 96
 
     def __init__(self):
-        pass 
+        self.__enemies = []
 
     def parse(self, mapName : str):
+        self.__enemies = []
         mapInfo = {}
         with open(MapParser.mapDir + "/" + mapName, 'r') as mapFile:
             mapInfo = json.load(mapFile)
@@ -21,24 +22,49 @@ class MapParser(object):
             layout = mapInfo['layout']
             # loop through the layout parsing each tile and adding it to tiles
             tiles = []
-            for row in enumerate(layout):
+            for rowNum, row in enumerate(layout):
                 currRow = []
-                for tile in enumerate(row[1]):
-                    currTile = Tile(tile[0], row[0], MapParser.tileSize)
-                    self.parseTile(tile[1], currTile)
+                for tileNum, tileInfo in enumerate(row.values()):
+                    currTile = Tile(tileNum, rowNum, MapParser.tileSize)
+                    self.parseTile(tileInfo["tile"], currTile)
+                    ## TODO check for enemy
+                    self.parseEnemy(tileInfo, tileNum, rowNum, currTile)
                     currRow.append(currTile)
                 tiles.append(currRow)
 
-        return tiles
+        return tiles, self.__enemies
 
-
-    def parseTile(self, tileInfo : str, inputTile : Tile):
-        tileInfo = tileInfo.split(',')
-        while tileInfo:
-            match tileInfo.pop(0):
-                case "1":
+    def parseTile(self, tileType : str, inputTile : Tile):
+        tileType = tileType.split(',')
+        while tileType:
+            infoPiece = tileType.pop(0)
+            match infoPiece:
+                case "wall":
                     inputTile.walkable = False
                     inputTile.pic      = AssetLoader.assets["wall.png"]
 
-                case _ :
+                case "brick":
+                    ## TODO yeah this should be brick
                     inputTile.pic = AssetLoader.assets["grassTile2.png"]
+
+                case _ :
+                    print(f"WARNING : case {infoPiece} not matched")
+                    inputTile.pic = AssetLoader.assets["grassTile2.png"]
+
+    def parseEnemy(self, tileInfo : str, x : int, y : int, inputTile : Tile):
+        enemyClass = tileInfo.get("enemy_class")
+        if enemyClass:
+            # parse inventory of enemy
+            inventory = []
+            for item in tileInfo.get("enemy_inv").split(","):
+                match item:
+                    case "sword":
+                        inventory.append(Sword())
+                        
+                    case _ : 
+                        print(f"WARNING : case {item} not matched")
+
+            enemy = Unit(x, y, MapParser.tileSize, inventory)
+
+            inputTile.currentUnit = enemy
+            self.__enemies.append(enemy)

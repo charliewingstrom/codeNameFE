@@ -24,13 +24,14 @@ class MapManager():
         self.__maps         = []
         self.__currentMap   = None
         # do I build all of my maps here?
-        map1Enemies = [Unit(9, 5, tileSize, [Sword()]), Unit(9, 6, tileSize, [Sword()])]
+        # map1Enemies = [Unit(9, 5, tileSize, [Sword()]), Unit(9, 6, tileSize, [Sword()])]
         
         ## setting up the map
         def map1Win():
             return map1Enemies[0].hp <= 0
 
-        map1tiles = MapManager.mapParser.parse("one.json")        
+        ## TODO make mapParser return a fully constructed map  
+        map1tiles, map1Enemies = MapManager.mapParser.parse("default.json")        
 
         map1 = Map(AssetLoader.assets["level1Background.png"], map1tiles, map1Win, set(map1Enemies))
 
