@@ -138,10 +138,7 @@ class HealingItem(Item):
 
     # return True if we are out of uses
     def use(self, unit):
-        if unit.hp + self.power < unit.maxHp:
-            unit.hp += self.power
-        else: 
-            unit.hp = unit.maxHp
+        unit.addHp(self.power)
         self.uses -= 1
         return self.uses <= 0
             

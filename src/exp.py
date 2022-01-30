@@ -1,6 +1,7 @@
 import pygame 
 import random
 from assetLoader import AssetLoader
+from unit        import Stat
 
 class Exp():
 
@@ -60,27 +61,27 @@ class LevelUp():
         if self.currUnit != None:
             screen.blit(self.levelUpUI, (self.X, self.Y))
 
-            hpT = font.render(str(self.currUnit.maxHp)+self.getHasLeveled(0), True, (0,0,0))
+            hpT = font.render(str(self.currUnit.getStat(Stat.MAX_HP))+self.getHasLeveled(0), True, (0,0,0))
             hpR = hpT.get_rect()
             hpR.topleft = (self.X+380, self.Y+370)
 
-            strT = font.render(str(self.currUnit.attack)+self.getHasLeveled(1), True, (0,0,0))
+            strT = font.render(str(self.currUnit.getStat(Stat.STR))+self.getHasLeveled(1), True, (0,0,0))
             strR = hpT.get_rect()
             strR.topleft = (self.X+380, self.Y+520)
 
-            defT = font.render(str(self.currUnit.defense)+self.getHasLeveled(2), True, (0,0,0))
+            defT = font.render(str(self.currUnit.getStat(Stat.DEF))+self.getHasLeveled(2), True, (0,0,0))
             defR = hpT.get_rect()
             defR.topleft = (self.X+380, self.Y+670)
 
-            spdT = font.render(str(self.currUnit.speed)+self.getHasLeveled(3), True, (0,0,0))
+            spdT = font.render(str(self.currUnit.getStat(Stat.SPD))+self.getHasLeveled(3), True, (0,0,0))
             spdR = hpT.get_rect()
             spdR.topleft = (self.X+380, self.Y+820)
 
-            sklT = font.render(str(self.currUnit.skill)+self.getHasLeveled(4), True, (0,0,0))
+            sklT = font.render(str(self.currUnit.getStat(Stat.SKL))+self.getHasLeveled(4), True, (0,0,0))
             sklR = hpT.get_rect()
             sklR.topleft = (self.X+900, self.Y+370)
 
-            lckT = font.render(str(self.currUnit.luck)+self.getHasLeveled(5), True, (0,0,0))
+            lckT = font.render(str(self.currUnit.getStat(Stat.LCK))+self.getHasLeveled(5), True, (0,0,0))
             lckR = hpT.get_rect()
             lckR.topleft = (self.X+900, self.Y+520)
 

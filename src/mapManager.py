@@ -1,10 +1,9 @@
 from assetLoader    import AssetLoader
 from mapParser      import MapParser
-from unit           import Unit
+from unit           import Stat
 from tileMap        import Map
 from cursor         import Cursor
 from camera         import Camera
-from inventory      import HealingItem, Sword, Bow, Javelin
 
 class MapManager():
 
@@ -28,10 +27,10 @@ class MapManager():
         
         ## setting up the map
         def map1Win():
-            return map1Enemies[0].hp <= 0
+            return map1Enemies[0].getStat(Stat.HP) <= 0
 
         ## TODO make mapParser return a fully constructed map  
-        map1tiles, map1Enemies = MapManager.mapParser.parse("default.json")        
+        map1tiles, map1Enemies = MapManager.mapParser.parse("one.json")        
 
         map1 = Map(AssetLoader.assets["level1Background.png"], map1tiles, map1Win, set(map1Enemies))
 
@@ -43,7 +42,7 @@ class MapManager():
         # map2enemies = [Unit(1, 2, tileSize, [Sword()]), Unit(2, 1, tileSize, [Sword()])]
 
         # def map2Win():
-        #     return map2enemies[0].hp <= 0
+        #     return map2enemies[0].getStat(Stat.HP) <= 0
 
         # map2tiles = MapManager.mapParser.parse("two.json")  
 

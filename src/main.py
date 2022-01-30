@@ -9,7 +9,7 @@ from ui                 import MainMenu, BattleForecast, MapUnitUI, UnitInfo
 from menu               import Menu, menuOptions
 from exp                import Exp, LevelUp
 from inventory          import HealingItem, Sword, Bow, Javelin
-from unit               import Unit
+from unit               import Unit, Stat
 from unitHolder         import UnitHolder
 from combatManager      import CombatManager
 from mapManager         import MapManager
@@ -75,19 +75,20 @@ class Game(object):
 
         ## creating units
         protag = Unit(3, 3, self.__tileSize, [Bow()], True)
-        protag.attack = 7
-        protag.defense = 6
-        protag.speed = 5
-        protag.skill = 7
-        protag.luck = 8
+        ## breaking encapsulation for dev purposes
+        protag.__str = 7
+        protag.__def = 6
+        protag.__spd = 5
+        protag.__skl = 7
+        protag.__lck = 8
 
         Jagen = Unit(3, 5, self.__tileSize, [Sword(), Javelin(), HealingItem()], True)
         Jagen.name = 'Jagen'
-        Jagen.attack = 15
-        Jagen.defense = 10
-        Jagen.speed = 9
-        Jagen.skill = 8
-        Jagen.luck = 8
+        Jagen.__str = 15
+        Jagen.__def = 10
+        Jagen.__spd = 9
+        Jagen.__skl = 8
+        Jagen.__lck = 8
 
         self.__unitHolder.addUnit(protag)
         self.__unitHolder.addUnit(Jagen)
@@ -114,11 +115,11 @@ class Game(object):
         
         bestTarget = (None, None)
         for target in possibleTargets:
-            if target[0].hp < (unit.attack + unit.getEquippedWeapon().might) - target[0].defense:
+            if target[0].getStat(Stat.HP) < (unit.getStat(Stat.STR) + unit.getEquippedWeapon().might) - target[0].getStat(Stat.DEF):
                 return target
             elif bestTarget == (None, None):
                 bestTarget = target
-            elif bestTarget[0].defense > target[0].defense:
+            elif bestTarget[0].getStat(Stat.DEF) > target[0].getStat(Stat.DEF):
                 bestTarget = target
             
         return bestTarget        
@@ -136,7 +137,7 @@ class Game(object):
             queue.sort(key=lambda tile:tile.distance)
             currTile = queue.pop(0)
             if unit.getIsPlayer():
-                if currTile.distance <= self.__currentUnit.mov and currTile.walkable and (currTile.currentUnit == None or currTile.currentUnit.getIsPlayer()):
+                if currTile.distance <= self.__currentUnit.getStat(Stat.MOV) and currTile.walkable and (currTile.currentUnit == None or currTile.currentUnit.getIsPlayer()):
                     tilesInRange.append(currTile)
                     added.append(currTile)
                     for tile in currTile.getAdjList():
@@ -147,7 +148,7 @@ class Game(object):
                                 tile.parent = currTile
                             queue.append(tile)
             else:
-                if currTile.distance <= self.__currentUnit.mov and currTile.walkable and (currTile.currentUnit == None or currTile.currentUnit in self.__unitHolder.getEnemies()):
+                if currTile.distance <= self.__currentUnit.getStat(Stat.MOV) and currTile.walkable and (currTile.currentUnit == None or currTile.currentUnit in self.__unitHolder.getEnemies()):
                     tilesInRange.append(currTile)
                     added.append(currTile)
                     for tile in currTile.getAdjList():
@@ -503,19 +504,19 @@ class Game(object):
                         self.__attackingState = atkStates.finishedAttacking 
 
                 elif self.__combatManager.runSequence():
-                    if self.__currentUnit.hp <= 0:
+                    if self.__currentUnit.getStat(Stat.HP) <= 0:
                         self.__unitHolder.removeUnit(self.__currentUnit)
                         self.__mapManager.getTileUnitIsOn(self.__currentUnit).currentUnit = None
-                    if self.__defendingUnit.hp <= 0:
+                    if self.__defendingUnit.getStat(Stat.HP) <= 0:
                         self.__unitHolder.removeUnit(self.__defendingUnit)
                         self.__mapManager.getTileUnitIsOn(self.__defendingUnit).currentUnit = None
                         
                     if self.__combatManager.getExp() > 0:
                         self.__attackingState = atkStates.addingExp
-                        if self.__currentUnit.hp > 0 and self.__currentUnit.getIsPlayer():
+                        if self.__currentUnit.getStat(Stat.HP) > 0 and self.__currentUnit.getIsPlayer():
                             self.__exp.setup(self.__currentUnit, self.__combatManager.getExp())
 
-                        elif self.__defendingUnit.hp > 0 and self.__defendingUnit.getIsPlayer():
+                        elif self.__defendingUnit.getStat(Stat.HP) > 0 and self.__defendingUnit.getIsPlayer():
                             self.__exp.setup(self.__defendingUnit, self.__combatManager.getExp())
 
                         else:

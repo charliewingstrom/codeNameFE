@@ -9,34 +9,46 @@ class UnitType(Enum):
     Enemy   = auto()
     Other   = auto()
 
+class Stat(Enum):
+    MAX_HP  = auto()
+    HP      = auto()
+    STR     = auto()
+    DEF     = auto()
+    SPD     = auto()
+    SKL     = auto()
+    LCK     = auto()
+    MOV     = auto()
+
 class Unit():
 
     def __init__(self, X, Y, tileSize, startingInventory, isPlayer = False):
-        self.name = "generic"
-        self.level = 1
-        self.exp = 0
+        self.name           = "generic"
+        self.level          = 1
+        self.exp            = 0
+        self.__unitClass    = None
+
         if isPlayer:
             self.__unitType = UnitType.Player
         else:
             self.__unitType = UnitType.Enemy 
         
         # stats
-        self.maxHp = 15
-        self.hp = self.maxHp
-        self.attack = 5
-        self.defense = 3
-        self.speed = 4
-        self.skill = 4
-        self.luck = 0
-        self.mov = 5
+        self.__maxHp = 15
+        self.__hp    = self.__maxHp
+        self.__str   = 5
+        self.__def   = 3
+        self.__spd   = 4
+        self.__skl   = 4
+        self.__lck   = 0
+        self.__mov   = 5
 
         # growths
-        self.hpG = 50
-        self.attackG = 50
-        self.defenseG = 50
-        self.speedG = 50
-        self.skillG = 50
-        self.luckG = 50
+        self.__hpG  = 50
+        self.__strG = 50
+        self.__defG = 50
+        self.__spdG = 50
+        self.__sklG = 50
+        self.__lckG = 50
         
         self.inventory = Inventory()
         for item in startingInventory:
@@ -58,22 +70,40 @@ class Unit():
     def getIsPlayer(self):
         return self.__unitType == UnitType.Player
         
-    def getStats(self):
-        return [self.maxHp, self.attack, self.defense, self.speed, self.skill, self.luck]
+    def getStat(self, stat):
+        match stat:
+            case Stat.HP:
+                return self.__hp
+            case Stat.MAX_HP:
+                return self.__maxHp
+            case Stat.STR:
+                return self.__str
+            case Stat.DEF:
+                return self.__def
+            case Stat.SPD:
+                return self.__spd
+            case Stat.SKL:
+                return self.__skl
+            case Stat.LCK:
+                return self.__lck
+            case Stat.MOV:
+                return self.__mov
+            case _:
+                print(f"WARNING : stat {stat} not recognized")
 
     def addToStat(self, index, amount):
         if index == 0:
-            self.maxHp += amount
+            self.__maxHp += amount
         if index == 1:
-            self.attack += amount
+            self.__str += amount
         if index == 2:
-            self.defense += amount
+            self.__def += amount
         if index == 3:
-            self.speed += amount
+            self.__spd += amount
         if index == 4:
-            self.skill += amount
+            self.__skl += amount
         if index == 5:
-            self.luck += amount
+            self.__lck += amount
 
     def getGrowths(self):
         return [self.hpG, self.attackG, self.defenseG, self.speedG, self.skillG, self.luckG]
@@ -91,6 +121,14 @@ class Unit():
             return self.getEquippedWeapon().range
         return [0,0]
 
+    def addHp(self, amount):
+        if amount > 0:
+            self.__hp = min(self.__maxHp, self.__hp + amount)
+
+    def removeHp(self, amount):
+        if amount > 0:
+            self.__hp = max(0, self.__hp - amount)
+
     def drawFirstFrame(self, screen, x, y, reverse):
         return self.combatAnimation.drawFirstFrame(screen, x, y, reverse)
 
@@ -104,7 +142,7 @@ class Unit():
         
         ## draw health bar 
         pygame.draw.rect(screen, (0,0,0), pygame.Rect(self.X*tileSize + xCamera, (self.Y*tileSize)+tileSize-5 + yCamera, tileSize, 5))
-        healthPercent = self.hp/self.maxHp
+        healthPercent = self.__hp/self.__maxHp
         color = (0, 255, 0)
         if healthPercent < 0.2:
             color = (255, 0, 0)

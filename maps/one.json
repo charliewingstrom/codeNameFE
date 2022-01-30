@@ -18,7 +18,7 @@
                 "enemy_inv": ""
             },
             "row_1_tile_4": {
-                "tile": "brick",
+                "tile": "wall",
                 "enemy_class": "",
                 "enemy_inv": ""
             },
@@ -38,7 +38,7 @@
                 "enemy_inv": ""
             },
             "row_1_tile_8": {
-                "tile": "brick",
+                "tile": "wall",
                 "enemy_class": "",
                 "enemy_inv": ""
             },
@@ -58,7 +58,7 @@
                 "enemy_inv": ""
             },
             "row_1_tile_12": {
-                "tile": "brick",
+                "tile": "wall",
                 "enemy_class": "",
                 "enemy_inv": ""
             },
@@ -100,7 +100,7 @@
                 "enemy_inv": ""
             },
             "row_2_tile_4": {
-                "tile": "brick",
+                "tile": "wall",
                 "enemy_class": "",
                 "enemy_inv": ""
             },
@@ -120,7 +120,7 @@
                 "enemy_inv": ""
             },
             "row_2_tile_8": {
-                "tile": "brick",
+                "tile": "wall",
                 "enemy_class": "",
                 "enemy_inv": ""
             },
@@ -140,7 +140,7 @@
                 "enemy_inv": ""
             },
             "row_2_tile_12": {
-                "tile": "brick",
+                "tile": "wall",
                 "enemy_class": "",
                 "enemy_inv": ""
             },
@@ -182,7 +182,7 @@
                 "enemy_inv": ""
             },
             "row_3_tile_4": {
-                "tile": "brick",
+                "tile": "wall",
                 "enemy_class": "",
                 "enemy_inv": ""
             },
@@ -202,7 +202,7 @@
                 "enemy_inv": ""
             },
             "row_3_tile_8": {
-                "tile": "brick",
+                "tile": "wall",
                 "enemy_class": "",
                 "enemy_inv": ""
             },
@@ -222,7 +222,7 @@
                 "enemy_inv": ""
             },
             "row_3_tile_12": {
-                "tile": "brick",
+                "tile": "wall",
                 "enemy_class": "",
                 "enemy_inv": ""
             },
@@ -249,12 +249,12 @@
         },
         {
             "row_4_tile_1": {
-                "tile": "brick",
+                "tile": "wall",
                 "enemy_class": "",
                 "enemy_inv": ""
             },
             "row_4_tile_2": {
-                "tile": "brick",
+                "tile": "wall",
                 "enemy_class": "",
                 "enemy_inv": ""
             },
@@ -264,17 +264,17 @@
                 "enemy_inv": ""
             },
             "row_4_tile_4": {
-                "tile": "brick",
+                "tile": "wall",
                 "enemy_class": "",
                 "enemy_inv": ""
             },
             "row_4_tile_5": {
-                "tile": "brick",
+                "tile": "wall",
                 "enemy_class": "",
                 "enemy_inv": ""
             },
             "row_4_tile_6": {
-                "tile": "brick",
+                "tile": "wall",
                 "enemy_class": "",
                 "enemy_inv": ""
             },
@@ -284,17 +284,17 @@
                 "enemy_inv": ""
             },
             "row_4_tile_8": {
-                "tile": "brick",
+                "tile": "wall",
                 "enemy_class": "",
                 "enemy_inv": ""
             },
             "row_4_tile_9": {
-                "tile": "brick",
+                "tile": "wall",
                 "enemy_class": "",
                 "enemy_inv": ""
             },
             "row_4_tile_10": {
-                "tile": "brick",
+                "tile": "wall",
                 "enemy_class": "",
                 "enemy_inv": ""
             },
@@ -304,7 +304,7 @@
                 "enemy_inv": ""
             },
             "row_4_tile_12": {
-                "tile": "brick",
+                "tile": "wall",
                 "enemy_class": "",
                 "enemy_inv": ""
             },
@@ -459,8 +459,8 @@
             },
             "row_6_tile_10": {
                 "tile": "brick",
-                "enemy_class": "",
-                "enemy_inv": ""
+                "enemy_class": "bandit",
+                "enemy_inv": "sword"
             },
             "row_6_tile_11": {
                 "tile": "brick",
@@ -505,7 +505,7 @@
                 "enemy_inv": ""
             },
             "row_7_tile_3": {
-                "tile": "brick",
+                "tile": "wall",
                 "enemy_class": "",
                 "enemy_inv": ""
             },
@@ -588,8 +588,8 @@
             },
             "row_8_tile_3": {
                 "tile": "brick",
-                "enemy_class": "bandit",
-                "enemy_inv": "sword"
+                "enemy_class": "",
+                "enemy_inv": ""
             },
             "row_8_tile_4": {
                 "tile": "brick",

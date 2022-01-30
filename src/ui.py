@@ -1,5 +1,6 @@
 import random
 from assetLoader import AssetLoader
+from unit        import Stat
 
 class MainMenu():
 
@@ -33,12 +34,12 @@ class BattleForecast():
         self.defendingUnitCanCounter = defendingUnitCanCounter
         
         #TODO calculate crit
-        self.attackingUnitDmg = max(0, (attackingUnit.attack + attackingUnit.getEquippedWeapon().might) - defendingUnit.defense)
-        self.attackingUnitHit = min(100, int((attackingUnit.getEquippedWeapon().hit + (attackingUnit.skill * 2) + attackingUnit.luck / 2) - ((defendingUnit.speed * 2) + defendingUnit.luck)))
+        self.attackingUnitDmg = max(0, (attackingUnit.getStat(Stat.STR) + attackingUnit.getEquippedWeapon().might) - defendingUnit.getStat(Stat.DEF))
+        self.attackingUnitHit = min(100, int((attackingUnit.getEquippedWeapon().hit + (attackingUnit.getStat(Stat.SKL) * 2) + attackingUnit.getStat(Stat.LCK) / 2) - ((defendingUnit.getStat(Stat.SPD) * 2) + defendingUnit.getStat(Stat.LCK))))
         self.defendingUnitCrit = 0
         if self.defendingUnitCanCounter:
-            self.defendingUnitDmg = max(0, (defendingUnit.attack + defendingUnit.getEquippedWeapon().might) - attackingUnit.defense)
-            self.defendingUnitHit = min(100, int((defendingUnit.getEquippedWeapon().hit + (defendingUnit.skill * 2) + defendingUnit.luck / 2) - ((attackingUnit.speed * 2) + attackingUnit.luck)))
+            self.defendingUnitDmg = max(0, (defendingUnit.getStat(Stat.STR) + defendingUnit.getEquippedWeapon().might) - attackingUnit.getStat(Stat.DEF))
+            self.defendingUnitHit = min(100, int((defendingUnit.getEquippedWeapon().hit + (defendingUnit.getStat(Stat.SKL) * 2) + defendingUnit.getStat(Stat.LCK) / 2) - ((attackingUnit.getStat(Stat.SPD) * 2) + attackingUnit.getStat(Stat.LCK))))
             self.defendingUnitCrit = 0
         else:
             self.defendingUnitDmg = "-"
@@ -61,7 +62,7 @@ class BattleForecast():
         if currentUnit and defendingUnit:
             screen.blit(self.pic, (self.X, self.Y))
 
-            pHpText = font.render(str(currentUnit.hp), True, (0,0,0))
+            pHpText = font.render(str(currentUnit.getStat(Stat.HP)), True, (0,0,0))
             pHpRect = pHpText.get_rect()
             pHpRect.center = (self.X+75, self.Y+85)
 
@@ -77,7 +78,7 @@ class BattleForecast():
             pCritRect = pCritText.get_rect()
             pCritRect.center = (self.X+75, self.Y+500)
 
-            eHpText = font.render(str(defendingUnit.hp), True, (0,0,0))
+            eHpText = font.render(str(defendingUnit.getStat(Stat.HP)), True, (0,0,0))
             eHpRect = eHpText.get_rect()
             eHpRect.center = (self.X+390, self.Y+85)
 
@@ -118,7 +119,7 @@ class CombatUI():
         DUOffset = 1075
         screen.blit(self.pic, (self.X, self.Y))
         screen.blit(self.pic, (self.X + DUOffset, self.Y))
-        if currentUnit.hp > 0:
+        if currentUnit.getStat(Stat.HP) > 0:
             CUNameText = self.__font.render(currentUnit.name, True, (0,0,0))
             CUNameRect = CUNameText.get_rect()
             CUNameRect.center = (self.X + (len(currentUnit.name) * 25), self.Y + 100)
@@ -135,9 +136,9 @@ class CombatUI():
             CUCritRect = CUCritText.get_rect()
             CUCritRect.center = (self.X + 720, self.Y + 330)
 
-            for i in range(currentUnit.maxHp):
+            for i in range(currentUnit.getStat(Stat.MAX_HP)):
                 screen.blit(self.EmptyPic, (self.X + 50 + (20*i), self.Y + 140))
-            for i in range(currentUnit.hp):
+            for i in range(currentUnit.getStat(Stat.HP)):
                 screen.blit(self.HealthBarPic, (self.X + 50 + (20*i), self.Y + 140))
                 
             screen.blit(CUNameText, CUNameRect)
@@ -145,7 +146,7 @@ class CombatUI():
             screen.blit(CUHitText, CUHitRect)
             screen.blit(CUCritText, CUCritRect)
             
-        if defendingUnit and defendingUnit.hp > 0:
+        if defendingUnit and defendingUnit.getStat(Stat.HP) > 0:
             ## defending unit stuff
             DUNameText = self.__font.render(defendingUnit.name, True, (0,0,0))
             DUNameRect = DUNameText.get_rect()
@@ -163,9 +164,9 @@ class CombatUI():
             DUCritRect = DUCritText.get_rect()
             DUCritRect.center = (self.X + 720 + DUOffset, self.Y + 330)
 
-            for i in range(defendingUnit.maxHp):
+            for i in range(defendingUnit.getStat(Stat.MAX_HP)):
                 screen.blit(self.EmptyPic, (self.X + 50 + (20*i) + DUOffset, self.Y + 140))
-            for i in range(defendingUnit.hp):
+            for i in range(defendingUnit.getStat(Stat.HP)):
                 screen.blit(self.HealthBarPic, (self.X + 50 + (20*i) + DUOffset, self.Y + 140))
 
             screen.blit(DUNameText, DUNameRect)
@@ -192,11 +193,11 @@ class MapUnitUI():
             nameR = nameT.get_rect()
             nameR.center = (self.X + 21*len(self.currUnit.name), self.Y + 50)
 
-            hpT = font.render(str(self.currUnit.hp) + " /", True, (0,0,0))
+            hpT = font.render(str(self.currUnit.getStat(Stat.HP)) + " /", True, (0,0,0))
             hpR = hpT.get_rect()
             hpR.center = (self.X + 70, self.Y + 150)
 
-            mHpT = font.render(str(self.currUnit.maxHp), True, (0,0,0))
+            mHpT = font.render(str(self.currUnit.getStat(Stat.MAX_HP)), True, (0,0,0))
             mHpR = mHpT.get_rect()
             mHpR.center = (self.X + 150, self.Y + 150)
 
@@ -230,35 +231,35 @@ class UnitInfo():
         expR = expT.get_rect()
         expR.center = (630, 870)
 
-        hpT = font.render(str(self.currUnit.hp), True, (0,0,0))
+        hpT = font.render(str(self.currUnit.getStat(Stat.HP)), True, (0,0,0))
         hpR = hpT.get_rect()
         hpR.center = (330, 990)
 
-        mhpT = font.render(str(self.currUnit.maxHp), True, (0,0,0))
+        mhpT = font.render(str(self.currUnit.getStat(Stat.MAX_HP)), True, (0,0,0))
         mhpR = mhpT.get_rect()
         mhpR.center = (450, 990)
 
-        strT = font.render(str(self.currUnit.attack), True, (0,0,0))
+        strT = font.render(str(self.currUnit.getStat(Stat.STR)), True, (0,0,0))
         strR = strT.get_rect()
         strR.center = (870, 110)
 
-        sklT = font.render(str(self.currUnit.skill), True, (0,0,0))
+        sklT = font.render(str(self.currUnit.getStat(Stat.SKL)), True, (0,0,0))
         sklR = strT.get_rect()
         sklR.center = (870, 230)
 
-        spdT = font.render(str(self.currUnit.speed), True, (0,0,0))
+        spdT = font.render(str(self.currUnit.getStat(Stat.SPD)), True, (0,0,0))
         spdR = spdT.get_rect()
         spdR.center = (870, 340)
 
-        lckT = font.render(str(self.currUnit.luck), True, (0,0,0))
+        lckT = font.render(str(self.currUnit.getStat(Stat.LCK)), True, (0,0,0))
         lckR = lckT.get_rect()
         lckR.center = (870, 460)
 
-        defT = font.render(str(self.currUnit.defense), True, (0,0,0))
+        defT = font.render(str(self.currUnit.getStat(Stat.DEF)), True, (0,0,0))
         defR = defT.get_rect()
         defR.center = (870, 580)
 
-        movT = font.render(str(self.currUnit.mov), True, (0,0,0))
+        movT = font.render(str(self.currUnit.getStat(Stat.MOV)), True, (0,0,0))
         movR = movT.get_rect()
         movR.center = (870, 700)
 

@@ -1,6 +1,7 @@
 from enum   import Enum, auto
 from exp    import Exp, LevelUp
 from ui     import CombatUI
+from unit   import Stat
 
 class atkStates(Enum):
 
@@ -68,11 +69,11 @@ class CombatManager():
                 # play hit animation
                 if self.__runningAction(self.__screen, 0, 0, self.__runningUnit != self.__attackingUnit):
                     actionFinished = True
-                    self.__standingUnit.hp -= self.__dmg
+                    self.__standingUnit.removeHp(self.__dmg)
                     if self.__attackingUnitIsPlayer:
                         self.__exp += self.__dmg
                         # standingUnitDied
-                        if self.__standingUnit.hp <= 0:
+                        if self.__standingUnit.getStat(Stat.HP) <= 0:
                             self.__exp += 30
                 
                 ## TODO may need to play "finishing" animation here
@@ -85,7 +86,7 @@ class CombatManager():
         else:
             actionFinished = True
 
-        if self.__standingUnit.hp > 0:
+        if self.__standingUnit.getStat(Stat.HP) > 0:
             self.__standingUnit.drawFirstFrame(self.__screen, 0, 0, self.__standingUnit == self.__defendingUnit)
         
         return actionFinished
@@ -97,7 +98,7 @@ class CombatManager():
         ##      defendingUnitAttacking (if they can)
         ##      finishedAttacking
         if self.__state == atkStates.currentUnitAttacking:
-            if self.__defendingUnit.hp <= 0:
+            if self.__defendingUnit.getStat(Stat.HP) <= 0:
                 self.__state = atkStates.finishedAttacking
             else:
                 self.__state                    = atkStates.defendingUnitAttacking
@@ -115,15 +116,4 @@ class CombatManager():
                 pass
             else:
                 self.__state = atkStates.finishedAttacking
-        
-    # Returns true if user needs to move to the next state
-    def __addExp(self):
-        if self.__expManager.currUnit.exp >= 100:
-            return True
-        else:
-            return self.__expManager.draw(self.__screen, self.__gameWidth)
-
-
-
-        
         
