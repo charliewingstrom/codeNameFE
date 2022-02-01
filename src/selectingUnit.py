@@ -9,7 +9,6 @@ class SelectingUnit(object):
         self.__unitsInRange = []
         self.__selectionIndex  = 0
         for tile in tilesInRange:
-            tile.attackable = True
             if tile.currentUnit != None and tile.currentUnit in units:
                 self.__unitsInRange.append(tile.currentUnit)
         return self.__unitsInRange

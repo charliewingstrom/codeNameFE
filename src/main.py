@@ -174,6 +174,8 @@ class Game(object):
         self.__currentState = states.selectingUnit
         self.__mapManager.resetCurrentMap()
 
+    # for finding all tiles in attack range from a given tile 
+    # i.e, after/without moving
     def findTilesInAttackRange(self, startTile, atkRange):
         rangeMin = atkRange[0]
         rangeMax = atkRange[1]
@@ -199,6 +201,7 @@ class Game(object):
                         dist[tile] = dist[currTile] + 1
         return inRange
 
+    # for showing all tiles that a unit could attack before they move
     def setTilesInRangeAttackable(self, atkRange, tilesInRange):
         for tile in tilesInRange:
             if tile.currentUnit == None or tile.currentUnit == self.__currentUnit:
@@ -245,6 +248,7 @@ class Game(object):
                             self.__currentState = states.selectingAction
                             #;)
                             tilesInAttackRange = self.findTilesInAttackRange(self.__mapManager.getTileUnitIsOn(self.__currentUnit), self.__currentUnit.inventory.getBestRange())
+                            for tile in tilesInAttackRange: tile.attackable = True
                             self.__selectingAttack.getUnitsInRange(tilesInAttackRange, self.__unitHolder.getEnemies())
                             self.__selectingTrade.getUnitsInRange(self.__mapManager.getTileUnitIsOn(self.__currentUnit).getAdjList(), self.__unitHolder.getPlayers())
                             self.__actionMenu.checkForMenuOptions(self.__currentUnit, self.__selectingAttack.areUnitsInRange(), self.__selectingTrade.areUnitsInRange())

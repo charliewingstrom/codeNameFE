@@ -66,7 +66,8 @@ class Inventory():
     
     # gets largest range of all weapons in the inventory
     def getBestRange(self):
-        largestRange = [0,0]
+        MAX_RANGE = 256
+        largestRange = [MAX_RANGE,0]
         if len(self.__weapons) > 0:
             largestRange[0] = self.__weapons[0].range[0]
             for weapon in self.__weapons:

@@ -25,9 +25,9 @@ class CombatManager():
         self.__defendingUnit    = None
         self.__battleForcast    = None 
         self.__exp              = 0
-        self.__expManager       = Exp()
-        self.__gameWidth        = gameWidth
-        self.__levelUp          = LevelUp(gameWidth, gameHeight)
+        # self.__expManager       = Exp()
+        # self.__gameWidth        = gameWidth
+        # self.__levelUp          = LevelUp(gameWidth, gameHeight)
         self.__combatUI         = CombatUI(0, gameHeight - 385, font)
 
     # Used to setup the usage of this class
