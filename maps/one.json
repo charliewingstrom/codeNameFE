@@ -387,8 +387,8 @@
             },
             "row_5_tile_12": {
                 "tile": "brick",
-                "enemy_class": "",
-                "enemy_inv": ""
+                "enemy_class": "bandit",
+                "enemy_inv": "sword"
             },
             "row_5_tile_13": {
                 "tile": "brick",
@@ -510,52 +510,52 @@
                 "enemy_inv": ""
             },
             "row_7_tile_4": {
-                "tile": "brick",
+                "tile": "wall",
                 "enemy_class": "",
                 "enemy_inv": ""
             },
             "row_7_tile_5": {
-                "tile": "brick",
+                "tile": "wall",
                 "enemy_class": "",
                 "enemy_inv": ""
             },
             "row_7_tile_6": {
-                "tile": "brick",
+                "tile": "wall",
                 "enemy_class": "",
                 "enemy_inv": ""
             },
             "row_7_tile_7": {
-                "tile": "brick",
+                "tile": "wall",
                 "enemy_class": "",
                 "enemy_inv": ""
             },
             "row_7_tile_8": {
-                "tile": "brick",
+                "tile": "wall",
                 "enemy_class": "",
                 "enemy_inv": ""
             },
             "row_7_tile_9": {
-                "tile": "brick",
+                "tile": "wall",
                 "enemy_class": "",
                 "enemy_inv": ""
             },
             "row_7_tile_10": {
-                "tile": "brick",
+                "tile": "wall",
                 "enemy_class": "",
                 "enemy_inv": ""
             },
             "row_7_tile_11": {
-                "tile": "brick",
+                "tile": "wall",
                 "enemy_class": "",
                 "enemy_inv": ""
             },
             "row_7_tile_12": {
-                "tile": "brick",
+                "tile": "wall",
                 "enemy_class": "",
                 "enemy_inv": ""
             },
             "row_7_tile_13": {
-                "tile": "brick",
+                "tile": "wall",
                 "enemy_class": "",
                 "enemy_inv": ""
             },
