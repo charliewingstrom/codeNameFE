@@ -387,8 +387,8 @@
             },
             "row_5_tile_12": {
                 "tile": "brick",
-                "enemy_class": "",
-                "enemy_inv": ""
+                "enemy_class": "bandit",
+                "enemy_inv": "sword"
             },
             "row_5_tile_13": {
                 "tile": "brick",
@@ -510,7 +510,7 @@
                 "enemy_inv": ""
             },
             "row_7_tile_4": {
-                "tile": "brick",
+                "tile": "wall",
                 "enemy_class": "",
                 "enemy_inv": ""
             },

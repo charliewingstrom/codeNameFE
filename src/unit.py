@@ -70,6 +70,27 @@ class Unit():
     def getIsPlayer(self):
         return self.__unitType == UnitType.Player
         
+    def setStat(self, stat, value):
+        match stat:
+            case Stat.HP:
+                self.__hp = value
+            case Stat.MAX_HP:
+                self.__maxHp = value
+            case Stat.STR:
+                self.__str = value
+            case Stat.DEF:
+                self.__def = value
+            case Stat.SPD:
+                self.__spd = value
+            case Stat.SKL:
+                self.__skl = value
+            case Stat.LCK:
+                self.__lck = value
+            case Stat.MOV:
+                self.__mov = value
+            case _:
+                print(f"WARNING : stat {stat} not recognized")
+
     def getStat(self, stat):
         match stat:
             case Stat.HP:

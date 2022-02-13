@@ -1,5 +1,4 @@
 import pygame
-from pathlib import Path
 from assetLoader import AssetLoader
 
 class Cursor():

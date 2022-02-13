@@ -75,20 +75,19 @@ class Game(object):
 
         ## creating units
         protag = Unit(3, 3, self.__tileSize, [Bow()], True)
-        ## breaking encapsulation for dev purposes
-        protag.__str = 7
-        protag.__def = 6
-        protag.__spd = 5
-        protag.__skl = 7
-        protag.__lck = 8
+        protag.setStat(Stat.STR, 15)
+        protag.setStat(Stat.DEF, 10)
+        protag.setStat(Stat.SPD, 9)
+        protag.setStat(Stat.SKL, 8)
+        protag.setStat(Stat.LCK, 8)
 
         Jagen = Unit(3, 5, self.__tileSize, [Sword(), Javelin(), HealingItem()], True)
         Jagen.name = 'Jagen'
-        Jagen.__str = 15
-        Jagen.__def = 10
-        Jagen.__spd = 9
-        Jagen.__skl = 8
-        Jagen.__lck = 8
+        Jagen.setStat(Stat.STR, 15)
+        Jagen.setStat(Stat.DEF, 10)
+        Jagen.setStat(Stat.SPD, 9)
+        Jagen.setStat(Stat.SKL, 8)
+        Jagen.setStat(Stat.LCK, 8)
 
         self.__unitHolder.addUnit(protag)
         self.__unitHolder.addUnit(Jagen)
