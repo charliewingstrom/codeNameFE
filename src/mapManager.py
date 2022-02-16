@@ -6,7 +6,6 @@ from cursor         import Cursor
 from camera         import Camera
 
 class MapManager():
-
     mapParser = MapParser()
 
     def __init__(self, tileSize, gameWidth, gameHeight, myUnitHolder):
@@ -16,41 +15,29 @@ class MapManager():
 
         self.__tileSize     = tileSize
         self.__gameWidth    = gameWidth
-        #self.__gameHeight   = gameHeight
         self.__cursor       = Cursor(self.__tileSize, firstMapWidth, firstMapHeight, gameWidth, gameHeight)
         self.__camera       = Camera()
 
         self.__maps         = []
         self.__currentMap   = None
-        # do I build all of my maps here?
-        # map1Enemies = [Unit(9, 5, tileSize, [Sword()]), Unit(9, 6, tileSize, [Sword()])]
         
-        ## setting up the map
         def map1Win():
-            return map1Enemies[0].getStat(Stat.HP) <= 0
+            # Check if all units are dead
+            for unit in map1Enemies:
+                if unit.getStat(Stat.HP) > 0:
+                    return False
+
+                else:
+                    return True
 
         ## TODO make mapParser return a fully constructed map  
         map1tiles, map1Enemies = MapManager.mapParser.parse("one.json")        
 
-        map1 = Map(AssetLoader.assets["level1Background.png"], map1tiles, map1Win, set(map1Enemies))
+        map1 = Map(AssetLoader.assets["level1Background.png"], map1tiles, map1Win)
 
         myUnitHolder.setEnemiesToMap(map1, map1Enemies)
 
         self.__maps.append(map1)
-
-        # # map2
-        # map2enemies = [Unit(1, 2, tileSize, [Sword()]), Unit(2, 1, tileSize, [Sword()])]
-
-        # def map2Win():
-        #     return map2enemies[0].getStat(Stat.HP) <= 0
-
-        # map2tiles = MapManager.mapParser.parse("two.json")  
-
-        # map2 = Map(map2background, map2tiles, map2Win, set(map2enemies))
-
-        # myUnitHolder.setEnemiesToMap(map2, map2enemies)
-
-        # self.__maps.append(map2)
 
         self.__setupNextMap()
         myUnitHolder.moveToNextMap(self.__currentMap)

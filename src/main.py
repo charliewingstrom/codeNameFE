@@ -75,17 +75,17 @@ class Game(object):
 
         ## creating units
         protag = Unit(3, 3, self.__tileSize, [Bow()], True)
-        protag.setStat(Stat.STR, 15)
-        protag.setStat(Stat.DEF, 10)
-        protag.setStat(Stat.SPD, 9)
-        protag.setStat(Stat.SKL, 8)
-        protag.setStat(Stat.LCK, 8)
+        protag.setStat(Stat.STR, 4)
+        protag.setStat(Stat.DEF, 3)
+        protag.setStat(Stat.SPD, 5)
+        protag.setStat(Stat.SKL, 7)
+        protag.setStat(Stat.LCK, 7)
 
         Jagen = Unit(3, 5, self.__tileSize, [Sword(), Javelin(), HealingItem()], True)
         Jagen.name = 'Jagen'
-        Jagen.setStat(Stat.STR, 15)
-        Jagen.setStat(Stat.DEF, 10)
-        Jagen.setStat(Stat.SPD, 9)
+        Jagen.setStat(Stat.STR, 9)
+        Jagen.setStat(Stat.DEF, 6)
+        Jagen.setStat(Stat.SPD, 6)
         Jagen.setStat(Stat.SKL, 8)
         Jagen.setStat(Stat.LCK, 8)
 

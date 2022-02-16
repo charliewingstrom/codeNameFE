@@ -2,7 +2,7 @@ from tile import Tile
 
 class Map():
 
-    def __init__(self, background, tiles, winCondition, enemyUnits = set()):
+    def __init__(self, background, tiles, winCondition):
         self.__background = background
         self.__tiles = tiles
         self.__width=len(tiles[0])
@@ -25,8 +25,6 @@ class Map():
 
         ## win condition is a function that returns true if the condition has been met
         self.__winCondition = winCondition
-        for unit in enemyUnits:
-            self.addUnitToMap(unit)
 
     # for adding enemies
     def addUnitToMap(self, unit):
