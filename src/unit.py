@@ -35,7 +35,7 @@ class Unit():
         # stats
         self.__maxHp = 15
         self.__hp    = self.__maxHp
-        self.__str   = 5
+        self.__str   = 3
         self.__def   = 3
         self.__spd   = 4
         self.__skl   = 4
@@ -127,7 +127,7 @@ class Unit():
             self.__lck += amount
 
     def getGrowths(self):
-        return [self.hpG, self.attackG, self.defenseG, self.speedG, self.skillG, self.luckG]
+        return [self.__hpG, self.__strG, self.__defG, self.__spdG, self.__sklG, self.__lckG]
 
     def getEquippedWeapon(self):
         if len(self.getInventory()) > 0:

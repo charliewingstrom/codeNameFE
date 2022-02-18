@@ -38,18 +38,9 @@ class Tile():
         self.__color = color
 
     def draw(self, screen, xCamera, yCamera):
-        if self.currentUnit != None:
-            color = (0, 0, 0)
-        else:
-            color = self.__color
-
-        # TODO add tile textures
-        # TODO try to draw this without lagging
         screen.blit(self.pic, (self.X*self.tileSize + xCamera, self.Y*self.tileSize + yCamera))
-        #pygame.draw.rect(screen, color, pygame.Rect(self.X*self.tileSize + xCamera, self.Y*self.tileSize + yCamera, self.tileSize, self.tileSize))
         pygame.draw.rect(screen, (100, 100, 100), pygame.Rect(self.X*self.tileSize + xCamera, self.Y*self.tileSize + yCamera, self.tileSize, self.tileSize), 2)
         
-
         if self.attackable:
             screen.blit(self.attackablePic, (self.X*self.tileSize + xCamera, self.Y*self.tileSize + yCamera))
         elif self.inPath:

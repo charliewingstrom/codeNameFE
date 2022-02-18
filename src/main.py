@@ -106,6 +106,7 @@ class Game(object):
         
 
     def findPlayerTarget(self, tiles, unit):
+        # TODO how to find a player target that is not within the enemy's movement + attack range
         possibleTargets = []
         for tile in tiles:
             for attackableTile in self.findTilesInAttackRange(tile, unit.getAttackRange()):
