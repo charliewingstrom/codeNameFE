@@ -23,8 +23,7 @@ class PathManager():
 
     def resetPath(self, targetTile : object):
         self.emptyPath()
-        if targetTile.selectable:
-            self.__findPath(targetTile)
+        self.__findPath(targetTile)
 
     # pops off the path
     # returns True if the path is not empty and the targetTile

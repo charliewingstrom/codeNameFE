@@ -88,7 +88,10 @@ class MapManager():
         if self.__camera.updateFromCursor(self.__cursor, arrowKeys):
             self.checkMapUI(myMapUnitUI, myBattleForecast)
             cursorTile = self.getTileCursorIsOn()
-            myPathManager.resetPath(cursorTile)
+            if cursorTile.selectable:
+                myPathManager.resetPath(cursorTile)
+            else:
+                myPathManager.emptyPath()
                 
     ## compares the UI elements to the cursor location
     ## keeps the UI from covering up the map

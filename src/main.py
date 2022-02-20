@@ -1,7 +1,6 @@
 import pygame
 
 from enum       import Enum, auto
-from pathlib    import Path
 
 ## custom classes
 from pathManager        import PathManager
@@ -46,7 +45,8 @@ class Game(object):
     def __init__(self):
         self.__gameWidth    = 1920
         self.__gameHeight   = 1080
-        self.__screen       = pygame.display.set_mode((self.__gameWidth, self.__gameHeight))
+        # for debugging purposes, will need to change this when it comes to general use
+        self.__screen       = pygame.display.set_mode((self.__gameWidth, self.__gameHeight), pygame.FULLSCREEN, 0, 1)
         self.__assetLoader  = AssetLoader()
         self.__assetLoader.loadAssets()
         
@@ -124,8 +124,44 @@ class Game(object):
             
         return bestTarget        
 
+    # find a path to the nearest player unit
+    # only include tiles up to the mov value of the unit
+    def findNearestPlayerPath(self, unit):
+        self.__mapManager.resetCurrentMap()
+        currTile = self.__mapManager.getTileUnitIsOn(unit)
+        currTile.distance = 0
+        queue   = []
+        visited = []
+        queue.append(currTile)
+        visited.append(currTile)
+        while len(queue) > 0:
+            # get the tile with the smallest distance
+            queue.sort(key=lambda tile:tile.distance)
+            currTile = queue.pop(0)
+            if currTile.currentUnit != None and currTile.currentUnit.getIsPlayer():
+                ## currTile contains a player, meaning currTile.parent is the tile we want to move towards...
+                break
+
+            if currTile.walkable:
+                visited.append(currTile)
+                for tile in currTile.getAdjList():
+                    if tile not in visited:
+                        altDist = currTile.distance + 1
+                        if tile.distance > altDist:
+                            tile.distance = altDist
+                            tile.parent = currTile
+                        queue.append(tile)
+
+        path = []
+        while currTile != None:
+            path.append(currTile)
+            currTile = currTile.parent
+            
+        return path[-(unit.getStat(Stat.MOV)+1):]
+
+
     def findTilesInMovRange(self, unit):
-        self.__mapManager.resetCurrentMap
+        self.__mapManager.resetCurrentMap()
         currentTile = self.__mapManager.getTileUnitIsOn(unit)
         currentTile.distance = 0
         queue = []
@@ -238,12 +274,15 @@ class Game(object):
                             self.__currentUnitTile.currentUnit = self.__currentUnit
 
                         self.__moving = False
+                        self.__pathManager.emptyPath()
                         if not self.__playerTurn:
-                            self.__battleForecast.calculate(self.__currentUnit, self.__defendingUnit, self.canDefendingUnitCounter(self.__currentUnit, self.__defendingUnit))
-                            self.__battleForecast.roll()
-                            self.__currentState = states.attacking
-                            self.__combatManager.setupAttack(self.__currentUnit, self.__defendingUnit, self.__battleForecast, False)
-                            
+                            if self.__defendingUnit:
+                                self.__battleForecast.calculate(self.__currentUnit, self.__defendingUnit, self.canDefendingUnitCounter(self.__currentUnit, self.__defendingUnit))
+                                self.__battleForecast.roll()
+                                self.__currentState = states.attacking
+                                self.__combatManager.setupAttack(self.__currentUnit, self.__defendingUnit, self.__battleForecast, False)
+                            else:
+                                self.__currentState = states.selectingUnit     
                         else:
                             self.__currentState = states.selectingAction
                             #;)
@@ -265,16 +304,27 @@ class Game(object):
                         for tile in enemyTilesInRange:
                             if tile.currentUnit == None or tile.currentUnit == self.__currentUnit:
                                 tile.selectable = True
+
+                        ## Target Tile is target to move to,
+                        ## defendingUnit is unit to attack
+                        ## only make defendingUnit != None if they can be attacked
+                        ## but we need to change this ... need to search the whole board if we don't find something here in order to find a path
                         self.__defendingUnit, targetTile = self.findPlayerTarget(enemyTilesInRange, self.__currentUnit)
 
-                        ## for now if a unit is not in range, don't move
-                        if self.__defendingUnit != None:
-                            self.__pathManager.resetPath(targetTile)
-                            self.__pathManager.followPath()
-                            self.__moving = True
-                            
+                        # we did not find a target to attack, just move as close as we can to a target
+                        if self.__defendingUnit == None:
+                            path = self.findNearestPlayerPath(self.__currentUnit)
+                            # don't target a tile that has a unit already, unless it is self.__currentUnit
+                            for tile in path:
+                                if tile.currentUnit == None or tile.currentUnit == self.__currentUnit:
+                                    targetTile = tile
+                                    break
+
+                        self.__pathManager.resetPath(targetTile)
+                        self.__pathManager.followPath()
+                        self.__moving = True
                         self.__mapManager.resetCurrentMap()
-                        
+
                     else:
                         self.__playerTurn = True
                         self.__currentUnit = None
@@ -419,7 +469,8 @@ class Game(object):
                                             if atkTile not in tilesInRange:
                                                 atkTile.attackable = True
                                 cursorTile = self.__mapManager.getTileCursorIsOn()
-                                self.__pathManager.resetPath(cursorTile)
+                                if cursorTile.selectable:
+                                    self.__pathManager.resetPath(cursorTile)
                                 
 
                         ### selecting what tile to move to 
