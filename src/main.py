@@ -355,185 +355,182 @@ class Game(object):
                     # player turn
                     elif self.__playerTurn:
                         # picking a unit to attack
-                        if self.__currentState == states.selectingAttack:
-                            if event.type == pygame.KEYDOWN and event.key == pygame.K_z:
-                                self.__currentState = states.attacking
-                                self.__battleForecast.roll()
-                                self.__combatManager.setupAttack(self.__currentUnit, self.__defendingUnit, self.__battleForecast, True)
+                        match self.__currentState:
 
-                            if event.type == pygame.KEYDOWN and (event.key == pygame.K_RIGHT or event.key == pygame.K_UP):
-                                self.__selectingAttack.moveUp()
-                                self.__defendingUnit = self.__selectingAttack.getTargetedUnit()
-                                self.__mapManager.setCursorOnUnit(self.__defendingUnit)
-                                self.__battleForecast.calculate(self.__currentUnit, self.__defendingUnit, self.canDefendingUnitCounter(self.__currentUnit, self.__defendingUnit))
+                            case states.selectingAttack:
+                                if event.type == pygame.KEYDOWN and event.key == pygame.K_z:
+                                    self.__currentState = states.attacking
+                                    self.__battleForecast.roll()
+                                    self.__combatManager.setupAttack(self.__currentUnit, self.__defendingUnit, self.__battleForecast, True)
 
-                            if event.type == pygame.KEYDOWN and (event.key == pygame.K_LEFT or event.key == pygame.K_DOWN):
-                                self.__selectingAttack.moveDown()
-                                self.__defendingUnit = self.__selectingAttack.getTargetedUnit()
-                                self.__mapManager.setCursorOnUnit(self.__defendingUnit)
-                                self.__battleForecast.calculate(self.__currentUnit, self.__defendingUnit, self.canDefendingUnitCounter(self.__currentUnit, self.__defendingUnit))
+                                if event.type == pygame.KEYDOWN and (event.key == pygame.K_RIGHT or event.key == pygame.K_UP):
+                                    self.__selectingAttack.moveUp()
+                                    self.__defendingUnit = self.__selectingAttack.getTargetedUnit()
+                                    self.__mapManager.setCursorOnUnit(self.__defendingUnit)
+                                    self.__battleForecast.calculate(self.__currentUnit, self.__defendingUnit, self.canDefendingUnitCounter(self.__currentUnit, self.__defendingUnit))
 
-                            if event.type == pygame.KEYDOWN and event.key == pygame.K_x:
-                                self.__currentState = states.selectingWeapon
+                                if event.type == pygame.KEYDOWN and (event.key == pygame.K_LEFT or event.key == pygame.K_DOWN):
+                                    self.__selectingAttack.moveDown()
+                                    self.__defendingUnit = self.__selectingAttack.getTargetedUnit()
+                                    self.__mapManager.setCursorOnUnit(self.__defendingUnit)
+                                    self.__battleForecast.calculate(self.__currentUnit, self.__defendingUnit, self.canDefendingUnitCounter(self.__currentUnit, self.__defendingUnit))
 
-                        elif self.__currentState == states.selectingItems:
-                            if event.type == pygame.KEYDOWN and event.key == pygame.K_x:
-                                self.__currentState = states.selectingAction
-                            if event.type == pygame.KEYDOWN and event.key == pygame.K_UP:
-                                self.__currentUnit.inventory.up()
-                            if event.type == pygame.KEYDOWN and event.key == pygame.K_DOWN:
-                                self.__currentUnit.inventory.down()
-                            if event.type == pygame.KEYDOWN and event.key == pygame.K_z:
-                                if self.__currentUnit.inventory.activateItem(self.__currentUnit):
-                                    self.resetAfterAction()
-
-                        elif self.__currentState == states.selectingTrade:
-                            if event.type == pygame.KEYDOWN and event.key == pygame.K_z:
-                                pass
-                                # TODO implement trading
-                                # currentState = states.trading
-
-                            if event.type == pygame.KEYDOWN and (event.key == pygame.K_RIGHT or event.key == pygame.K_UP):
-                                self.__selectingTrade.moveUp()
-                                self.__defendingUnit = self.__selectingTrade.getTargetedUnit()
-                                self.__mapManager.setCursorOnUnit(self.__defendingUnit)
-                                # TODO draw defendingUnit inventory
-                                ## also below case
-
-                            if event.type == pygame.KEYDOWN and (event.key == pygame.K_LEFT or event.key == pygame.K_DOWN):
-                                self.__selectingTrade.moveDown()
-                                self.__defendingUnit = self.__selectingTrade.getTargetedUnit()
-                                self.__mapManager.setCursorOnUnit(self.__defendingUnit)
-
-                            if event.type == pygame.KEYDOWN and event.key == pygame.K_x:
-                                self.__currentState = states.selectingAction
-
-                        elif self.__currentState == states.selectingWeapon:
-                            if event.type == pygame.KEYDOWN and event.key == pygame.K_z:
-                                self.__currentState = states.selectingAttack
-                                self.__currentUnit.inventory.equipSelectedWeapon()
-                                self.__mapManager.resetCurrentMap()
-                                tilesInAttackRange = self.findTilesInAttackRange(self.__mapManager.getTileUnitIsOn(self.__currentUnit), self.__currentUnit.inventory.getEquippedWeapon().range)
-                                self.__selectingAttack.getUnitsInRange(tilesInAttackRange, self.__unitHolder.getEnemies())
-                                self.__defendingUnit = self.__selectingAttack.getTargetedUnit()
-                                self.__mapManager.setCursorOnUnit(self.__defendingUnit)
-                                self.__battleForecast.calculate(self.__currentUnit, self.__defendingUnit, self.canDefendingUnitCounter(self.__currentUnit, self.__defendingUnit))
-
-                            if event.type == pygame.KEYDOWN and event.key == pygame.K_x:
-                                self.__currentState = states.selectingAction
-
-                            if event.type == pygame.KEYDOWN and event.key == pygame.K_UP:
-                                self.__currentUnit.inventory.up()
-                            if event.type == pygame.KEYDOWN and event.key == pygame.K_DOWN:
-                                self.__currentUnit.inventory.down()
-
-                        ### selecting action in menu
-                        elif self.__currentState == states.selectingAction:
-                            # action selected from menu
-                            if event.type == pygame.KEYDOWN and event.key == pygame.K_z:
-                                selectedOption = self.__actionMenu.selectOption()
-                                if selectedOption == menuOptions.wait:
-                                    self.resetAfterAction()
-                                    
-                                elif selectedOption == menuOptions.attack:
-                                    self.__currentUnit.inventory.getAvaliableWeapons(self.findTilesInAttackRange, self.__mapManager.getTileUnitIsOn(self.__currentUnit), self.__unitHolder.getEnemies())
+                                if event.type == pygame.KEYDOWN and event.key == pygame.K_x:
                                     self.__currentState = states.selectingWeapon
 
-                                elif selectedOption == menuOptions.items:                            
-                                    self.__currentState = states.selectingItems
-                                    self.__currentUnit.inventory.setAllItemsAvaliable()
+                            case states.selectingItems:
+                                if event.type == pygame.KEYDOWN and event.key == pygame.K_x:
+                                    self.__currentState = states.selectingAction
+                                if event.type == pygame.KEYDOWN and event.key == pygame.K_UP:
+                                    self.__currentUnit.inventory.up()
+                                if event.type == pygame.KEYDOWN and event.key == pygame.K_DOWN:
+                                    self.__currentUnit.inventory.down()
+                                if event.type == pygame.KEYDOWN and event.key == pygame.K_z:
+                                    if self.__currentUnit.inventory.activateItem(self.__currentUnit):
+                                        self.resetAfterAction()
 
-                                elif selectedOption == menuOptions.trade:
-                                    self.__currentState = states.selectingTrade
-                                    self.__currentUnit.inventory.setAllItemsAvaliable()
+                            case states.selectingTrade:
+                                if event.type == pygame.KEYDOWN and event.key == pygame.K_z:
+                                    pass
+                                    # TODO implement trading
+                                    # currentState = states.trading
+
+                                if event.type == pygame.KEYDOWN and (event.key == pygame.K_RIGHT or event.key == pygame.K_UP):
+                                    self.__selectingTrade.moveUp()
                                     self.__defendingUnit = self.__selectingTrade.getTargetedUnit()
-                                    self.__defendingUnit.inventory.setAllItemsAvaliable()
+                                    self.__mapManager.setCursorOnUnit(self.__defendingUnit)
+                                    # TODO draw defendingUnit inventory
+                                    ## also below case
+
+                                if event.type == pygame.KEYDOWN and (event.key == pygame.K_LEFT or event.key == pygame.K_DOWN):
+                                    self.__selectingTrade.moveDown()
+                                    self.__defendingUnit = self.__selectingTrade.getTargetedUnit()
                                     self.__mapManager.setCursorOnUnit(self.__defendingUnit)
 
+                                if event.type == pygame.KEYDOWN and event.key == pygame.K_x:
+                                    self.__currentState = states.selectingAction
 
-                            # go back to selecting tile
-                            if event.type == pygame.KEYDOWN and event.key == pygame.K_x:
-                                self.__mapManager.resetCurrentMap()
-                                self.__currentUnitTile.currentUnit = None
-                                self.__currentUnit.X = self.__currentUnitStartingTile.X
-                                self.__currentUnit.Y = self.__currentUnitStartingTile.Y
-                                self.__currentUnitStartingTile.currentUnit = self.__currentUnit
-                                self.__currentUnitTile = self.__currentUnitStartingTile
-                                # update state
-                                self.__currentState = states.selectingTile
-                                tilesInRange = self.findTilesInMovRange(self.__currentUnit)
-                                for tile in tilesInRange:
-                                    if tile.currentUnit == None or tile.currentUnit == self.__currentUnit:
-                                        tile.selectable = True
-                                        for atkTile in self.findTilesInAttackRange(tile, self.__currentUnit.inventory.getBestRange()):
-                                            if atkTile not in tilesInRange:
-                                                atkTile.attackable = True
-                                cursorTile = self.__mapManager.getTileCursorIsOn()
-                                if cursorTile.selectable:
-                                    self.__pathManager.resetPath(cursorTile)
-                                
-
-                        ### selecting what tile to move to 
-                        elif self.__currentState == states.selectingTile:
-                            # Select tile and get ready to move to it
-                            if event.type == pygame.KEYDOWN and event.key == pygame.K_z:
-                                cursorTile = self.__mapManager.getTileCursorIsOn()
-                                if cursorTile.selectable:
-                                    self.__moving = True
-                                    self.__currentState = states.selectingUnit
-                                    self.__pathManager.resetPath(cursorTile)
-                                    self.__pathManager.followPath()
+                            case states.selectingWeapon:
+                                if event.type == pygame.KEYDOWN and event.key == pygame.K_z:
+                                    self.__currentState = states.selectingAttack
+                                    self.__currentUnit.inventory.equipSelectedWeapon()
                                     self.__mapManager.resetCurrentMap()
+                                    tilesInAttackRange = self.findTilesInAttackRange(self.__mapManager.getTileUnitIsOn(self.__currentUnit), self.__currentUnit.inventory.getEquippedWeapon().range)
+                                    self.__selectingAttack.getUnitsInRange(tilesInAttackRange, self.__unitHolder.getEnemies())
+                                    self.__defendingUnit = self.__selectingAttack.getTargetedUnit()
+                                    self.__mapManager.setCursorOnUnit(self.__defendingUnit)
+                                    self.__battleForecast.calculate(self.__currentUnit, self.__defendingUnit, self.canDefendingUnitCounter(self.__currentUnit, self.__defendingUnit))
 
-                            # Stop selecting tile
-                            elif event.type == pygame.KEYDOWN and event.key == pygame.K_x:
-                                # clear path
-                                self.__pathManager.emptyPath()
-                                self.__mapManager.resetCurrentMap()
-                                self.__currentUnit = None
-                                self.__currentUnitTile = None
-                                self.__currentUnitStartingTile = None
-                                self.__currentState = states.selectingUnit
-                                
-                                
+                                if event.type == pygame.KEYDOWN and event.key == pygame.K_x:
+                                    self.__currentState = states.selectingAction
 
-                        elif self.__currentState == states.viewingUnitInfo:
-                            if event.type == pygame.KEYDOWN and event.key == pygame.K_x:
-                                self.__currentState = states.selectingUnit
+                                if event.type == pygame.KEYDOWN and event.key == pygame.K_UP:
+                                    self.__currentUnit.inventory.up()
+                                if event.type == pygame.KEYDOWN and event.key == pygame.K_DOWN:
+                                    self.__currentUnit.inventory.down()
 
-                        ### no unit selected, waiting for next unit to be selected
-                        elif self.__currentState == states.selectingUnit:
-                            if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
-                                self.__playerTurn = False
-                                
-                            # Select unit and show their range
-                            if event.type == pygame.KEYDOWN and event.key == pygame.K_z:
-                                
-                                # get the unit that cursor is on
-                                currentTile = self.__mapManager.getTileCursorIsOn()
-                                self.__currentUnit = currentTile.currentUnit
-                                
-                                # get tiles in range of that unit and highlight them
-                                if self.__currentUnit != None:
-                                    self.setTilesInRangeAttackable(self.__currentUnit.inventory.getBestRange(), self.findTilesInMovRange(self.__currentUnit))
-                                    if self.__currentUnit.active and self.__currentUnit.getIsPlayer():
-                                        self.__currentState = states.selectingTile
-                                        self.__currentUnitTile = currentTile
-                                        self.__currentUnitStartingTile = currentTile
-                            
-                            if event.type == pygame.KEYDOWN and event.key == pygame.K_x:
-                                self.__currentUnit = None
-                                self.__mapManager.resetCurrentMap()
-                                self.__pathManager.emptyPath()
-                                self.__currentState = states.selectingUnit
-                                
-                            if event.type == pygame.KEYDOWN and event.key == pygame.K_a:
-                                currentTile = self.__mapManager.getTileCursorIsOn()
-                                if currentTile.currentUnit != None:
+                            ### selecting action in menu
+                            case states.selectingAction:
+                                # action selected from menu
+                                if event.type == pygame.KEYDOWN and event.key == pygame.K_z:
+                                    selectedOption = self.__actionMenu.selectOption()
+                                    if selectedOption == menuOptions.wait:
+                                        self.resetAfterAction()
+                                        
+                                    elif selectedOption == menuOptions.attack:
+                                        self.__currentUnit.inventory.getAvaliableWeapons(self.findTilesInAttackRange, self.__mapManager.getTileUnitIsOn(self.__currentUnit), self.__unitHolder.getEnemies())
+                                        self.__currentState = states.selectingWeapon
+
+                                    elif selectedOption == menuOptions.items:                            
+                                        self.__currentState = states.selectingItems
+                                        self.__currentUnit.inventory.setAllItemsAvaliable()
+
+                                    elif selectedOption == menuOptions.trade:
+                                        self.__currentState = states.selectingTrade
+                                        self.__currentUnit.inventory.setAllItemsAvaliable()
+                                        self.__defendingUnit = self.__selectingTrade.getTargetedUnit()
+                                        self.__defendingUnit.inventory.setAllItemsAvaliable()
+                                        self.__mapManager.setCursorOnUnit(self.__defendingUnit)
+
+
+                                # go back to selecting tile
+                                if event.type == pygame.KEYDOWN and event.key == pygame.K_x:
+                                    self.__mapManager.resetCurrentMap()
+                                    self.__currentUnitTile.currentUnit = None
+                                    self.__currentUnit.X = self.__currentUnitStartingTile.X
+                                    self.__currentUnit.Y = self.__currentUnitStartingTile.Y
+                                    self.__currentUnitStartingTile.currentUnit = self.__currentUnit
+                                    self.__currentUnitTile = self.__currentUnitStartingTile
+                                    # update state
+                                    self.__currentState = states.selectingTile
+                                    tilesInRange = self.findTilesInMovRange(self.__currentUnit)
+                                    self.setTilesInRangeAttackable(self.__currentUnit.getAttackRange(), tilesInRange)
+                                    cursorTile = self.__mapManager.getTileCursorIsOn()
+                                    if cursorTile.selectable:
+                                        self.__pathManager.resetPath(cursorTile)
+                                    
+
+                            ### selecting what tile to move to 
+                            case states.selectingTile:
+                                # Select tile and get ready to move to it
+                                if event.type == pygame.KEYDOWN and event.key == pygame.K_z:
+                                    cursorTile = self.__mapManager.getTileCursorIsOn()
+                                    if cursorTile.selectable:
+                                        self.__moving = True
+                                        self.__currentState = states.selectingUnit
+                                        self.__pathManager.resetPath(cursorTile)
+                                        self.__pathManager.followPath()
+                                        self.__mapManager.resetCurrentMap()
+
+                                # Stop selecting tile
+                                elif event.type == pygame.KEYDOWN and event.key == pygame.K_x:
+                                    # clear path
+                                    self.__pathManager.emptyPath()
+                                    self.__mapManager.resetCurrentMap()
+                                    self.__currentUnit = None
+                                    self.__currentUnitTile = None
+                                    self.__currentUnitStartingTile = None
+                                    self.__currentState = states.selectingUnit
+                                    
+                                    
+
+                            case states.viewingUnitInfo:
+                                if event.type == pygame.KEYDOWN and event.key == pygame.K_x:
+                                    self.__currentState = states.selectingUnit
+
+                            ### no unit selected, waiting for next unit to be selected
+                            case states.selectingUnit:
+                                if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
+                                    self.__playerTurn = False
+                                    
+                                # Select unit and show their range
+                                if event.type == pygame.KEYDOWN and event.key == pygame.K_z:
+                                    
+                                    # get the unit that cursor is on
+                                    currentTile = self.__mapManager.getTileCursorIsOn()
                                     self.__currentUnit = currentTile.currentUnit
-                                    self.__unitInfo.reset(self.__currentUnit)
-                                    self.__currentState = states.viewingUnitInfo
-            
+                                    
+                                    # get tiles in range of that unit and highlight them
+                                    if self.__currentUnit != None:
+                                        self.setTilesInRangeAttackable(self.__currentUnit.inventory.getBestRange(), self.findTilesInMovRange(self.__currentUnit))
+                                        if self.__currentUnit.active and self.__currentUnit.getIsPlayer():
+                                            self.__currentState = states.selectingTile
+                                            self.__currentUnitTile = currentTile
+                                            self.__currentUnitStartingTile = currentTile
+                                
+                                if event.type == pygame.KEYDOWN and event.key == pygame.K_x:
+                                    self.__currentUnit = None
+                                    self.__mapManager.resetCurrentMap()
+                                    self.__pathManager.emptyPath()
+                                    self.__currentState = states.selectingUnit
+                                    
+                                if event.type == pygame.KEYDOWN and event.key == pygame.K_a:
+                                    currentTile = self.__mapManager.getTileCursorIsOn()
+                                    if currentTile.currentUnit != None:
+                                        self.__currentUnit = currentTile.currentUnit
+                                        self.__unitInfo.reset(self.__currentUnit)
+                                        self.__currentState = states.viewingUnitInfo
+                
             #### drawing ####
             if self.__currentState == states.inMainMenu:
                 self.__mainMenu.draw(self.__screen)
