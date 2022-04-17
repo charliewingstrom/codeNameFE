@@ -74,7 +74,7 @@ class CombatManager():
                         self.__exp += self.__dmg
                         # standingUnitDied
                         if self.__standingUnit.getStat(Stat.HP) <= 0:
-                            self.__exp += 30
+                            self.__exp += 150
                 
                 ## TODO may need to play "finishing" animation here
             else:

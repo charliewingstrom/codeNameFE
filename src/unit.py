@@ -1,4 +1,5 @@
 import pygame
+from copy           import deepcopy
 from enum           import Enum, auto
 from assetLoader    import AssetLoader
 from inventory      import Inventory
@@ -33,22 +34,25 @@ class Unit():
             self.__unitType = UnitType.Enemy 
         
         # stats
-        self.__maxHp = 15
-        self.__hp    = self.__maxHp
-        self.__str   = 3
-        self.__def   = 3
-        self.__spd   = 4
-        self.__skl   = 4
-        self.__lck   = 0
-        self.__mov   = 5
+        self.__stats = {
+            Stat.MAX_HP : 15,
+            Stat.HP     : 15, 
+            Stat.STR    : 3,
+            Stat.DEF    : 3,
+            Stat.SPD    : 4,
+            Stat.SKL    : 4,
+            Stat.LCK    : 0,
+            Stat.MOV    : 5
+        }
 
-        # growths
-        self.__hpG  = 50
-        self.__strG = 50
-        self.__defG = 50
-        self.__spdG = 50
-        self.__sklG = 50
-        self.__lckG = 50
+        self.__growths = {
+            Stat.HP     : 50,
+            Stat.STR    : 50,
+            Stat.DEF    : 50,
+            Stat.SPD    : 50,
+            Stat.SKL    : 50,
+            Stat.LCK    : 50,
+        }
         
         self.inventory = Inventory()
         for item in startingInventory:
@@ -71,63 +75,16 @@ class Unit():
         return self.__unitType == UnitType.Player
         
     def setStat(self, stat, value):
-        match stat:
-            case Stat.HP:
-                self.__hp = value
-            case Stat.MAX_HP:
-                self.__maxHp = value
-            case Stat.STR:
-                self.__str = value
-            case Stat.DEF:
-                self.__def = value
-            case Stat.SPD:
-                self.__spd = value
-            case Stat.SKL:
-                self.__skl = value
-            case Stat.LCK:
-                self.__lck = value
-            case Stat.MOV:
-                self.__mov = value
-            case _:
-                print(f"WARNING : stat {stat} not recognized")
+        self.__stats[stat] = value
 
     def getStat(self, stat):
-        match stat:
-            case Stat.HP:
-                return self.__hp
-            case Stat.MAX_HP:
-                return self.__maxHp
-            case Stat.STR:
-                return self.__str
-            case Stat.DEF:
-                return self.__def
-            case Stat.SPD:
-                return self.__spd
-            case Stat.SKL:
-                return self.__skl
-            case Stat.LCK:
-                return self.__lck
-            case Stat.MOV:
-                return self.__mov
-            case _:
-                print(f"WARNING : stat {stat} not recognized")
+        return self.__stats[stat]
 
-    def addToStat(self, index, amount):
-        if index == 0:
-            self.__maxHp += amount
-        if index == 1:
-            self.__str += amount
-        if index == 2:
-            self.__def += amount
-        if index == 3:
-            self.__spd += amount
-        if index == 4:
-            self.__skl += amount
-        if index == 5:
-            self.__lck += amount
+    def addToStat(self, stat, amount):
+        self.__stats[stat] += amount
 
     def getGrowths(self):
-        return [self.__hpG, self.__strG, self.__defG, self.__spdG, self.__sklG, self.__lckG]
+        return deepcopy(self.__growths)
 
     def getEquippedWeapon(self):
         if len(self.getInventory()) > 0:
@@ -144,11 +101,11 @@ class Unit():
 
     def addHp(self, amount):
         if amount > 0:
-            self.__hp = min(self.__maxHp, self.__hp + amount)
+            self.__stats[Stat.HP] = min(self.__stats[Stat.MAX_HP], self.__stats[Stat.HP] + amount)
 
     def removeHp(self, amount):
         if amount > 0:
-            self.__hp = max(0, self.__hp - amount)
+            self.__stats[Stat.HP] = max(0, self.__stats[Stat.HP] - amount)
 
     def drawFirstFrame(self, screen, x, y, reverse):
         return self.combatAnimation.drawFirstFrame(screen, x, y, reverse)
@@ -163,7 +120,7 @@ class Unit():
         
         ## draw health bar 
         pygame.draw.rect(screen, (0,0,0), pygame.Rect(self.X*tileSize + xCamera, (self.Y*tileSize)+tileSize-5 + yCamera, tileSize, 5))
-        healthPercent = self.__hp/self.__maxHp
+        healthPercent = self.__stats[Stat.HP]/self.__stats[Stat.MAX_HP]
         color = (0, 255, 0)
         if healthPercent < 0.2:
             color = (255, 0, 0)
