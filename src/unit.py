@@ -46,7 +46,7 @@ class Unit():
         }
 
         self.__growths = {
-            Stat.HP     : 50,
+            Stat.MAX_HP : 50,
             Stat.STR    : 50,
             Stat.DEF    : 50,
             Stat.SPD    : 50,
