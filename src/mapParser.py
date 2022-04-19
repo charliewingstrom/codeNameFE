@@ -1,6 +1,7 @@
 import json
 from tile           import Tile
 from unit           import Unit
+from unitClass      import UnitClass
 from inventory      import Sword, Bow
 from assetLoader    import AssetLoader
 
@@ -66,7 +67,7 @@ class MapParser(object):
                     case _ : 
                         print(f"WARNING : case {item} not matched")
 
-            enemy = Unit(x, y, MapParser.tileSize, inventory)
+            enemy = Unit(x, y, MapParser.tileSize, inventory, False, UnitClass.getClass(enemyClass.upper()))
 
             inputTile.currentUnit = enemy
             self.__enemies.append(enemy)

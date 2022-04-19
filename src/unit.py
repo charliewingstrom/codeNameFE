@@ -1,5 +1,4 @@
 import pygame
-from copy           import deepcopy
 from enum           import Enum, auto
 from assetLoader    import AssetLoader
 from inventory      import Inventory
@@ -22,11 +21,11 @@ class Stat(Enum):
 
 class Unit():
 
-    def __init__(self, X, Y, tileSize, startingInventory, isPlayer = False):
+    def __init__(self, X, Y, tileSize, startingInventory, isPlayer, unitClass):
         self.name           = "generic"
         self.level          = 1
         self.exp            = 0
-        self.__unitClass    = None
+        self.__unitClass    = unitClass
 
         if isPlayer:
             self.__unitType = UnitType.Player
@@ -84,7 +83,10 @@ class Unit():
         self.__stats[stat] += amount
 
     def getGrowths(self):
-        return deepcopy(self.__growths)
+        classGrowths = self.__unitClass.getGrowths()
+        combinedGrowths = {key: self.__growths.get(key) + classGrowths.get(key) for key in self.__growths}
+        
+        return combinedGrowths
 
     def getEquippedWeapon(self):
         if len(self.getInventory()) > 0:

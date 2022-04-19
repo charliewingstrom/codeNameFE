@@ -9,6 +9,7 @@ from menu               import Menu, menuOptions
 from exp                import Exp, LevelUp
 from inventory          import HealingItem, Sword, Bow, Javelin
 from unit               import Unit, Stat
+from unitClass          import UnitClass, UnitClassType
 from unitHolder         import UnitHolder
 from combatManager      import CombatManager
 from mapManager         import MapManager
@@ -74,14 +75,14 @@ class Game(object):
         self.__unitHolder = UnitHolder()
 
         ## creating units
-        protag = Unit(3, 3, self.__tileSize, [Bow()], True)
+        protag = Unit(3, 3, self.__tileSize, [Bow()], True, UnitClass.getClass("LORD"))
         protag.setStat(Stat.STR, 4)
         protag.setStat(Stat.DEF, 3)
         protag.setStat(Stat.SPD, 5)
         protag.setStat(Stat.SKL, 7)
         protag.setStat(Stat.LCK, 7)
 
-        Jagen = Unit(3, 5, self.__tileSize, [Sword(), Javelin(), HealingItem()], True)
+        Jagen = Unit(3, 5, self.__tileSize, [Sword(), Javelin(), HealingItem()], True, UnitClass.getClass("KNIGHT"))
         Jagen.name = 'Jagen'
         Jagen.setStat(Stat.STR, 9)
         Jagen.setStat(Stat.DEF, 6)
@@ -89,6 +90,7 @@ class Game(object):
         Jagen.setStat(Stat.SKL, 8)
         Jagen.setStat(Stat.LCK, 8)
 
+        Jagen.getGrowths()
         self.__unitHolder.addUnit(protag)
         self.__unitHolder.addUnit(Jagen)
 
